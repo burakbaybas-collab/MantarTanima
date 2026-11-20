@@ -1,0 +1,17 @@
+agaricus_bisporus
+agaricus_xanthodermus
+amanita_muscaria
+amanita_pantherina
+amanita_phalloides
+boletus_edulis
+cantharellus_cibarius
+coprinus_comatus
+flammulina_filiformis
+gyromitra_esculenta
+hypholoma_fasciculare
+lactarius_deliciosus
+lentinula_edodes
+macrolepiota_procera
+morchella_esculenta
+omphalotus_olearius
+pleurotus_ostreatus
