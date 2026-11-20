@@ -9,7 +9,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "training/species.csv"
+      - "app/src/main/assets/species.tsv"
       - "training/own/**"
 
 permissions:
@@ -23,7 +23,7 @@ concurrency:
 jobs:
   train:
     runs-on: ubuntu-latest
-    timeout-minutes: 240
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
 
@@ -40,7 +40,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: training/data
-          key: inat-${{ hashFiles('training/species.csv') }}-${{ inputs.per_species || '300' }}
+          key: inat-${{ hashFiles('app/src/main/assets/species.tsv') }}-${{ inputs.per_species || '300' }}
           restore-keys: inat-
 
       - name: iNaturalist fotoğraflarını indir

@@ -8,6 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.burakbaybas.mantartanima.classifier.ClassifierFactory
 import com.burakbaybas.mantartanima.classifier.Prediction
+import com.burakbaybas.mantartanima.data.SpeciesCatalog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -31,6 +32,10 @@ sealed interface UiState {
 }
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
+
+    init {
+        SpeciesCatalog.load(app)
+    }
 
     private val classifier = ClassifierFactory.create(app)
 

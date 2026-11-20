@@ -112,8 +112,9 @@ fun ResultScreen(
                     if (predictions.first().confidence < LOW_CONFIDENCE) {
                         item {
                             InfoCard(
-                                "Model bu fotoğraflardan emin değil. Daha net, iyi ışıkta " +
-                                    "çekilmiş fotoğraflarla yeniden deneyin."
+                                "Model bu fotoğraflardan emin değil. Mantar, veri tabanında olmayan " +
+                                    "bir tür olabilir ya da fotoğraflar yeterince net değil. " +
+                                    "Aşağıdaki sonuçlara güvenmeyin; iyi ışıkta yeniden deneyin."
                             )
                         }
                     }
@@ -143,10 +144,10 @@ private fun PredictionCard(prediction: Prediction) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        species?.turkishName ?: prediction.label,
+                        species?.displayName ?: prediction.label,
                         style = MaterialTheme.typography.titleMedium,
                     )
-                    if (species != null) {
+                    if (species != null && species.turkishName.isNotBlank()) {
                         Text(
                             species.latinName,
                             style = MaterialTheme.typography.bodyMedium,

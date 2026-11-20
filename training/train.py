@@ -14,6 +14,7 @@ Yöntem: ImageNet'te eğitilmiş MobileNetV2 üzerine transfer öğrenme.
   training/rapor.md -> doğrulama başarımı (genel ve tür bazında)
 """
 import argparse
+import csv
 import os
 import random
 import shutil
@@ -26,13 +27,15 @@ IMG = 224
 SEED = 42
 
 
-def merge_sources(data_dir, own_dir, tmp, val_frac=0.15):
+MIN_PHOTOS = 40  # bundan az fotoğrafı olan tür modele alınmaz
+
+
+def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15):
     """iNaturalist ve kendi fotoğraflarınızı birleştirir; her türü ayrı ayrı eğitim/doğrulama
     olarak böler (sembolik bağlarla). Doğrulama fotoğrafları eğitimde asla kullanılmaz."""
     rng = random.Random(SEED)
-    classes = sorted(d for d in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, d)))
-    counts = {}
-    for c in classes:
+    classes, counts, skipped = [], {}, []
+    for c in sorted(species_ids):
         files = []
         for src_root, prefix in ((data_dir, "inat"), (own_dir, "own")):
             src = os.path.join(src_root, c) if src_root else None
@@ -41,6 +44,10 @@ def merge_sources(data_dir, own_dir, tmp, val_frac=0.15):
             for f in sorted(os.listdir(src)):
                 if f.lower().endswith((".jpg", ".jpeg", ".png")):
                     files.append((os.path.abspath(os.path.join(src, f)), f"{prefix}_{f}"))
+        if len(files) < MIN_PHOTOS:
+            skipped.append(f"{c} ({len(files)})")
+            continue
+        classes.append(c)
         rng.shuffle(files)
         n_val = max(1, int(len(files) * val_frac))
         for i, (path, name) in enumerate(files):
@@ -49,7 +56,9 @@ def merge_sources(data_dir, own_dir, tmp, val_frac=0.15):
             os.makedirs(dst, exist_ok=True)
             os.symlink(path, os.path.join(dst, name))
         counts[c] = len(files)
-    return classes, counts
+    if skipped:
+        print("Az fotoğraf nedeniyle atlanan türler:", ", ".join(skipped), flush=True)
+    return classes, counts, skipped
 
 
 def build_model(num_classes):
@@ -77,16 +86,20 @@ def build_model(num_classes):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--species", default="app/src/main/assets/species.tsv")
     ap.add_argument("--data", default="training/data")
     ap.add_argument("--own", default="training/own")
     ap.add_argument("--out", default="app/src/main/assets")
-    ap.add_argument("--epochs-head", type=int, default=8)
-    ap.add_argument("--epochs-fine", type=int, default=6)
+    ap.add_argument("--epochs-head", type=int, default=6)
+    ap.add_argument("--epochs-fine", type=int, default=5)
     ap.add_argument("--report", default="training/rapor.md")
     args = ap.parse_args()
 
     tmp = tempfile.mkdtemp()
-    classes, counts = merge_sources(args.data, args.own if os.path.isdir(args.own) else None, tmp)
+    with open(args.species, encoding="utf-8") as f:
+        species_ids = [row["id"] for row in csv.DictReader(f, delimiter="\t")]
+    classes, counts, skipped = merge_sources(
+        species_ids, args.data, args.own if os.path.isdir(args.own) else None, tmp)
     print("Tür başına fotoğraf:", counts, flush=True)
 
     common = dict(labels="inferred", label_mode="int", class_names=classes,
@@ -139,6 +152,8 @@ def main():
         wrong = y_pred[mask][y_pred[mask] != i]
         confused = classes[np.bincount(wrong).argmax()] if len(wrong) else "–"
         lines.append(f"| {c} | {counts[c]} | %{cacc * 100:.0f} | {confused} |")
+    if skipped:
+        lines += ["", "Az fotoğraf nedeniyle modele alınmayan türler: " + ", ".join(skipped)]
     lines += ["", "Not: Uygulama üç fotoğrafın ortalamasını aldığı için gerçek kullanımda başarım genelde daha yüksektir."]
     with open(args.report, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")

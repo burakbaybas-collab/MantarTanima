@@ -2,12 +2,13 @@
 iNaturalist'ten araştırma düzeyinde (research grade) mantar fotoğrafları indirir.
 
 Kullanım:
-    python training/fetch_inat.py --per-species 300 --out training/data
+    python training/fetch_inat.py --per-species 300
 
 Her tür için training/data/<id>/ klasörüne JPEG fotoğraflar indirilir.
 Yalnızca yeniden kullanıma izin veren lisanslar alınır (CC0, CC-BY, CC-BY-NC)
 ve kaynak bilgisi training/data/<id>/_kaynaklar.csv dosyasına yazılır.
 
+Tür listesi: app/src/main/assets/species.tsv (uygulama da aynı tabloyu kullanır).
 Kendi fotoğraflarınızı eklemek için: training/own/<id>/ klasörüne koyun;
 train.py bunları da otomatik kullanır.
 """
@@ -94,17 +95,21 @@ def download(item, folder):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--species", default="training/species.csv")
+    ap.add_argument("--species", default="app/src/main/assets/species.tsv")
     ap.add_argument("--out", default="training/data")
     ap.add_argument("--per-species", type=int, default=300)
     args = ap.parse_args()
 
     with open(args.species, encoding="utf-8") as f:
-        species = list(csv.DictReader(f))
+        species = list(csv.DictReader(f, delimiter="\t"))
 
     summary = []
     for sp in species:
-        taxon_id, name, rank = resolve_taxon(sp["taxon"])
+        try:
+            taxon_id, name, rank = resolve_taxon(sp["taxon"])
+        except SystemExit as e:
+            print(f"ATLANDI: {e}", flush=True)
+            continue
         photos = collect_photos(taxon_id, args.per_species)
         folder = os.path.join(args.out, sp["id"])
         os.makedirs(folder, exist_ok=True)

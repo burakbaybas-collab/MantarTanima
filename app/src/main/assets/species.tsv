@@ -1,0 +1,115 @@
+id	taxon	turkish_name	edibility	description	lookalikes
+amanita_phalloides	Amanita phalloides	Köygöçüren	DEADLY	Zeytin yeşili-sarımsı şapka, beyaz lameller, sapta halka, tabanda torba (volva). Ölümcül zehirlenmelerin başlıca sebebi.	Agaricus türleri; Russula türleri
+amanita_verna	Amanita verna	Ak köygöçüren	DEADLY	Tamamen beyaz; halka ve torba vardır. İlkbaharda görülür.	Agaricus campestris; Agaricus arvensis
+amanita_virosa	Amanita virosa		DEADLY	Tamamen beyaz, konik şapka, pullu sap, halka ve torba.	Agaricus türleri
+amanita_muscaria	Amanita muscaria	Sinek mantarı	POISONOUS	Kırmızı şapka üzerinde beyaz benekler, beyaz lameller ve sap.	Amanita caesarea
+amanita_pantherina	Amanita pantherina	Panter mantarı	POISONOUS	Kahverengi şapka üzerinde beyaz benekler, sapta halka ve kenarlı torba.	Amanita rubescens
+amanita_caesarea	Amanita caesarea	Yumurta mantarı	EDIBLE	Turuncu-kırmızı şapka, sarı lameller ve sap, beyaz torba.	Amanita muscaria
+amanita_rubescens	Amanita rubescens		EDIBLE_WITH_CAUTION	Kırmızımsı kahverengi şapka; dokunulan yerler kırmızılaşır. Çiğ zehirlidir.	Amanita pantherina
+amanita_citrina	Amanita citrina		INEDIBLE	Soluk limon sarısı şapka, patates kokusu, köşeli torba.	Amanita phalloides
+amanita_vaginata	Amanita vaginata		EDIBLE_WITH_CAUTION	Gri şapka, kenarı çizgili, halkasız, torbalı. Çiğ zehirlidir.	Ölümcül Amanita türleri
+amanita_proxima	Amanita proxima		POISONOUS	Beyaz, turuncumsu torbalı; böbrek hasarı yapar.	Amanita ovoidea
+agaricus_bisporus	Agaricus bisporus	Kültür mantarı	EDIBLE	Beyaz veya kahverengi şapka; lameller pembeden koyu kahveye döner, torbası yoktur.	Amanita phalloides (genç); Agaricus xanthodermus
+agaricus_campestris	Agaricus campestris	Çayır mantarı	EDIBLE	Çayırlarda beyaz şapka, pembe sonra kahve lameller, ince halka.	Amanita verna; Agaricus xanthodermus
+agaricus_arvensis	Agaricus arvensis		EDIBLE	Büyük beyaz şapka, anason kokusu, çift katlı halka.	Agaricus xanthodermus; Amanita virosa
+agaricus_augustus	Agaricus augustus		EDIBLE	Kahverengi pullu büyük şapka, badem kokusu.	Agaricus xanthodermus
+agaricus_sylvaticus	Agaricus sylvaticus		EDIBLE	Orman içinde, kahverengi pullu şapka, et kırmızılaşır.	
+agaricus_bitorquis	Agaricus bitorquis		EDIBLE	Kalın etli beyaz şapka, sapta çift halka, sıkışık toprakta.	Agaricus xanthodermus
+agaricus_xanthodermus	Agaricus xanthodermus	Sarı lekeli mantar	POISONOUS	Kültür mantarına benzer; sap tabanı kesilince parlak sarıya döner, mürekkep/fenol kokar.	Agaricus bisporus; Agaricus campestris
+macrolepiota_procera	Macrolepiota procera	Şemsiye mantarı	EDIBLE_WITH_CAUTION	Büyük, pullu şapka, uzun alaca desenli sap ve hareketli halka.	Küçük Lepiota türleri (ölümcül); Chlorophyllum molybdites
+chlorophyllum_rhacodes	Chlorophyllum rhacodes		EDIBLE_WITH_CAUTION	Şemsiye mantarına benzer; sap düz, et kesilince turuncu-kırmızı olur. Bazı kişilerde rahatsızlık yapar.	Chlorophyllum molybdites
+chlorophyllum_molybdites	Chlorophyllum molybdites		POISONOUS	Büyük beyaz pullu şapka; olgun lameller yeşilimsi.	Macrolepiota procera
+lepiota_brunneoincarnata	Lepiota brunneoincarnata		DEADLY	Küçük, pembemsi kahve pullu şapka. Köygöçürenle aynı toksini içerir.	Macrolepiota procera (genç)
+lepiota_cristata	Lepiota cristata		POISONOUS	Küçük beyaz şapka, ortası kahverengi, keskin koku.	
+boletus_edulis	Boletus edulis	Çörek mantarı	EDIBLE	Kahverengi şapka, beyazdan sarı-yeşile dönen gözenekler, kalın şişkin sap.	Tylopilus felleus (acı)
+boletus_aereus	Boletus aereus		EDIBLE	Koyu kahve-siyah şapka, ağsı desenli sap; meşe altında.	Boletus edulis
+boletus_reticulatus	Boletus reticulatus		EDIBLE	Açık kahve kadifemsi şapka, sapın tamamında ağ deseni.	Tylopilus felleus
+imleria_badia	Imleria badia		EDIBLE	Kestane rengi şapka, sarı gözenekler bastırınca maviye döner.	
+xerocomellus_chrysenteron	Xerocomellus chrysenteron		EDIBLE	Kahverengi şapka çatlakları kırmızımsı, sarı gözenekler.	
+suillus_luteus	Suillus luteus		EDIBLE_WITH_CAUTION	Yapışkan kahve şapka, sapta halka; çam altında. Kabuğu soyulmalıdır.	Suillus granulatus
+suillus_granulatus	Suillus granulatus		EDIBLE_WITH_CAUTION	Yapışkan sarı-turuncu şapka, halkasız, gözeneklerden süt damlar.	Suillus luteus
+suillus_bovinus	Suillus bovinus		EDIBLE	Kahve-pembe şapka, köşeli geniş gözenekler; çam altında.	
+rubroboletus_satanas	Rubroboletus satanas		POISONOUS	Beyazımsı şapka, kırmızı gözenekler ve şişkin kırmızı sap; kesilince maviye döner.	Neoboletus erythropus
+neoboletus_erythropus	Neoboletus erythropus		EDIBLE_WITH_CAUTION	Kahverengi şapka, kırmızı gözenekler, kesilince hemen koyu maviye döner. İyi pişirilmelidir.	Rubroboletus satanas
+leccinum_scabrum	Leccinum scabrum		EDIBLE_WITH_CAUTION	Kahve şapka, beyaz sap üzerinde siyah pürtükler; huş altında.	
+tylopilus_felleus	Tylopilus felleus		INEDIBLE	Çörek mantarına benzer; gözenekler pembeleşir, tadı çok acıdır.	Boletus edulis
+caloboletus_calopus	Caloboletus calopus		INEDIBLE	Gri şapka, sarı gözenekler, kırmızı ağlı sap; acıdır.	
+cantharellus_cibarius	Cantharellus cibarius	Horoz mantarı (Sarıkız)	EDIBLE	Yumurta sarısı renk, gerçek lamel yerine sapa doğru inen kıvrımlar.	Omphalotus olearius; Hygrophoropsis aurantiaca
+craterellus_cornucopioides	Craterellus cornucopioides		EDIBLE	Koyu gri-siyah borazan biçimli, içi boş.	
+craterellus_tubaeformis	Craterellus tubaeformis		EDIBLE	Kahve şapka, sarı-gri kıvrımlar, sarı içi boş sap.	
+hydnum_repandum	Hydnum repandum	Kirpi mantarı	EDIBLE	Krem-turuncu şapka, altta lamel yerine dikenler.	
+hygrophoropsis_aurantiaca	Hygrophoropsis aurantiaca	Yalancı horoz mantarı	INEDIBLE	Turuncu, ince çatallanan gerçek lameller.	Cantharellus cibarius
+omphalotus_olearius	Omphalotus olearius	Zeytin mantarı	POISONOUS	Turuncu, kümeler halinde, zeytin ve meşe kütüklerinde; gerçek lamelleri vardır.	Cantharellus cibarius
+lactarius_deliciosus	Lactarius deliciosus	Kanlıca	EDIBLE	Turuncu şapka, kırıldığında turuncu süt salgılar; çam altında.	Lactarius torminosus
+lactarius_sanguifluus	Lactarius sanguifluus	Kanlıca	EDIBLE	Şarap kırmızısı süt salgılar; çam altında.	Lactarius deliciosus
+lactarius_deterrimus	Lactarius deterrimus		EDIBLE	Turuncu, yeşilimsi lekelenir; ladin altında.	
+lactarius_volemus	Lactarius volemus		EDIBLE	Turuncu-kahve şapka, bol beyaz süt, balık kokusu.	
+lactarius_piperatus	Lactarius piperatus		INEDIBLE	Beyaz, çok sık lameller, acı beyaz süt.	
+lactarius_torminosus	Lactarius torminosus		POISONOUS	Pembe, kenarı tüylü şapka, acı beyaz süt; mide-bağırsak zehirlenmesi.	Lactarius deliciosus
+russula_cyanoxantha	Russula cyanoxantha		EDIBLE	Mor-yeşil karışık renkli şapka, esnek lameller.	
+russula_virescens	Russula virescens		EDIBLE	Yeşil, çatlak yüzeyli şapka.	Amanita phalloides
+russula_vesca	Russula vesca		EDIBLE	Pembe-kahve şapka, kenarda kabuk çekilmiş görünüm.	
+russula_emetica	Russula emetica		POISONOUS	Parlak kırmızı şapka, beyaz lameller ve sap, çok acı.	
+russula_nigricans	Russula nigricans		INEDIBLE	Kirli beyazdan siyaha dönen iri mantar.	
+russula_foetens	Russula foetens		INEDIBLE	Bal-kahve yapışkan şapka, kötü koku.	
+pleurotus_ostreatus	Pleurotus ostreatus	İstiridye mantarı	EDIBLE	Ağaç gövdelerinde kümeler halinde, yelpaze biçimli şapka, sap kısa ve yanda.	Omphalotus olearius
+pleurotus_eryngii	Pleurotus eryngii	Çakşır mantarı	EDIBLE	Çakşır otu köklerinde, kahve şapka, kalın beyaz sap.	
+pleurotus_pulmonarius	Pleurotus pulmonarius		EDIBLE	Açık renkli istiridye mantarı; yaz aylarında.	
+pleurotus_cornucopiae	Pleurotus cornucopiae		EDIBLE	Krem renkli, huni biçimli, sapa inen lameller.	
+pleurotus_citrinopileatus	Pleurotus citrinopileatus	Sarı istiridye mantarı	EDIBLE	Limon sarısı kümeler.	
+lentinula_edodes	Lentinula edodes	Şitake	EDIBLE	Kahverengi, kenarları içe kıvrık şapka; odun üzerinde kültürü yapılır.	
+flammulina_velutipes	Flammulina velutipes	Kadife ayak (Enoki)	EDIBLE	Doğada turuncu yapışkan şapka ve kadifemsi koyu sap; kültür formu ince uzun beyazdır. İyi pişirilmelidir.	Galerina marginata
+hericium_erinaceus	Hericium erinaceus	Aslan yelesi	EDIBLE	Beyaz, sarkık uzun dikenlerden oluşan top.	
+grifola_frondosa	Grifola frondosa	Maitake	EDIBLE	Meşe dibinde gri-kahve yaprakçıklardan oluşan iri küme.	
+laetiporus_sulphureus	Laetiporus sulphureus	Tavuk mantarı	EDIBLE_WITH_CAUTION	Ağaçta parlak sarı-turuncu raf şeklinde katlar. İyi pişirilmelidir; porsuk ağacındakiler zehirlidir.	
+fistulina_hepatica	Fistulina hepatica	Ciğer mantarı	EDIBLE	Ciğere benzeyen kırmızı-kahve raf; kesilince kırmızı sıvı.	
+ganoderma_lucidum	Ganoderma lucidum	Reishi	INEDIBLE	Parlak kırmızı-kahve verniklenmiş raf; tıbbi amaçla kullanılır.	
+trametes_versicolor	Trametes versicolor	Hindi kuyruğu	INEDIBLE	İnce, renkli halkalı raf mantarı.	
+fomes_fomentarius	Fomes fomentarius	Kav mantarı	INEDIBLE	At toynağı biçimli sert raf.	
+schizophyllum_commune	Schizophyllum commune		INEDIBLE	Küçük, tüylü beyaz yelpaze; yarık lameller.	
+auricularia_auricula_judae	Auricularia auricula-judae	Kulak mantarı	EDIBLE	Kahverengi, jelatinimsi kulak biçimli.	
+cyclocybe_aegerita	Cyclocybe aegerita	Kavak mantarı	EDIBLE	Kavak kütüklerinde kahve şapka, sapta halka, kümeler halinde.	
+stropharia_rugosoannulata	Stropharia rugosoannulata		EDIBLE	Şarap kırmızısı-kahve şapka, sapta belirgin halka.	
+volvariella_volvacea	Volvariella volvacea	Saman mantarı	EDIBLE	Gri-kahve şapka, tabanda torba; sıcak iklim kültür türü.	Amanita phalloides
+sparassis_crispa	Sparassis crispa	Karnabahar mantarı	EDIBLE	Krem renkli, kıvrımlı yapraklardan oluşan karnabahar biçimli.	
+armillaria_mellea	Armillaria mellea	Bal mantarı	EDIBLE_WITH_CAUTION	Bal renkli kümeler, sapta halka; çiğ zehirlidir, iyi pişirilmelidir.	Galerina marginata
+kuehneromyces_mutabilis	Kuehneromyces mutabilis		EDIBLE_WITH_CAUTION	Kütüklerde iki renkli (nem) şapka, kümeler halinde.	Galerina marginata (ölümcül)
+galerina_marginata	Galerina marginata		DEADLY	Kütüklerde küçük kahve şapka, sapta halka. Köygöçürenle aynı toksin.	Kuehneromyces mutabilis; Armillaria mellea
+hypholoma_fasciculare	Hypholoma fasciculare	Kükürt başlı mantar	POISONOUS	Odun üzerinde yoğun kümeler, kükürt sarısı şapka, yeşilimsi lameller; tadı acıdır.	Armillaria mellea
+pholiota_squarrosa	Pholiota squarrosa		INEDIBLE	Sarımsı şapka ve sap üzerinde kalkık pullar, kümeler halinde.	
+morchella_esculenta	Morchella esculenta	Kuzugöbeği	EDIBLE_WITH_CAUTION	Bal peteği görünümlü, içi boş şapka. Çiğ veya az pişmiş tüketildiğinde zehirlenme yapar.	Gyromitra esculenta
+morchella_elata	Morchella elata	Kara kuzugöbeği	EDIBLE_WITH_CAUTION	Koyu renkli, dikey sıralı petekler. Mutlaka pişirilmelidir.	Gyromitra esculenta; Verpa bohemica
+gyromitra_esculenta	Gyromitra esculenta	Yalancı kuzugöbeği	DEADLY	Beyin kıvrımlarını andıran kahverengi-kırmızımsı şapka. Gyromitrin içerir.	Morchella esculenta
+verpa_bohemica	Verpa bohemica		POISONOUS	Kuzugöbeğine benzer; şapka sapın yalnızca tepesine bağlı.	Morchella türleri
+helvella_crispa	Helvella crispa		POISONOUS	Beyaz, eyer biçimli kıvrık şapka, oluklu sap.	
+peziza_vesiculosa	Peziza vesiculosa		INEDIBLE	Bej renkli kase biçimli.	
+aleuria_aurantia	Aleuria aurantia	Portakal kabuğu mantarı	INEDIBLE	Parlak turuncu küçük kaseler.	
+coprinus_comatus	Coprinus comatus	Mürekkep mantarı	EDIBLE_WITH_CAUTION	Uzun silindirik pullu beyaz şapka; yaşlandıkça siyah sıvıya dönüşür. Genç toplanıp hemen pişirilmelidir.	
+coprinopsis_atramentaria	Coprinopsis atramentaria	Gri mürekkep mantarı	POISONOUS	Gri çan şapka; alkolle birlikte tüketilince zehirlenme yapar.	Coprinus comatus
+coprinellus_micaceus	Coprinellus micaceus		EDIBLE	Küçük bal renkli çan şapkalar, parıltılı tanecikler; kütük diplerinde.	
+calocybe_gambosa	Calocybe gambosa	Mayıs mantarı	EDIBLE	İlkbaharda beyaz-krem kalın etli şapka, un kokusu.	Inosperma erubescens; Entoloma sinuatum
+lepista_nuda	Lepista nuda	Mor ayak	EDIBLE_WITH_CAUTION	Lila-mor şapka ve lameller, meyve kokusu. Pişirilmelidir.	Cortinarius türleri
+lepista_saeva	Lepista saeva		EDIBLE_WITH_CAUTION	Krem şapka, mor sap; çayırlarda.	
+clitocybe_nebularis	Clitocybe nebularis		INEDIBLE	Gri büyük şapka, sapa inen krem lameller; mide rahatsızlığı yapabilir.	Entoloma sinuatum
+clitocybe_dealbata	Clitocybe dealbata		POISONOUS	Küçük beyaz çayır mantarı; muskarin içerir.	Marasmius oreades
+infundibulicybe_geotropa	Infundibulicybe geotropa		EDIBLE	Krem renkli huni biçimli büyük şapka, uzun sap.	
+tricholoma_terreum	Tricholoma terreum		EDIBLE	Gri keçemsi şapka, beyaz lameller; çam altında.	Tricholoma pardinum
+tricholoma_equestre	Tricholoma equestre		POISONOUS	Sarı-yeşil şapka ve lameller; çok tüketilince kas yıkımı yapar.	
+tricholoma_pardinum	Tricholoma pardinum		POISONOUS	Gri pullu iri şapka; şiddetli mide-bağırsak zehirlenmesi.	Tricholoma terreum
+entoloma_sinuatum	Entoloma sinuatum		POISONOUS	Krem-gri iri şapka, sarıdan pembeye dönen lameller.	Calocybe gambosa; Clitocybe nebularis
+inosperma_erubescens	Inosperma erubescens		POISONOUS	Beyaz, konik, kırmızılaşan şapka; muskarin içerir.	Calocybe gambosa
+cortinarius_orellanus	Cortinarius orellanus		DEADLY	Turuncu-kahve şapka; böbrek yetmezliği yapar, belirtiler günler sonra çıkar.	
+cortinarius_rubellus	Cortinarius rubellus		DEADLY	Turuncu-kahve konik şapka, sarı bantlı sap; böbrek yetmezliği yapar.	Craterellus tubaeformis
+paxillus_involutus	Paxillus involutus		DEADLY	Kahve şapka, kenarı içe kıvrık, dokununca kahverengileşen lameller; tekrar tüketimde ağır bağışıklık tepkisi.	
+hebeloma_crustuliniforme	Hebeloma crustuliniforme		POISONOUS	Krem şapka, turp kokusu, damlacıklı lameller.	
+mycena_pura	Mycena pura		POISONOUS	Küçük pembe-lila şapka, turp kokusu.	Lepista nuda
+marasmius_oreades	Marasmius oreades	Halka mantarı	EDIBLE	Çayırlarda halka oluşturur, açık kahve şapka, sert esnek sap.	Clitocybe dealbata
+laccaria_laccata	Laccaria laccata		EDIBLE	Küçük turuncu-pembe şapka, kalın seyrek lameller.	
+laccaria_amethystina	Laccaria amethystina		EDIBLE	Tamamen ametist moru küçük mantar.	
+pluteus_cervinus	Pluteus cervinus		EDIBLE	Odunda kahve şapka, serbest pembe lameller.	
+volvopluteus_gloiocephalus	Volvopluteus gloiocephalus		EDIBLE_WITH_CAUTION	Gri-beyaz yapışkan şapka, tabanda torba, pembe lameller.	Amanita phalloides
+calvatia_gigantea	Calvatia gigantea	Dev puf mantarı	EDIBLE_WITH_CAUTION	Beyaz top biçimli dev mantar; yalnızca içi tamamen beyazken yenir.	Genç Amanita (yumurta evresi)
+lycoperdon_perlatum	Lycoperdon perlatum	Puf mantarı	EDIBLE_WITH_CAUTION	Beyaz, dikenli küçük armut biçimli; içi beyazken yenir.	Scleroderma citrinum; genç Amanita
+scleroderma_citrinum	Scleroderma citrinum		POISONOUS	Sert, sarımsı pullu top; içi erkenden koyulaşır.	Lycoperdon perlatum
+phallus_impudicus	Phallus impudicus		INEDIBLE	Beyaz sap, yeşil-kahve kokulu baş; yumurtadan çıkar.	
+clathrus_ruber	Clathrus ruber		INEDIBLE	Kırmızı kafes biçimli, kötü kokulu.	
