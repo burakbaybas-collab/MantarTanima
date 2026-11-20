@@ -21,24 +21,33 @@ class MainActivity : ComponentActivity() {
             MantarTanimaTheme {
                 val vm: MainViewModel = viewModel()
                 val state by vm.state.collectAsState()
+                val photos by vm.photos.collectAsState()
 
-                BackHandler(enabled = state !is UiState.Home) { vm.reset() }
+                BackHandler(enabled = state !is UiState.Home) { vm.backToHome() }
 
                 when (val s = state) {
-                    UiState.Home -> HomeScreen(isDemo = vm.isDemo, onImageSelected = vm::analyze)
-                    is UiState.Analyzing -> ResultScreen(
-                        imageUri = s.imageUri,
+                    UiState.Home -> HomeScreen(
+                        photos = photos,
+                        isDemo = vm.isDemo,
+                        onPhotoSelected = vm::setPhoto,
+                        onPhotoRemoved = vm::removePhoto,
+                        onAnalyze = vm::analyze,
+                    )
+                    UiState.Analyzing -> ResultScreen(
+                        photos = photos,
                         predictions = null,
                         isDemo = vm.isDemo,
-                        onBack = vm::reset,
+                        onBack = vm::backToHome,
+                        onStartOver = vm::startOver,
                     )
                     is UiState.Result -> ResultScreen(
-                        imageUri = s.imageUri,
+                        photos = photos,
                         predictions = s.predictions,
                         isDemo = s.isDemo,
-                        onBack = vm::reset,
+                        onBack = vm::backToHome,
+                        onStartOver = vm::startOver,
                     )
-                    is UiState.Error -> ErrorScreen(message = s.message, onBack = vm::reset)
+                    is UiState.Error -> ErrorScreen(message = s.message, onBack = vm::backToHome)
                 }
             }
         }

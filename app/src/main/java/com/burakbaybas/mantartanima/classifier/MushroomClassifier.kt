@@ -13,7 +13,11 @@ interface MushroomClassifier {
     /** Gerçek bir model yüklü değilse true. */
     val isDemo: Boolean
 
-    fun classify(bitmap: Bitmap, topK: Int = 3): List<Prediction>
+    /**
+     * Aynı mantarın farklı açılardan (üstten, yandan, alttan) çekilmiş fotoğraflarını
+     * birlikte değerlendirir; her türün olasılığı fotoğrafların ortalamasıdır.
+     */
+    fun classify(bitmaps: List<Bitmap>, topK: Int = 3): List<Prediction>
 
     fun close() {}
 }
@@ -21,7 +25,7 @@ interface MushroomClassifier {
 /** Model dosyası yokken kullanılan yer tutucu. Tahmin üretmez. */
 class DemoClassifier : MushroomClassifier {
     override val isDemo = true
-    override fun classify(bitmap: Bitmap, topK: Int): List<Prediction> = emptyList()
+    override fun classify(bitmaps: List<Bitmap>, topK: Int): List<Prediction> = emptyList()
 }
 
 object ClassifierFactory {

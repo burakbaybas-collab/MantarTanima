@@ -12,17 +12,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+/** Mantarın fotoğraflanacağı üç açı. */
+enum class PhotoAngle(val title: String, val hint: String) {
+    TOP("Üstten", "Şapkanın üst yüzeyi"),
+    SIDE("Yandan", "Şapka, sap ve taban birlikte"),
+    BOTTOM("Alttan", "Lameller / gözenekler"),
+}
+
 sealed interface UiState {
     data object Home : UiState
-    data class Analyzing(val imageUri: Uri) : UiState
-    data class Result(
-        val imageUri: Uri,
-        val predictions: List<Prediction>,
-        val isDemo: Boolean,
-    ) : UiState
+    data object Analyzing : UiState
+    data class Result(val predictions: List<Prediction>, val isDemo: Boolean) : UiState
     data class Error(val message: String) : UiState
 }
 
@@ -32,25 +36,41 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     val isDemo: Boolean get() = classifier.isDemo
 
+    private val _photos = MutableStateFlow<Map<PhotoAngle, Uri>>(emptyMap())
+    val photos: StateFlow<Map<PhotoAngle, Uri>> = _photos.asStateFlow()
+
     private val _state = MutableStateFlow<UiState>(UiState.Home)
     val state: StateFlow<UiState> = _state.asStateFlow()
 
-    fun analyze(uri: Uri) {
-        _state.value = UiState.Analyzing(uri)
+    fun setPhoto(angle: PhotoAngle, uri: Uri) = _photos.update { it + (angle to uri) }
+
+    fun removePhoto(angle: PhotoAngle) = _photos.update { it - angle }
+
+    fun analyze() {
+        val uris = PhotoAngle.entries.mapNotNull { _photos.value[it] }
+        if (uris.size < PhotoAngle.entries.size) return
+        _state.value = UiState.Analyzing
         viewModelScope.launch {
             try {
                 val predictions = withContext(Dispatchers.Default) {
-                    val bitmap = decodeBitmap(uri) ?: error("Fotoğraf açılamadı")
-                    classifier.classify(bitmap)
+                    val bitmaps = uris.map { decodeBitmap(it) ?: error("Fotoğraf açılamadı") }
+                    classifier.classify(bitmaps)
                 }
-                _state.value = UiState.Result(uri, predictions, classifier.isDemo)
+                _state.value = UiState.Result(predictions, classifier.isDemo)
             } catch (e: Exception) {
                 _state.value = UiState.Error(e.message ?: "Bilinmeyen hata")
             }
         }
     }
 
-    fun reset() {
+    /** Sonuçtan ana sayfaya döner; fotoğraflar korunur. */
+    fun backToHome() {
+        _state.value = UiState.Home
+    }
+
+    /** Fotoğrafları temizleyip yeni tanıma başlatır. */
+    fun startOver() {
+        _photos.value = emptyMap()
         _state.value = UiState.Home
     }
 

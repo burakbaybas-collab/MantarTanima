@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.burakbaybas.mantartanima.PhotoAngle
 import com.burakbaybas.mantartanima.classifier.Prediction
 import com.burakbaybas.mantartanima.data.Edibility
 import com.burakbaybas.mantartanima.data.SpeciesCatalog
@@ -52,10 +53,11 @@ private const val LOW_CONFIDENCE = 0.6f
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
-    imageUri: Uri,
+    photos: Map<PhotoAngle, Uri>,
     predictions: List<Prediction>?, // null = analiz sürüyor
     isDemo: Boolean,
     onBack: () -> Unit,
+    onStartOver: () -> Unit,
 ) {
     Scaffold(
         topBar = {
@@ -75,15 +77,23 @@ fun ResultScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             item {
-                AsyncImage(
-                    model = imageUri,
-                    contentDescription = "Seçilen fotoğraf",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(4f / 3f)
-                        .clip(RoundedCornerShape(16.dp)),
-                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PhotoAngle.entries.forEach { angle ->
+                        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+                            AsyncImage(
+                                model = photos[angle],
+                                contentDescription = angle.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
+                                    .clip(RoundedCornerShape(12.dp)),
+                            )
+                            Spacer(Modifier.height(4.dp))
+                            Text(angle.title, style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
             }
             when {
                 predictions == null -> item {
@@ -93,17 +103,17 @@ fun ResultScreen(
                 }
                 isDemo -> item {
                     InfoCard(
-                        "Tanıma modeli henüz eklenmedi. Fotoğraf seçme ve gösterme akışı çalışıyor; " +
-                            "model eklendiğinde tahminler burada görünecek."
+                        "Tanıma modeli henüz eklenmedi. Üç fotoğraf alındı; " +
+                            "model eklendiğinde veri tabanıyla karşılaştırma sonuçları burada görünecek."
                     )
                 }
-                predictions.isEmpty() -> item { InfoCard("Bu fotoğraf için tahmin üretilemedi.") }
+                predictions.isEmpty() -> item { InfoCard("Bu fotoğraflar için tahmin üretilemedi.") }
                 else -> {
                     if (predictions.first().confidence < LOW_CONFIDENCE) {
                         item {
                             InfoCard(
-                                "Model bu fotoğraftan emin değil. Farklı açılardan, " +
-                                    "lameller ve sap görünecek şekilde yeni fotoğraf deneyin."
+                                "Model bu fotoğraflardan emin değil. Daha net, iyi ışıkta " +
+                                    "çekilmiş fotoğraflarla yeniden deneyin."
                             )
                         }
                     }
@@ -112,8 +122,13 @@ fun ResultScreen(
             }
             item { SafetyNotice() }
             item {
-                OutlinedButton(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
-                    Text("Yeni fotoğraf")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) {
+                        Text("Fotoğrafları değiştir")
+                    }
+                    OutlinedButton(onClick = onStartOver, modifier = Modifier.weight(1f)) {
+                        Text("Yeni tanıma")
+                    }
                 }
             }
         }

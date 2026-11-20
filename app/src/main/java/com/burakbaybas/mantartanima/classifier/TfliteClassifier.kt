@@ -38,16 +38,23 @@ class TfliteClassifier(
         inputWidth = shape[2]
     }
 
-    override fun classify(bitmap: Bitmap, topK: Int): List<Prediction> {
-        val input = toInputBuffer(bitmap)
-        val output = Array(1) { FloatArray(labels.size) }
-        interpreter.run(input, output)
-
-        val probs = output[0].let { if (looksLikeProbabilities(it)) it else softmax(it) }
+    override fun classify(bitmaps: List<Bitmap>, topK: Int): List<Prediction> {
+        if (bitmaps.isEmpty()) return emptyList()
+        val probs = FloatArray(labels.size)
+        for (bitmap in bitmaps) {
+            val p = probabilitiesFor(bitmap)
+            for (i in probs.indices) probs[i] += p[i] / bitmaps.size
+        }
         return probs.indices
             .sortedByDescending { probs[it] }
             .take(topK)
             .map { Prediction(labels[it], probs[it]) }
+    }
+
+    private fun probabilitiesFor(bitmap: Bitmap): FloatArray {
+        val output = Array(1) { FloatArray(labels.size) }
+        interpreter.run(toInputBuffer(bitmap), output)
+        return output[0].let { if (looksLikeProbabilities(it)) it else softmax(it) }
     }
 
     override fun close() = interpreter.close()
