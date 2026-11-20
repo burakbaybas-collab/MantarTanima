@@ -15,6 +15,7 @@ Yöntem: ImageNet'te eğitilmiş MobileNetV2 üzerine transfer öğrenme.
 """
 import argparse
 import os
+import random
 import shutil
 import tempfile
 
@@ -25,20 +26,30 @@ IMG = 224
 SEED = 42
 
 
-def merge_sources(data_dir, own_dir, tmp):
-    """iNaturalist ve kendi fotoğraflarınızı tek klasör yapısında birleştirir (sembolik bağlarla)."""
+def merge_sources(data_dir, own_dir, tmp, val_frac=0.15):
+    """iNaturalist ve kendi fotoğraflarınızı birleştirir; her türü ayrı ayrı eğitim/doğrulama
+    olarak böler (sembolik bağlarla). Doğrulama fotoğrafları eğitimde asla kullanılmaz."""
+    rng = random.Random(SEED)
     classes = sorted(d for d in os.listdir(data_dir) if os.path.isdir(os.path.join(data_dir, d)))
+    counts = {}
     for c in classes:
-        dst = os.path.join(tmp, c)
-        os.makedirs(dst, exist_ok=True)
+        files = []
         for src_root, prefix in ((data_dir, "inat"), (own_dir, "own")):
             src = os.path.join(src_root, c) if src_root else None
             if not src or not os.path.isdir(src):
                 continue
-            for f in os.listdir(src):
+            for f in sorted(os.listdir(src)):
                 if f.lower().endswith((".jpg", ".jpeg", ".png")):
-                    os.symlink(os.path.abspath(os.path.join(src, f)), os.path.join(dst, f"{prefix}_{f}"))
-    return classes
+                    files.append((os.path.abspath(os.path.join(src, f)), f"{prefix}_{f}"))
+        rng.shuffle(files)
+        n_val = max(1, int(len(files) * val_frac))
+        for i, (path, name) in enumerate(files):
+            split = "val" if i < n_val else "train"
+            dst = os.path.join(tmp, split, c)
+            os.makedirs(dst, exist_ok=True)
+            os.symlink(path, os.path.join(dst, name))
+        counts[c] = len(files)
+    return classes, counts
 
 
 def build_model(num_classes):
@@ -75,16 +86,13 @@ def main():
     args = ap.parse_args()
 
     tmp = tempfile.mkdtemp()
-    classes = merge_sources(args.data, args.own if os.path.isdir(args.own) else None, tmp)
-    counts = {c: len(os.listdir(os.path.join(tmp, c))) for c in classes}
+    classes, counts = merge_sources(args.data, args.own if os.path.isdir(args.own) else None, tmp)
     print("Tür başına fotoğraf:", counts, flush=True)
 
-    common = dict(
-        directory=tmp, labels="inferred", label_mode="int", class_names=classes,
-        image_size=(IMG, IMG), batch_size=32, seed=SEED, validation_split=0.15,
-    )
-    train_ds = tf.keras.utils.image_dataset_from_directory(subset="training", **common)
-    val_ds = tf.keras.utils.image_dataset_from_directory(subset="validation", shuffle=False, **common)
+    common = dict(labels="inferred", label_mode="int", class_names=classes,
+                  image_size=(IMG, IMG), batch_size=32, seed=SEED)
+    train_ds = tf.keras.utils.image_dataset_from_directory(os.path.join(tmp, "train"), **common)
+    val_ds = tf.keras.utils.image_dataset_from_directory(os.path.join(tmp, "val"), shuffle=False, **common)
 
     scale = lambda x, y: (x / 255.0, y)
     train_ds = train_ds.map(scale).prefetch(tf.data.AUTOTUNE)
@@ -119,7 +127,7 @@ def main():
         "# Model doğrulama raporu", "",
         f"Genel doğruluk (tek fotoğraf): **%{acc * 100:.1f}**  ",
         f"Doğrulama fotoğrafı: {len(y_true)}, tür sayısı: {len(classes)}", "",
-        "| Tür | Eğitim+doğrulama fotoğrafı | Doğruluk | En çok karıştığı tür |",
+        "| Tür | Fotoğraf (toplam) | Doğruluk | En çok karıştığı tür |",
         "|---|---|---|---|",
     ]
     for i, c in enumerate(classes):
