@@ -94,7 +94,7 @@ fun HomeScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("Mantar Tanıma", style = MaterialTheme.typography.headlineLarge)
+            Text("Mantar Tanımlama", style = MaterialTheme.typography.headlineLarge)
             Spacer(Modifier.height(6.dp))
             Text(
                 "Mantarı üç açıdan fotoğraflayın; üç fotoğraf birlikte veri tabanıyla karşılaştırılır.",
