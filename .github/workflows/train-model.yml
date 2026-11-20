@@ -1,0 +1,64 @@
+name: Modeli eğit
+
+on:
+  workflow_dispatch:
+    inputs:
+      per_species:
+        description: "Tür başına en fazla fotoğraf"
+        default: "300"
+  push:
+    branches: [main]
+    paths:
+      - "training/species.csv"
+      - "training/own/**"
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: model-egitimi
+  cancel-in-progress: false
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: training/requirements.txt
+
+      - name: Kütüphaneleri kur
+        run: pip install -r training/requirements.txt
+
+      - name: İndirilmiş fotoğrafları önbellekten al
+        uses: actions/cache@v4
+        with:
+          path: training/data
+          key: inat-${{ hashFiles('training/species.csv') }}-${{ inputs.per_species || '300' }}
+          restore-keys: inat-
+
+      - name: iNaturalist fotoğraflarını indir
+        run: python training/fetch_inat.py --per-species ${{ inputs.per_species || '300' }}
+
+      - name: Modeli eğit
+        run: python training/train.py
+
+      - name: Modeli repoya kaydet
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/model.tflite app/src/main/assets/labels.txt training/rapor.md
+          git commit -m "Model yeniden eğitildi" || exit 0
+          git pull --rebase
+          git push
+
+      - name: Yeni APK derlemesini başlat
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-apk.yml --ref main

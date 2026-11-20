@@ -10,7 +10,15 @@ Fotoğraftan mantar türü tanıyan Android uygulaması (Kotlin + Jetpack Compos
 - [x] Sonuç ekranı: en olası 3 tür, güven oranı, yenilebilirlik etiketi, karışabilen türler
 - [x] Tür bilgi kataloğu (`app/src/main/java/.../data/SpeciesCatalog.kt`)
 - [x] TensorFlow Lite model altyapısı (model eklenince otomatik devreye girer)
-- [ ] Tanıma modeli (`app/src/main/assets/model.tflite` + `labels.txt`)
+- [x] Tanıma modeli eğitim altyapısı (`training/`)
+
+## Veri tabanı ve model
+
+- Tür listesi: `training/species.csv` (17 tür; yenen türler ve karışabilen zehirli türler)
+- Fotoğraflar: iNaturalist'teki doğrulanmış (research grade) gözlemler, yalnızca CC0 / CC-BY / CC-BY-NC lisanslı
+- Kendi fotoğraflarınız: `training/own/<tür_id>/`
+- Eğitim: GitHub → **Actions → Modeli eğit → Run workflow**. `species.csv` veya `training/own/` değişince otomatik başlar.
+- Sonuç raporu: `training/rapor.md`
 
 Model yokken uygulama **demo modunda** çalışır: fotoğraf akışı çalışır, tahmin yapılmaz.
 

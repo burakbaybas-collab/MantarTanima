@@ -10,3 +10,6 @@
 .cxx/
 *.apk
 *.aab
+
+# Eğitim verisi (her eğitimde yeniden indirilir)
+/training/data/
