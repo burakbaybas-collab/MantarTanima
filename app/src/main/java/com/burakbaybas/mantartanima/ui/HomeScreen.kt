@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -239,28 +238,11 @@ fun HomeScreen(
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.Bold,
                 color = DeepGreen,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { uriHandler.openUri(INSTAGRAM_URL) }
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
             )
-            Spacer(Modifier.height(6.dp))
-            Surface(
-                shape = RoundedCornerShape(50),
-                color = PillGlass,
-                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)),
-                modifier = Modifier.clickable { uriHandler.openUri(INSTAGRAM_URL) },
-            ) {
-                Row(
-                    Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(Icons.Outlined.PhotoCamera, null, tint = DeepGreen, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        "Instagram: $INSTAGRAM_HANDLE",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = DeepGreen,
-                    )
-                }
-            }
             Spacer(Modifier.height(8.dp))
         }
     }
