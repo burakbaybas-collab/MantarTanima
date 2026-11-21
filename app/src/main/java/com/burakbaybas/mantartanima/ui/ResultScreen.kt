@@ -43,6 +43,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.burakbaybas.mantartanima.PhotoAngle
+import com.burakbaybas.mantartanima.UiState
 import com.burakbaybas.mantartanima.classifier.Prediction
 import com.burakbaybas.mantartanima.data.Edibility
 import com.burakbaybas.mantartanima.data.SpeciesCatalog
@@ -58,6 +59,7 @@ fun ResultScreen(
     isDemo: Boolean,
     onBack: () -> Unit,
     onStartOver: () -> Unit,
+    noMushroom: UiState.NoMushroom? = null,
 ) {
     Scaffold(
         topBar = {
@@ -96,6 +98,13 @@ fun ResultScreen(
                 }
             }
             when {
+                noMushroom != null -> item {
+                    InfoCard(
+                        "Fotoğraflarda mantar algılanamadı " +
+                            "(${noMushroom.totalPhotos} fotoğraftan ${noMushroom.mushroomPhotos} tanesinde mantar görüldü). " +
+                            "Mantarı yakından, kadrajı dolduracak şekilde ve iyi ışıkta yeniden çekin."
+                    )
+                }
                 predictions == null -> item {
                     Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
                         CircularProgressIndicator()

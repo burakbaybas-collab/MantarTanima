@@ -47,6 +47,14 @@ class MainActivity : ComponentActivity() {
                         onBack = vm::backToHome,
                         onStartOver = vm::startOver,
                     )
+                    is UiState.NoMushroom -> ResultScreen(
+                        photos = photos,
+                        predictions = emptyList(),
+                        isDemo = false,
+                        onBack = vm::backToHome,
+                        onStartOver = vm::startOver,
+                        noMushroom = s,
+                    )
                     is UiState.Error -> ErrorScreen(message = s.message, onBack = vm::backToHome)
                 }
             }

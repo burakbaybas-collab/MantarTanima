@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.burakbaybas.mantartanima.classifier.ClassifierFactory
+import com.burakbaybas.mantartanima.classifier.MushroomDetector
 import com.burakbaybas.mantartanima.classifier.Prediction
 import com.burakbaybas.mantartanima.data.SpeciesCatalog
 import kotlinx.coroutines.Dispatchers
@@ -28,6 +29,9 @@ sealed interface UiState {
     data object Home : UiState
     data object Analyzing : UiState
     data class Result(val predictions: List<Prediction>, val isDemo: Boolean) : UiState
+
+    /** Fotoğrafların çoğunda mantar algılanamadı; tür tahmini gösterilmez. */
+    data class NoMushroom(val mushroomPhotos: Int, val totalPhotos: Int) : UiState
     data class Error(val message: String) : UiState
 }
 
@@ -38,6 +42,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private val classifier = ClassifierFactory.create(app)
+    private val detector = MushroomDetector.create(app)
 
     val isDemo: Boolean get() = classifier.isDemo
 
@@ -57,11 +62,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         _state.value = UiState.Analyzing
         viewModelScope.launch {
             try {
-                val predictions = withContext(Dispatchers.Default) {
+                _state.value = withContext(Dispatchers.Default) {
                     val bitmaps = uris.map { decodeBitmap(it) ?: error("Fotoğraf açılamadı") }
-                    classifier.classify(bitmaps)
+                    val mushroomPhotos = detector?.let { d -> bitmaps.count { d.looksLikeMushroom(it) } }
+                    if (mushroomPhotos != null && mushroomPhotos < MIN_MUSHROOM_PHOTOS) {
+                        UiState.NoMushroom(mushroomPhotos, bitmaps.size)
+                    } else {
+                        UiState.Result(classifier.classify(bitmaps), classifier.isDemo)
+                    }
                 }
-                _state.value = UiState.Result(predictions, classifier.isDemo)
             } catch (e: Exception) {
                 _state.value = UiState.Error(e.message ?: "Bilinmeyen hata")
             }
@@ -92,5 +101,11 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     override fun onCleared() {
         classifier.close()
+        detector?.close()
+    }
+
+    companion object {
+        /** Üç fotoğraftan en az bu kadarında mantar algılanmalı. */
+        const val MIN_MUSHROOM_PHOTOS = 2
     }
 }
