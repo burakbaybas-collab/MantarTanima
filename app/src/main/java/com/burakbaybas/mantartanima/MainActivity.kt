@@ -6,6 +6,25 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.CenterFocusStrong
+import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import com.burakbaybas.mantartanima.ui.EmergencyScreen
+import com.burakbaybas.mantartanima.ui.SpeciesGuideScreen
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,12 +60,66 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+private enum class Tab(val label: String) { IDENTIFY("Tanımla"), GUIDE("Rehber"), EMERGENCY("Acil") }
+
 @Composable
 private fun AppContent() {
     val vm: MainViewModel = viewModel()
     val state by vm.state.collectAsState()
     val photos by vm.photos.collectAsState()
+    var tab by rememberSaveable { mutableStateOf(Tab.IDENTIFY) }
+    val showBar = tab != Tab.IDENTIFY || state is UiState.Home
 
+    Scaffold(
+        contentWindowInsets = WindowInsets(0),
+        bottomBar = {
+            if (showBar) {
+                NavigationBar {
+                    Tab.entries.forEach { t ->
+                        NavigationBarItem(
+                            selected = tab == t,
+                            onClick = { tab = t },
+                            label = { Text(t.label) },
+                            icon = {
+                                Icon(
+                                    when (t) {
+                                        Tab.IDENTIFY -> Icons.Filled.CenterFocusStrong
+                                        Tab.GUIDE -> Icons.AutoMirrored.Filled.MenuBook
+                                        Tab.EMERGENCY -> Icons.Filled.LocalHospital
+                                    },
+                                    contentDescription = null,
+                                    tint = if (t == Tab.EMERGENCY && tab != t) Color(0xFFB3261E) else LocalContentColor.current,
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+        },
+    ) { inner ->
+        Box(Modifier.padding(inner).consumeWindowInsets(inner)) {
+            when (tab) {
+                Tab.GUIDE -> {
+                    BackHandler { tab = Tab.IDENTIFY }
+                    SpeciesGuideScreen(onOpenEmergency = { tab = Tab.EMERGENCY })
+                }
+                Tab.EMERGENCY -> {
+                    BackHandler { tab = Tab.IDENTIFY }
+                    EmergencyScreen()
+                }
+                Tab.IDENTIFY -> IdentifyFlow(vm, state, photos, onOpenEmergency = { tab = Tab.EMERGENCY })
+            }
+        }
+    }
+}
+
+@Composable
+private fun IdentifyFlow(
+    vm: MainViewModel,
+    state: UiState,
+    photos: Map<PhotoAngle, android.net.Uri>,
+    onOpenEmergency: () -> Unit,
+) {
     BackHandler(enabled = state !is UiState.Home) { vm.backToHome() }
 
     when (val s = state) {
@@ -70,6 +143,7 @@ private fun AppContent() {
             isDemo = s.isDemo,
             onBack = vm::backToHome,
             onStartOver = vm::startOver,
+            onOpenEmergency = onOpenEmergency,
         )
         is UiState.NoMushroom -> ResultScreen(
             photos = photos,
