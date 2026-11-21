@@ -26,6 +26,10 @@ import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -156,7 +160,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     Modifier
                         .fillMaxWidth()
                         .background(PaleGreen, RoundedCornerShape(18.dp))
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                        .padding(horizontal = 10.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
@@ -165,15 +169,21 @@ fun AboutDialog(onDismiss: () -> Unit) {
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
                     )
-                    Spacer(Modifier.width(10.dp))
-                    Box(Modifier.width(1.dp).height(26.dp).background(GreenLine))
-                    Spacer(Modifier.width(10.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Box(Modifier.width(1.dp).height(24.dp).background(GreenLine))
+                    Spacer(Modifier.width(8.dp))
+                    // Tek satıra sığana kadar yazı boyutunu küçült
+                    var expertFont by remember { mutableStateOf(14.sp) }
                     Text(
                         "Mikoloji · Biyoteknoloji · Yapay Zekâ",
                         color = Ink,
-                        fontSize = 14.sp,
+                        fontSize = expertFont,
                         fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        softWrap = false,
+                        onTextLayout = { r ->
+                            if (r.hasVisualOverflow && expertFont.value > 10f) expertFont = (expertFont.value - 0.5f).sp
+                        },
                     )
                 }
                 Spacer(Modifier.height(8.dp))
