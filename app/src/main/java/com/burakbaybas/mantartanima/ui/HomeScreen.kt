@@ -66,7 +66,6 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -119,12 +118,12 @@ fun HomeScreen(
     onAnalyze: () -> Unit,
 ) {
     val context = LocalContext.current
-    val uriHandler = LocalUriHandler.current
     // Kamera açıkken uygulama arka planda kapanabilir; bu yüzden saklanabilir durum.
     var pendingAngle by rememberSaveable { mutableStateOf<PhotoAngle?>(null) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
     var sheetFor by remember { mutableStateOf<PhotoAngle?>(null) }
     var showTips by remember { mutableStateOf(false) }
+    var showAbout by remember { mutableStateOf(false) }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -238,7 +237,7 @@ fun HomeScreen(
                 color = DeepGreen,
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
-                    .clickable { uriHandler.openUri(INSTAGRAM_URL) }
+                    .clickable { showAbout = true }
                     .padding(horizontal = 8.dp, vertical = 4.dp),
             )
             Spacer(Modifier.height(8.dp))
@@ -286,6 +285,10 @@ fun HomeScreen(
             )
             Spacer(Modifier.height(24.dp))
         }
+    }
+
+    if (showAbout) {
+        AboutDialog(onDismiss = { showAbout = false })
     }
 
     if (showTips) {
