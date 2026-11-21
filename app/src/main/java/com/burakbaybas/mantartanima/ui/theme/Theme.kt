@@ -7,14 +7,19 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val ForestGreen = Color(0xFF2E5E3A)
+// FungiLens logosundaki renkler
+private val LogoGreen = Color(0xFF1B5E2E)
+private val LogoBrown = Color(0xFF8A3B16)
+private val LeafGreen = Color(0xFF5E9E45)
+private val Cream = Color(0xFFFDF8F3)
 private val Moss = Color(0xFF7FA36B)
-private val Cap = Color(0xFF8B5E3C)
 
 private val LightColors = lightColorScheme(
-    primary = ForestGreen,
-    secondary = Cap,
-    tertiary = Moss,
+    primary = LogoGreen,
+    secondary = LogoBrown,
+    tertiary = LeafGreen,
+    background = Cream,
+    surface = Cream,
 )
 
 private val DarkColors = darkColorScheme(

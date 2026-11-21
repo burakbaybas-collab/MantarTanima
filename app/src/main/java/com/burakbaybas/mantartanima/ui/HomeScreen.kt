@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -45,12 +46,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import com.burakbaybas.mantartanima.PhotoAngle
+import com.burakbaybas.mantartanima.R
 import java.io.File
 
 const val DEVELOPER_NAME = "Burak BAYBAŞ"
@@ -94,8 +98,27 @@ fun HomeScreen(
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("Mantar Tanımlama", style = MaterialTheme.typography.headlineLarge)
-            Spacer(Modifier.height(6.dp))
+            Image(
+                painter = painterResource(R.drawable.logo_fungilens),
+                contentDescription = "FungiLens logosu",
+                modifier = Modifier.size(210.dp),
+            )
+            Text(
+                "Yapay Zekâ Destekli Mantar Tanımlama Sistemi",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Doğayı Keşfet, Mantarları Tanı.",
+                style = MaterialTheme.typography.bodyLarge,
+                fontStyle = FontStyle.Italic,
+                color = MaterialTheme.colorScheme.secondary,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(Modifier.height(14.dp))
             Text(
                 "Mantarı üç açıdan fotoğraflayın; üç fotoğraf birlikte veri tabanıyla karşılaştırılır.",
                 style = MaterialTheme.typography.bodyMedium,

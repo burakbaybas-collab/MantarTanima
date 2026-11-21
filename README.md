@@ -1,4 +1,6 @@
-# MantarTanima
+# FungiLens (MantarTanima)
+
+Yapay Zekâ Destekli Mantar Tanımlama Sistemi — Doğayı Keşfet, Mantarları Tanı.
 
 Fotoğraftan mantar türü tanıyan Android uygulaması (Kotlin + Jetpack Compose).
 
