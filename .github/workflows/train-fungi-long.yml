@@ -26,7 +26,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  PER_SPECIES: ${{ inputs.smoke && '25' || inputs.per_species }}
+  PER_SPECIES: ${{ inputs.smoke && '45' || inputs.per_species }}
   MAX_EPOCHS: ${{ inputs.smoke && '3' || inputs.max_epochs }}
   STAGE_HOURS: ${{ inputs.smoke && '0.02' || '5.0' }}
 
@@ -47,7 +47,7 @@ jobs:
         with:
           path: training/data
           key: ${{ steps.k.outputs.key }}
-          restore-keys: ${{ inputs.smoke && 'yok-' || 'inat-' }}
+          restore-keys: inat-
       - uses: actions/cache/restore@v4
         if: ${{ !inputs.smoke }}
         with:
