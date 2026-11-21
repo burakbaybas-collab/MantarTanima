@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -87,20 +85,18 @@ fun AboutDialog(onDismiss: () -> Unit) {
             HorizontalDivider(color = Line)
             Spacer(Modifier.height(22.dp))
 
-            // Fotoğraf
-            Box(
-                Modifier
-                    .size(128.dp)
-                    .clip(CircleShape)
-                    .border(3.dp, Accent.copy(alpha = 0.8f), CircleShape),
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.about_photo),
-                    contentDescription = "Burak BAYBAŞ",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.size(128.dp).clip(CircleShape),
-                )
-            }
+            // Vesikalık fotoğraf (3:4)
+            val photoShape = RoundedCornerShape(14.dp)
+            Image(
+                painter = painterResource(R.drawable.about_photo),
+                contentDescription = "Burak BAYBAŞ",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .width(132.dp)
+                    .height(176.dp)
+                    .clip(photoShape)
+                    .border(3.dp, Accent.copy(alpha = 0.8f), photoShape),
+            )
             Spacer(Modifier.height(16.dp))
             Text(DEVELOPER_NAME, color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(4.dp))
