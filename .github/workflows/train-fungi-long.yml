@@ -36,27 +36,47 @@ jobs:
     timeout-minutes: 350
     outputs:
       key: ${{ steps.k.outputs.key }}
+      dfkey: ${{ steps.k.outputs.dfkey }}
     steps:
       - uses: actions/checkout@v4
       - id: k
-        run: echo "key=inat-${{ hashFiles('app/src/main/assets/species.tsv') }}-${{ env.PER_SPECIES }}" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "key=inat-${{ hashFiles('app/src/main/assets/species.tsv') }}-${{ env.PER_SPECIES }}" >> "$GITHUB_OUTPUT"
+          echo "dfkey=df20-${{ hashFiles('app/src/main/assets/species.tsv') }}" >> "$GITHUB_OUTPUT"
       - uses: actions/cache/restore@v4
         with:
           path: training/data
           key: ${{ steps.k.outputs.key }}
           restore-keys: ${{ inputs.smoke && 'yok-' || 'inat-' }}
+      - uses: actions/cache/restore@v4
+        if: ${{ !inputs.smoke }}
+        with:
+          path: training/data_df20
+          key: ${{ steps.k.outputs.dfkey }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - run: pip install requests
       - name: iNaturalist fotoğraflarını indir
         run: python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
-      - name: Önbelleğe kaydet
+      - name: Danish Fungi 2020 fotoğraflarını ekle
+        if: ${{ !inputs.smoke }}
+        continue-on-error: true
+        timeout-minutes: 120
+        run: python training/fetch_df20.py --per-species 200
+      - name: Önbelleğe kaydet (iNaturalist)
         uses: actions/cache/save@v4
         continue-on-error: true
         with:
           path: training/data
           key: ${{ steps.k.outputs.key }}
+      - name: Önbelleğe kaydet (DF20)
+        if: ${{ !inputs.smoke }}
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: training/data_df20
+          key: ${{ steps.k.outputs.dfkey }}
 
   stage1:
     needs: fetch
@@ -69,6 +89,10 @@ jobs:
           path: training/data
           key: ${{ needs.fetch.outputs.key }}
           fail-on-cache-miss: true
+      - uses: actions/cache/restore@v4
+        with:
+          path: training/data_df20
+          key: ${{ needs.fetch.outputs.dfkey }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -94,6 +118,10 @@ jobs:
           path: training/data
           key: ${{ needs.fetch.outputs.key }}
           fail-on-cache-miss: true
+      - uses: actions/cache/restore@v4
+        with:
+          path: training/data_df20
+          key: ${{ needs.fetch.outputs.dfkey }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -123,6 +151,10 @@ jobs:
           path: training/data
           key: ${{ needs.fetch.outputs.key }}
           fail-on-cache-miss: true
+      - uses: actions/cache/restore@v4
+        with:
+          path: training/data_df20
+          key: ${{ needs.fetch.outputs.dfkey }}
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"

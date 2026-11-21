@@ -33,26 +33,29 @@ SEED = 42
 MIN_PHOTOS = 40
 
 
-def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None):
+def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None, df20_dir=None):
     """Her türü ayrı ayrı eğitim/doğrulama olarak böler (train.py ile aynı bölme)."""
     rng = random.Random(SEED)
     classes, counts, skipped = [], {}, []
     for c in sorted(species_ids):
         files = []
-        for src_root, prefix in ((data_dir, "inat"), (own_dir, "own")):
+        own = []
+        for src_root, prefix in ((data_dir, "inat"), (df20_dir, "df20"), (own_dir, "own")):
             src = os.path.join(src_root, c) if src_root else None
             if not src or not os.path.isdir(src):
                 continue
             for f in sorted(os.listdir(src)):
                 if f.lower().endswith((".jpg", ".jpeg", ".png")):
-                    files.append((os.path.abspath(os.path.join(src, f)), f"{prefix}_{f}"))
-        if len(files) < MIN_PHOTOS:
-            skipped.append(f"{c} ({len(files)})")
+                    (own if prefix == "own" else files).append((os.path.abspath(os.path.join(src, f)), f"{prefix}_{f}"))
+        if len(files) + len(own) < MIN_PHOTOS:
+            skipped.append(f"{c} ({len(files) + len(own)})")
             continue
         classes.append(c)
         rng.shuffle(files)
         if limit:
-            files = files[:limit]
+            files = files[:max(0, limit - len(own))]
+        files = own + files  # kendi fotoğraflarınız her zaman dahil edilir
+        rng.shuffle(files)
         n_val = max(1, int(len(files) * val_frac))
         for i, (path, name) in enumerate(files):
             split = "val" if i < n_val else "train"
@@ -94,6 +97,7 @@ def main():
     ap.add_argument("--species", default="app/src/main/assets/species.tsv")
     ap.add_argument("--data", default="training/data")
     ap.add_argument("--own", default="training/own")
+    ap.add_argument("--df20", default="training/data_df20")
     ap.add_argument("--out", default="training/out")
     ap.add_argument("--report", default="training/rapor_fungi.md")
     ap.add_argument("--hours", type=float, default=3.5, help="İnce ayar için en fazla süre")
@@ -115,7 +119,7 @@ def main():
     tmp = tempfile.mkdtemp()
     classes, counts, skipped = merge_sources(
         species_ids, args.data, args.own if os.path.isdir(args.own) else None, tmp,
-        limit=args.limit_per_class)
+        limit=args.limit_per_class, df20_dir=args.df20 if os.path.isdir(args.df20) else None)
     print(f"{len(classes)} tür, {sum(counts.values())} fotoğraf; atlanan: {skipped}", flush=True)
 
     model = timm.create_model(BASE_MODEL, pretrained=True)
