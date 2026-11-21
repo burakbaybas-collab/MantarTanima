@@ -59,7 +59,7 @@ def main():
                 sid = wanted.get(norm_name(r[name_col]))
                 if not sid:
                     continue
-                fname = os.path.basename(r[img_col])
+                fname = os.path.splitext(os.path.basename(r[img_col]))[0].lower()
                 if fname in by_file or per_id.get(sid, 0) >= args.per_species:
                     continue
                 by_file[fname] = sid
@@ -68,31 +68,34 @@ def main():
 
     # Daha önce indirilmiş olanları atla
     todo = {f: s for f, s in by_file.items()
-            if not os.path.exists(os.path.join(args.out, s, f"df20_{f}"))}
+            if not os.path.exists(os.path.join(args.out, s, f"df20_{f}.jpg"))}
     if not todo:
         print("Tüm fotoğraflar zaten var.")
         return
     print(f"Arşiv akış halinde okunuyor ({len(todo)} fotoğraf aranıyor)...", flush=True)
-    written = 0
+    written, seen = 0, 0
     with urllib.request.urlopen(IMG_URL, timeout=600) as resp:
         with tarfile.open(fileobj=resp, mode="r|gz") as tar:
             for m in tar:
                 if not m.isfile():
                     continue
-                base = os.path.basename(m.name)
+                seen += 1
+                if seen <= 5:
+                    print("  arşiv örneği:", m.name, flush=True)
+                base = os.path.splitext(os.path.basename(m.name))[0].lower()
                 sid = todo.get(base)
                 if not sid:
                     continue
                 dst = os.path.join(args.out, sid)
                 os.makedirs(dst, exist_ok=True)
-                with open(os.path.join(dst, f"df20_{base}"), "wb") as f:
+                with open(os.path.join(dst, f"df20_{base}.jpg"), "wb") as f:
                     f.write(tar.extractfile(m).read())
                 written += 1
                 if written % 2000 == 0:
                     print(f"  {written} fotoğraf yazıldı", flush=True)
-    print(f"Tamamlandı: {written} fotoğraf.", flush=True)
-    for sid in sorted(per_id):
-        print(f"  {sid}: {per_id[sid]}")
+    print(f"Tamamlandı: arşivde {seen} dosya, yazılan {written} fotoğraf.", flush=True)
+    if written == 0:
+        print("UYARI: Hiç eşleşme yok; metadata örneği:", list(todo)[:5], flush=True)
 
 
 if __name__ == "__main__":
