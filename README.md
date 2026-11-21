@@ -40,7 +40,3 @@ app/src/main/java/com/burakbaybas/mantartanima/
 ├── data/SpeciesCatalog.kt   Türlerin Türkçe adı, yenilebilirliği, açıklaması
 └── ui/                      Ana ekran, sonuç ekranı, tema
 ```
-
-## Mantar Çiftliği oyunu
-
-`oyun/mantar-ciftligi.html`: tarayıcıda çalışan mantar yetiştiriciliği simülasyonu. Kompost (Faz I), pastörizasyon (Faz II), misel ekimi, kuluçka odası, üretim odası (örtü toprağı ve şoklama), 3 flaş hasat ve satış aşamalarından oluşur. Dosyayı tarayıcıda açmanız yeterli.
