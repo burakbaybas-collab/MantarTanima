@@ -201,15 +201,18 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     wrapper = ExportWrapper(model.eval(), mean, std).eval()
     sample = (torch.rand(1, IMG, IMG, 3),)
-    import ai_edge_torch
+    try:  # kütüphane yeni sürümlerde litert_torch adını aldı
+        import litert_torch as converter_lib
+    except ImportError:
+        import ai_edge_torch as converter_lib
     try:
         import tensorflow as tf
-        edge = ai_edge_torch.convert(
+        edge = converter_lib.convert(
             wrapper, sample, _ai_edge_converter_flags={"optimizations": [tf.lite.Optimize.DEFAULT]})
         print("TFLite: ağırlıklar 8-bit sıkıştırıldı", flush=True)
     except Exception as e:  # sıkıştırma desteklenmezse tam hassasiyetle aktar
         print("Sıkıştırmasız aktarım:", e, flush=True)
-        edge = ai_edge_torch.convert(wrapper, sample)
+        edge = converter_lib.convert(wrapper, sample)
     path = os.path.join(args.out, "model.tflite")
     edge.export(path)
 

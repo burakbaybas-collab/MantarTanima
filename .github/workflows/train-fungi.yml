@@ -35,7 +35,7 @@ jobs:
       - name: Kütüphaneleri kur
         run: |
           pip install -r training/requirements-fungi.txt
-          python -c "import torch, timm, ai_edge_torch; print('torch', torch.__version__, 'timm', timm.__version__)"
+          python -c "import torch, timm; print('torch', torch.__version__, 'timm', timm.__version__)"
 
       - name: İndirilmiş fotoğrafları önbellekten al
         uses: actions/cache@v4
@@ -45,6 +45,7 @@ jobs:
           restore-keys: inat-
 
       - name: Eksik fotoğrafları indir
+        if: ${{ !inputs.smoke }}
         run: python training/fetch_inat.py --per-species 500
 
       - name: Modeli eğit
