@@ -1,0 +1,5 @@
+ai-edge-torch
+timm
+pillow
+requests
+numpy

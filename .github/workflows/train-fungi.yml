@@ -1,0 +1,88 @@
+name: Modeli eğit (mantar modeli temelli)
+
+on:
+  workflow_dispatch:
+    inputs:
+      hours:
+        description: "İnce ayar için en fazla süre (saat)"
+        default: "3.5"
+      smoke:
+        description: "Hızlı deneme (tür başına 20 fotoğraf, 1 epoch; sonucu kaydetmez)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: model-egitimi
+  cancel-in-progress: false
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: training/requirements-fungi.txt
+
+      - name: Kütüphaneleri kur
+        run: |
+          pip install -r training/requirements-fungi.txt
+          python -c "import torch, timm, ai_edge_torch; print('torch', torch.__version__, 'timm', timm.__version__)"
+
+      - name: İndirilmiş fotoğrafları önbellekten al
+        uses: actions/cache@v4
+        with:
+          path: training/data
+          key: inat-${{ hashFiles('app/src/main/assets/species.tsv') }}-500
+          restore-keys: inat-
+
+      - name: Eksik fotoğrafları indir
+        run: python training/fetch_inat.py --per-species 500
+
+      - name: Modeli eğit
+        run: |
+          if [ "${{ inputs.smoke }}" = "true" ]; then
+            python training/train_fungi.py --limit-per-class 20 --head-epochs 1 --max-epochs 2
+          else
+            python training/train_fungi.py --hours ${{ inputs.hours || '3.5' }}
+          fi
+
+      - name: Eskisinden iyiyse uygulamaya ekle
+        if: ${{ !inputs.smoke }}
+        id: compare
+        run: |
+          NEW=$(cat training/out/accuracy.txt)
+          OLD=$(python -c "import re; m=re.search(r'\*\*%([0-9.]+)\*\*', open('training/rapor.md', encoding='utf-8').read()); print(float(m.group(1))/100 if m else 0)")
+          echo "Yeni: $NEW  Eski: $OLD"
+          if python -c "import sys; sys.exit(0 if float('$NEW') > float('${OLD:-0}') else 1)"; then
+            cp training/out/model.tflite training/out/labels.txt app/src/main/assets/
+            cp training/rapor_fungi.md training/rapor.md
+            echo "better=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Yeni model daha iyi değil; uygulamadaki model korunuyor."
+            echo "better=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Repoya kaydet
+        if: ${{ !inputs.smoke }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add training/rapor_fungi.md app/src/main/assets/model.tflite app/src/main/assets/labels.txt training/rapor.md
+          git commit -m "Mantar modeli temelli eğitim sonucu" || exit 0
+          git pull --rebase
+          git push
+
+      - name: Yeni APK derlemesini başlat
+        if: steps.compare.outputs.better == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-apk.yml --ref main
