@@ -181,16 +181,23 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
-                    Modifier.padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 4.dp),
+                    Modifier.padding(start = 12.dp, end = 2.dp, top = 2.dp, bottom = 2.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.Outlined.Collections, null, tint = DeepGreen, modifier = Modifier.size(22.dp))
-                    Spacer(Modifier.width(10.dp))
+                    Icon(Icons.Outlined.Collections, null, tint = DeepGreen, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(8.dp))
+                    // Tek satıra sığana kadar yazı boyutunu küçült
+                    var pillFont by remember { mutableStateOf(14.sp) }
                     Text(
                         "Mantarın üç farklı açıdan fotoğrafını yükleyin",
-                        style = MaterialTheme.typography.bodyMedium,
+                        fontSize = pillFont,
                         fontWeight = FontWeight.SemiBold,
                         color = DeepGreen,
+                        maxLines = 1,
+                        softWrap = false,
+                        onTextLayout = { r ->
+                            if (r.hasVisualOverflow && pillFont.value > 10f) pillFont = (pillFont.value - 0.5f).sp
+                        },
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = { showTips = true }) {
