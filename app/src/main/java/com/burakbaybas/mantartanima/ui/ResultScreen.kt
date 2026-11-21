@@ -1,6 +1,26 @@
 package com.burakbaybas.mantartanima.ui
 
 import android.net.Uri
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.outlined.CalendarMonth
+import androidx.compose.material.icons.automirrored.outlined.CompareArrows
+import androidx.compose.material.icons.outlined.Fingerprint
+import androidx.compose.material.icons.outlined.Forest
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material3.AssistChip
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -127,7 +147,7 @@ fun ResultScreen(
                             )
                         }
                     }
-                    items(predictions) { PredictionCard(it) }
+                    itemsIndexed(predictions) { i, p -> PredictionCard(p, i) }
                 }
             }
             item { SafetyNotice() }
@@ -146,15 +166,24 @@ fun ResultScreen(
 }
 
 @Composable
-private fun PredictionCard(prediction: Prediction) {
+private fun PredictionCard(prediction: Prediction, rank: Int) {
     val species = SpeciesCatalog.find(prediction.label)
-    Card(modifier = Modifier.fillMaxWidth()) {
+    var expanded by rememberSaveable(prediction.label) { mutableStateOf(rank == 0) }
+    val uriHandler = LocalUriHandler.current
+    val dangerous = species?.edibility == Edibility.POISONOUS || species?.edibility == Edibility.DEADLY
+
+    Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
         Column(Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable(enabled = species != null) { expanded = !expanded },
+            ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        species?.displayName ?: prediction.label,
+                        (if (rank == 0) "En olası: " else "${rank + 1}. olasılık: ") +
+                            (species?.displayName ?: prediction.label),
                         style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
                     )
                     if (species != null && species.turkishName.isNotBlank()) {
                         Text(
@@ -169,6 +198,12 @@ private fun PredictionCard(prediction: Prediction) {
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
+                if (species != null) {
+                    Icon(
+                        if (expanded) Icons.Filled.ExpandLess else Icons.Filled.ExpandMore,
+                        contentDescription = if (expanded) "Daralt" else "Ayrıntılar",
+                    )
+                }
             }
             Spacer(Modifier.height(8.dp))
             LinearProgressIndicator(
@@ -178,16 +213,88 @@ private fun PredictionCard(prediction: Prediction) {
             if (species != null) {
                 Spacer(Modifier.height(12.dp))
                 EdibilityBadge(species.edibility)
-                Spacer(Modifier.height(8.dp))
-                Text(species.description, style = MaterialTheme.typography.bodyMedium)
-                if (species.lookalikes.isNotEmpty()) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        "Karışabilen türler: " + species.lookalikes.joinToString(", "),
-                        style = MaterialTheme.typography.bodySmall,
+            }
+            if (species != null && !expanded) {
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    "Ayrıntılar için dokunun",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { expanded = true },
+                )
+            }
+            if (species != null && expanded) {
+            Spacer(Modifier.height(10.dp))
+            Text(species.description, style = MaterialTheme.typography.bodyMedium)
+
+            if (species.note.isNotBlank()) {
+                Spacer(Modifier.height(10.dp))
+                val bg = if (dangerous) Color(0xFFFDECEA) else Color(0xFFEFF5EA)
+                val fg = if (dangerous) Color(0xFF8C1D18) else Color(0xFF1F4D2A)
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .background(bg, RoundedCornerShape(12.dp))
+                        .padding(12.dp),
+                ) {
+                    Icon(
+                        if (dangerous) Icons.Filled.Warning else Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = fg,
+                        modifier = Modifier.size(20.dp),
                     )
+                    Spacer(Modifier.width(8.dp))
+                    Column {
+                        Text(
+                            if (dangerous) "Zehirlilik" else "Önemli not",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = fg,
+                        )
+                        Text(species.note, style = MaterialTheme.typography.bodySmall, color = fg)
+                    }
                 }
             }
+
+            Spacer(Modifier.height(10.dp))
+            InfoRow(Icons.Outlined.CalendarMonth, "Mevsim", species.season)
+            InfoRow(Icons.Outlined.Forest, "Yetişme ortamı", species.habitat)
+            InfoRow(Icons.Outlined.Fingerprint, "Spor izi", species.sporePrint)
+            if (species.lookalikes.isNotEmpty()) {
+                InfoRow(Icons.AutoMirrored.Outlined.CompareArrows, "Karışabilen türler", species.lookalikes.joinToString(", "))
+            }
+
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                val q = Uri.encode(species.latinName)
+                AssistChip(
+                    onClick = { uriHandler.openUri("https://tr.wikipedia.org/w/index.php?search=$q") },
+                    label = { Text("Vikipedi") },
+                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.MenuBook, null, Modifier.size(18.dp)) },
+                )
+                AssistChip(
+                    onClick = {
+                        uriHandler.openUri("https://www.inaturalist.org/taxa/search?q=$q")
+                    },
+                    label = { Text("Fotoğraflar") },
+                    leadingIcon = { Icon(Icons.Outlined.PhotoLibrary, null, Modifier.size(18.dp)) },
+                )
+            }
+            }
+        }
+    }
+}
+
+@Composable
+private fun InfoRow(icon: ImageVector, title: String, value: String) {
+    if (value.isBlank()) return
+    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
+        Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(10.dp))
+        Column {
+            Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.primary)
+            Text(value, style = MaterialTheme.typography.bodySmall)
         }
     }
 }

@@ -17,6 +17,10 @@ data class Species(
     val edibility: Edibility,
     val description: String,
     val lookalikes: List<String> = emptyList(),
+    val season: String = "",
+    val habitat: String = "",
+    val sporePrint: String = "",
+    val note: String = "",
 ) {
     /** Türkçe adı yoksa Latince adı gösterilir. */
     val displayName: String get() = turkishName.ifBlank { latinName }
@@ -27,7 +31,8 @@ data class Species(
  * Aynı tablo modeli eğitirken de kullanılır; yeni tür eklemek için yalnızca
  * tabloya satır eklemek yeterlidir.
  *
- * Sütunlar: id, taxon, turkish_name, edibility, description, lookalikes (; ile ayrılmış)
+ * Sütunlar: id, taxon, turkish_name, edibility, description, lookalikes (; ile ayrılmış),
+ *          season, habitat, spore_print, note
  */
 object SpeciesCatalog {
     private var byId: Map<String, Species> = emptyMap()
@@ -55,6 +60,10 @@ object SpeciesCatalog {
             edibility = edibility,
             description = c.getOrElse(4) { "" }.trim(),
             lookalikes = c.getOrElse(5) { "" }.split(';').map { it.trim() }.filter { it.isNotEmpty() },
+            season = c.getOrElse(6) { "" }.trim(),
+            habitat = c.getOrElse(7) { "" }.trim(),
+            sporePrint = c.getOrElse(8) { "" }.trim(),
+            note = c.getOrElse(9) { "" }.trim(),
         )
     }
 

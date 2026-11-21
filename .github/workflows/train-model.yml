@@ -6,11 +6,6 @@ on:
       per_species:
         description: "Tür başına en fazla fotoğraf"
         default: "500"
-  push:
-    branches: [main]
-    paths:
-      - "app/src/main/assets/species.tsv"
-      - "training/own/**"
 
 permissions:
   contents: write
