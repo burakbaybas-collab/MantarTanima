@@ -1,6 +1,5 @@
 package com.burakbaybas.mantartanima.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -20,6 +19,11 @@ private val LightColors = lightColorScheme(
     tertiary = LeafGreen,
     background = Cream,
     surface = Cream,
+    surfaceVariant = Color(0xFFE9F1E2),
+    onSurface = Color(0xFF1E211E),
+    onSurfaceVariant = Color(0xFF3F4A3F),
+    primaryContainer = Color(0xFFDCEBD3),
+    secondaryContainer = Color(0xFFE6F0DC),
 )
 
 private val DarkColors = darkColorScheme(
@@ -31,7 +35,8 @@ private val DarkColors = darkColorScheme(
 @Composable
 fun MantarTanimaTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
+        // Uygulama, telefon karanlık modda olsa da her zaman açık (beyaz-yeşil) temada çalışır
+        colorScheme = LightColors,
         content = content,
     )
 }

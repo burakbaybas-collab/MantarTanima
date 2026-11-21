@@ -1,6 +1,9 @@
 package com.burakbaybas.mantartanima.ui
 
 import android.net.Uri
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.size
@@ -68,6 +71,8 @@ import com.burakbaybas.mantartanima.classifier.Prediction
 import com.burakbaybas.mantartanima.data.Edibility
 import com.burakbaybas.mantartanima.data.SpeciesCatalog
 
+private val ResultGreen = Color(0xFF17502A)
+
 /** Bu güvenin altındaki en iyi tahmin "emin değil" olarak gösterilir. */
 private const val LOW_CONFIDENCE = 0.6f
 
@@ -82,16 +87,25 @@ fun ResultScreen(
     noMushroom: UiState.NoMushroom? = null,
 ) {
     Scaffold(
+        containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Sonuç") },
+                title = { Text("Sonuç", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Geri")
                     }
                 },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFFE6F0DC),
+                    titleContentColor = ResultGreen,
+                    navigationIconContentColor = ResultGreen,
+                ),
             )
-        }
+        },
+        modifier = Modifier.background(
+            Brush.verticalGradient(listOf(Color(0xFFF3F8EE), Color(0xFFFDFBF7)))
+        ),
     ) { padding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(padding),
@@ -172,7 +186,12 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
     val uriHandler = LocalUriHandler.current
     val dangerous = species?.edibility == Edibility.POISONOUS || species?.edibility == Edibility.DEADLY
 
-    Card(modifier = Modifier.fillMaxWidth().animateContentSize()) {
+    Card(
+        modifier = Modifier.fillMaxWidth().animateContentSize(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFCFE2C3)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
         Column(Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -209,6 +228,8 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
             LinearProgressIndicator(
                 progress = { prediction.confidence },
                 modifier = Modifier.fillMaxWidth(),
+                color = Color(0xFF4E9A2F),
+                trackColor = Color(0xFFE1EDD8),
             )
             if (species != null) {
                 Spacer(Modifier.height(12.dp))
@@ -320,7 +341,11 @@ private fun EdibilityBadge(edibility: Edibility) {
 
 @Composable
 private fun InfoCard(text: String) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFCFE2C3)),
+    ) {
         Text(text, modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.bodyMedium)
     }
 }
