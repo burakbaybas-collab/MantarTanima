@@ -37,9 +37,12 @@ def api_get(path, params, retries=4):
 
 
 def resolve_taxon(name):
-    data = api_get("/taxa", {"q": name, "per_page": 10})
+    """Adı iNaturalist'teki geçerli taksona çevirir; eski/eş anlamlı adları da tanır
+    (ör. Lepista nuda -> Collybia nuda)."""
+    data = api_get("/taxa", {"q": name, "per_page": 30, "is_active": "true"})
     for t in data["results"]:
-        if t["name"].lower() == name.lower():
+        names = {t["name"].lower(), (t.get("matched_term") or "").lower()}
+        if name.lower() in names:
             return t["id"], t["name"], t["rank"]
     raise SystemExit(f"Takson bulunamadı: {name}")
 

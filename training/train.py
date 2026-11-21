@@ -90,8 +90,8 @@ def main():
     ap.add_argument("--data", default="training/data")
     ap.add_argument("--own", default="training/own")
     ap.add_argument("--out", default="app/src/main/assets")
-    ap.add_argument("--epochs-head", type=int, default=6)
-    ap.add_argument("--epochs-fine", type=int, default=5)
+    ap.add_argument("--epochs-head", type=int, default=5)
+    ap.add_argument("--epochs-fine", type=int, default=10)
     ap.add_argument("--report", default="training/rapor.md")
     args = ap.parse_args()
 
@@ -124,13 +124,13 @@ def main():
 
     print("2. aşama: ince ayar", flush=True)
     base.trainable = True
-    for layer in base.layers[:-40]:
+    for layer in base.layers[:-70]:
         layer.trainable = False
-    model.compile(optimizer=tf.keras.optimizers.Adam(1e-5),
+    model.compile(optimizer=tf.keras.optimizers.Adam(3e-5),
                   loss="sparse_categorical_crossentropy", metrics=["accuracy"])
     model.fit(train_ds, validation_data=val_ds, epochs=args.epochs_fine,
               class_weight=class_weight, verbose=2,
-              callbacks=[tf.keras.callbacks.EarlyStopping(patience=2, restore_best_weights=True)])
+              callbacks=[tf.keras.callbacks.EarlyStopping(patience=3, restore_best_weights=True)])
 
     # Doğrulama raporu
     y_true = np.concatenate([y.numpy() for _, y in val_ds])

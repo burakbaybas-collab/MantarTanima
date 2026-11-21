@@ -5,7 +5,7 @@ on:
     inputs:
       per_species:
         description: "Tür başına en fazla fotoğraf"
-        default: "300"
+        default: "500"
   push:
     branches: [main]
     paths:
@@ -40,11 +40,11 @@ jobs:
         uses: actions/cache@v4
         with:
           path: training/data
-          key: inat-${{ hashFiles('app/src/main/assets/species.tsv') }}-${{ inputs.per_species || '300' }}
+          key: inat-${{ hashFiles('app/src/main/assets/species.tsv') }}-${{ inputs.per_species || '500' }}
           restore-keys: inat-
 
       - name: iNaturalist fotoğraflarını indir
-        run: python training/fetch_inat.py --per-species ${{ inputs.per_species || '300' }}
+        run: python training/fetch_inat.py --per-species ${{ inputs.per_species || '500' }}
 
       - name: Modeli eğit
         run: python training/train.py
