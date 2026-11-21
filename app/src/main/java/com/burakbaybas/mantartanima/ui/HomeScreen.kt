@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.outlined.AddAPhoto
 import androidx.compose.material.icons.outlined.Collections
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -66,6 +67,7 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -82,6 +84,8 @@ import com.burakbaybas.mantartanima.R
 import java.io.File
 
 const val DEVELOPER_NAME = "Burak BAYBAŞ"
+const val INSTAGRAM_HANDLE = "@burak_baybas"
+const val INSTAGRAM_URL = "https://www.instagram.com/burak_baybas/"
 
 private val DeepGreen = Color(0xFF17502A)
 private val FreshGreen = Color(0xFF4E9A2F)
@@ -116,6 +120,7 @@ fun HomeScreen(
     onAnalyze: () -> Unit,
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     // Kamera açıkken uygulama arka planda kapanabilir; bu yüzden saklanabilir durum.
     var pendingAngle by rememberSaveable { mutableStateOf<PhotoAngle?>(null) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -235,6 +240,27 @@ fun HomeScreen(
                 fontWeight = FontWeight.Bold,
                 color = DeepGreen,
             )
+            Spacer(Modifier.height(6.dp))
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = PillGlass,
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)),
+                modifier = Modifier.clickable { uriHandler.openUri(INSTAGRAM_URL) },
+            ) {
+                Row(
+                    Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(Icons.Outlined.PhotoCamera, null, tint = DeepGreen, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "Instagram: $INSTAGRAM_HANDLE",
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = DeepGreen,
+                    )
+                }
+            }
             Spacer(Modifier.height(8.dp))
         }
     }
@@ -303,46 +329,49 @@ fun HomeScreen(
 
 @Composable
 private fun Header() {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
         Image(
-            painter = painterResource(R.mipmap.ic_launcher_legacy),
+            painter = painterResource(R.drawable.logo_mark),
             contentDescription = "FungiLens logosu",
-            modifier = Modifier.size(76.dp),
+            modifier = Modifier.size(110.dp),
         )
-        Spacer(Modifier.width(10.dp))
-        Column {
-            Text(
-                buildAnnotatedString {
-                    withStyle(SpanStyle(color = DeepGreen)) { append("Fungi") }
-                    withStyle(SpanStyle(color = FreshGreen)) { append("Lens") }
-                },
-                fontSize = 38.sp,
-                fontWeight = FontWeight.ExtraBold,
-                lineHeight = 40.sp,
-            )
-            Text(
-                "Yapay Zekâ Destekli Mantar Tanımlama Sistemi",
-                style = MaterialTheme.typography.labelLarge,
-                color = DeepGreen,
-            )
-            Spacer(Modifier.height(4.dp))
-            Box(
-                Modifier
-                    .width(140.dp)
-                    .height(2.dp)
-                    .background(
-                        Brush.horizontalGradient(listOf(FreshGreen, FreshGreen.copy(alpha = 0f))),
-                        RoundedCornerShape(1.dp),
-                    )
-            )
-            Spacer(Modifier.height(4.dp))
-            Text(
-                "Doğayı Keşfet, Mantarları Tanı.",
-                style = MaterialTheme.typography.bodySmall,
-                fontStyle = FontStyle.Italic,
-                color = MaterialTheme.colorScheme.secondary,
-            )
-        }
+        Text(
+            buildAnnotatedString {
+                withStyle(SpanStyle(color = DeepGreen)) { append("Fungi") }
+                withStyle(SpanStyle(color = FreshGreen)) { append("Lens") }
+            },
+            fontSize = 40.sp,
+            fontWeight = FontWeight.ExtraBold,
+            lineHeight = 44.sp,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            "Yapay Zekâ Destekli Mantar Tanımlama Sistemi",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = DeepGreen,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(6.dp))
+        Box(
+            Modifier
+                .width(160.dp)
+                .height(2.dp)
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(FreshGreen.copy(alpha = 0f), FreshGreen, FreshGreen.copy(alpha = 0f))
+                    ),
+                    RoundedCornerShape(1.dp),
+                )
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            "Doğayı Keşfet, Mantarları Tanı.",
+            style = MaterialTheme.typography.bodyMedium,
+            fontStyle = FontStyle.Italic,
+            color = MaterialTheme.colorScheme.secondary,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
