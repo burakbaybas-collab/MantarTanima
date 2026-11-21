@@ -62,7 +62,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Box(
             Modifier
-                .padding(horizontal = 18.dp, vertical = 24.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
                 .fillMaxWidth()
                 .shadow(16.dp, cardShape, spotColor = Green.copy(alpha = 0.35f))
                 .clip(cardShape)
@@ -73,7 +73,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
             Image(
                 painter = painterResource(R.drawable.deco_leaf),
                 contentDescription = null,
-                modifier = Modifier.size(width = 46.dp, height = 68.dp).align(Alignment.TopStart),
+                modifier = Modifier.size(width = 38.dp, height = 56.dp).align(Alignment.TopStart),
             )
             // Alt süsleme (mantarlar ve çimen)
             Image(
@@ -86,14 +86,14 @@ fun AboutDialog(onDismiss: () -> Unit) {
             Column(
                 Modifier
                     .verticalScroll(rememberScrollState())
-                    .padding(start = 24.dp, end = 20.dp, top = 18.dp, bottom = 56.dp),
+                    .padding(start = 22.dp, end = 18.dp, top = 12.dp, bottom = 40.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         "Hakkımda",
                         color = Ink,
-                        fontSize = 30.sp,
+                        fontSize = 26.sp,
                         fontWeight = FontWeight.ExtraBold,
                         modifier = Modifier.weight(1f).padding(start = 10.dp),
                     )
@@ -103,17 +103,17 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     Box(
                         Modifier
                             .padding(start = 4.dp)
-                            .size(44.dp)
+                            .size(40.dp)
                             .clip(RoundedCornerShape(50))
                             .clickable(onClick = onDismiss),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Icon(Icons.Filled.Close, "Kapat", tint = Green, modifier = Modifier.size(28.dp))
+                        Icon(Icons.Filled.Close, "Kapat", tint = Green, modifier = Modifier.size(26.dp))
                     }
                 }
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
                 AccentDivider()
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(12.dp))
 
                 val photoShape = RoundedCornerShape(22.dp)
                 Image(
@@ -121,49 +121,49 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     contentDescription = DEVELOPER_NAME,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .width(150.dp)
-                        .height(186.dp)
+                        .width(112.dp)
+                        .height(140.dp)
                         .shadow(6.dp, photoShape)
                         .clip(photoShape)
                         .border(4.dp, GreenBorder, photoShape),
                 )
-                Spacer(Modifier.height(14.dp))
-                Text(DEVELOPER_NAME, color = Ink, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold)
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(8.dp))
+                Text(DEVELOPER_NAME, color = Ink, fontSize = 25.sp, fontWeight = FontWeight.ExtraBold)
+                Spacer(Modifier.height(4.dp))
                 Text(
                     "Mühendis · Mantar Araştırmacısı",
                     color = Ink,
-                    fontSize = 16.sp,
+                    fontSize = 14.sp,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier
                         .background(PaleGreen, RoundedCornerShape(50))
-                        .padding(horizontal = 22.dp, vertical = 6.dp),
+                        .padding(horizontal = 18.dp, vertical = 4.dp),
                 )
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(10.dp))
                 Box(Modifier.fillMaxWidth().height(1.dp).background(GreenLine))
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(8.dp))
 
                 Paragraph("Mantar yetiştiriciliği, misel teknolojileri ve mantar genetik kaynakları üzerine araştırmalar yürütüyorum.")
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(6.dp))
                 Paragraph("FungiLens'i, mantar türlerinin yapay zekâ destekli tanımlanmasını kolaylaştırmak ve mikolojik bilgiyi daha erişilebilir kılmak amacıyla geliştiriyorum.")
 
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(8.dp))
                 Box(Modifier.fillMaxWidth().height(1.dp).background(GreenLine))
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(10.dp))
 
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .background(PaleGreen, RoundedCornerShape(18.dp))
-                        .padding(horizontal = 14.dp, vertical = 10.dp),
+                        .padding(horizontal = 12.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_mushroom),
                         contentDescription = null,
-                        modifier = Modifier.size(30.dp),
+                        modifier = Modifier.size(24.dp),
                     )
                     Spacer(Modifier.width(10.dp))
                     Box(Modifier.width(1.dp).height(26.dp).background(GreenLine))
@@ -171,14 +171,14 @@ fun AboutDialog(onDismiss: () -> Unit) {
                     Text(
                         "Mikoloji · Biyoteknoloji · Yapay Zekâ",
                         color = Ink,
-                        fontSize = 15.sp,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                     )
                 }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(8.dp))
                 LinkBox(Icons.Outlined.Email, DEVELOPER_EMAIL) { uriHandler.openUri("mailto:$DEVELOPER_EMAIL") }
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(8.dp))
                 LinkBox(Icons.Outlined.PhotoCamera, "Instagram: $INSTAGRAM_HANDLE") { uriHandler.openUri(INSTAGRAM_URL) }
             }
         }
@@ -198,8 +198,8 @@ private fun Paragraph(text: String) {
     Text(
         text,
         color = Body,
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
+        fontSize = 14.5.sp,
+        lineHeight = 20.sp,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
     )
 }
@@ -214,15 +214,15 @@ private fun LinkBox(icon: ImageVector, text: String, onClick: () -> Unit) {
             .background(Color.White)
             .border(1.5.dp, OutlineGreen, shape)
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .padding(horizontal = 14.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Icon(icon, null, tint = Green, modifier = Modifier.size(24.dp))
+        Icon(icon, null, tint = Green, modifier = Modifier.size(22.dp))
         Spacer(Modifier.width(14.dp))
         Text(
             text,
             color = Body,
-            fontSize = 15.sp,
+            fontSize = 14.sp,
             textDecoration = TextDecoration.Underline,
             modifier = Modifier.weight(1f),
         )
