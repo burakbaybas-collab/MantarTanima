@@ -35,6 +35,7 @@ cortinarius_orellanus
 cortinarius_rubellus
 craterellus_cornucopioides
 craterellus_tubaeformis
+cyclocybe_aegerita
 entoloma_sinuatum
 fistulina_hepatica
 flammulina_velutipes
@@ -59,11 +60,14 @@ lactarius_deliciosus
 lactarius_deterrimus
 lactarius_sanguifluus
 lactarius_torminosus
+lactarius_volemus
 laetiporus_sulphureus
 leccinum_scabrum
 lentinula_edodes
 lepiota_brunneoincarnata
 lepiota_cristata
+lepista_nuda
+lepista_saeva
 lycoperdon_perlatum
 macrolepiota_procera
 marasmius_oreades
