@@ -201,10 +201,7 @@ def main():
     os.makedirs(args.out, exist_ok=True)
     wrapper = ExportWrapper(model.eval(), mean, std).eval()
     sample = (torch.rand(1, IMG, IMG, 3),)
-    try:  # kütüphane yeni sürümlerde litert_torch adını aldı
-        import litert_torch as converter_lib
-    except ImportError:
-        import ai_edge_torch as converter_lib
+    import litert_torch as converter_lib  # eski adı: ai_edge_torch
     try:
         import tensorflow as tf
         edge = converter_lib.convert(
