@@ -116,10 +116,19 @@ def main():
 
     with open(args.species, encoding="utf-8") as f:
         species_ids = [row["id"] for row in csv.DictReader(f, delimiter="\t")]
+    use_df20 = os.path.isdir(args.df20)
+    if args.resume and os.path.exists(args.ckpt):
+        # Devam ederken önceki aşamayla aynı tür listesi ve aynı veri kaynakları kullanılır;
+        # aksi halde eğitim/doğrulama bölmesi değişir ve sonuçlar karşılaştırılamaz.
+        pre = torch.load(args.ckpt, map_location="cpu", weights_only=False)
+        species_ids = pre["classes"]
+        use_df20 = use_df20 and pre.get("used_df20", False)
+        print(f"Devam modu: {len(species_ids)} tür, DF20 {'açık' if use_df20 else 'kapalı'}", flush=True)
+        del pre
     tmp = tempfile.mkdtemp()
     classes, counts, skipped = merge_sources(
         species_ids, args.data, args.own if os.path.isdir(args.own) else None, tmp,
-        limit=args.limit_per_class, df20_dir=args.df20 if os.path.isdir(args.df20) else None)
+        limit=args.limit_per_class, df20_dir=args.df20 if use_df20 else None)
     print(f"{len(classes)} tür, {sum(counts.values())} fotoğraf; atlanan: {skipped}", flush=True)
 
     model = timm.create_model(BASE_MODEL, pretrained=True)
@@ -175,7 +184,7 @@ def main():
 
     def save_ckpt(next_epoch):
         os.makedirs(os.path.dirname(args.ckpt), exist_ok=True)
-        torch.save({"classes": classes, "model": model.state_dict(), "epoch": next_epoch,
+        torch.save({"classes": classes, "used_df20": use_df20, "model": model.state_dict(), "epoch": next_epoch,
                     "best_acc": best_acc, "best_state": best_state, "since_best": since_best,
                     "done": done, "phase": phase, "opt": opt.state_dict(), "sched": sched.state_dict()},
                    args.ckpt)
