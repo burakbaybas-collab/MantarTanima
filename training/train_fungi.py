@@ -97,8 +97,8 @@ def main():
     ap.add_argument("--out", default="training/out")
     ap.add_argument("--report", default="training/rapor_fungi.md")
     ap.add_argument("--hours", type=float, default=3.5, help="İnce ayar için en fazla süre")
-    ap.add_argument("--head-epochs", type=int, default=2)
-    ap.add_argument("--max-epochs", type=int, default=12)
+    ap.add_argument("--head-epochs", type=int, default=1)
+    ap.add_argument("--max-epochs", type=int, default=4)
     ap.add_argument("--limit-per-class", type=int, default=None, help="Hızlı deneme için")
     args = ap.parse_args()
 
