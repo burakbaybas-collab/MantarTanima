@@ -25,6 +25,9 @@ jobs:
           java-version: "17"
 
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          # Eğitim fotoğrafları önbelleği silinmesin diye Gradle önbelleği yazılmaz
+          cache-read-only: true
 
       - name: Debug APK derle
         run: |

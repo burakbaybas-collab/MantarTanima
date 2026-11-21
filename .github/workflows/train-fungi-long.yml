@@ -12,6 +12,9 @@ on:
       max_epochs:
         description: "Toplam epoch (1'i yalnızca sınıflandırıcı)"
         default: "10"
+      resume_run_id:
+        description: "Önceki çalıştırmanın numarası (1. aşamanın devir dosyasından devam etmek için; boş = baştan)"
+        default: ""
       smoke:
         description: "Hızlı deneme (az fotoğraf, kısa aşamalar; sonucu kaydetmez)"
         type: boolean
@@ -79,16 +82,19 @@ jobs:
           key: ${{ steps.k.outputs.dfkey }}
 
   stage1:
+    if: ${{ inputs.resume_run_id == '' }}
     needs: fetch
     runs-on: ubuntu-latest
     timeout-minutes: 355
     steps:
+      - id: t0
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
       - uses: actions/cache/restore@v4
         with:
           path: training/data
           key: ${{ needs.fetch.outputs.key }}
-          fail-on-cache-miss: true
+          restore-keys: inat-
       - uses: actions/cache/restore@v4
         with:
           path: training/data_df20
@@ -99,25 +105,37 @@ jobs:
           cache: pip
           cache-dependency-path: training/requirements-fungi.txt
       - run: pip install -r training/requirements-fungi.txt
+      - name: Önbellek silinmişse fotoğrafları yeniden indir
+        run: |
+          N=$(find training/data -type f -name '*.jpg' 2>/dev/null | wc -l)
+          echo "Önbellekteki fotoğraf: $N"
+          if [ "$N" -lt 20000 ] && [ "${{ inputs.smoke }}" != "true" ]; then
+            python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
+          elif [ "${{ inputs.smoke }}" = "true" ]; then
+            python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
+          fi
       - name: Eğitim – 1. aşama
-        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --hours ${{ env.STAGE_HOURS }} --max-epochs ${{ env.MAX_EPOCHS }}
+        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }}  --hours $(python -c "import time; e=(time.time()-${{ steps.t0.outputs.start }})/3600; print(max(0.3, min(${{ env.STAGE_HOURS }}, 5.55 - e)))") --max-epochs ${{ env.MAX_EPOCHS }}
       - uses: actions/upload-artifact@v4
         with:
           name: devir-1
           path: training/out/ckpt.pt
-          retention-days: 3
+          retention-days: 5
 
   stage2:
     needs: [fetch, stage1]
+    if: ${{ always() && needs.fetch.result == 'success' && (needs.stage1.result == 'success' || needs.stage1.result == 'skipped') }}
     runs-on: ubuntu-latest
     timeout-minutes: 355
     steps:
+      - id: t0
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
       - uses: actions/cache/restore@v4
         with:
           path: training/data
           key: ${{ needs.fetch.outputs.key }}
-          fail-on-cache-miss: true
+          restore-keys: inat-
       - uses: actions/cache/restore@v4
         with:
           path: training/data_df20
@@ -128,29 +146,51 @@ jobs:
           cache: pip
           cache-dependency-path: training/requirements-fungi.txt
       - run: pip install -r training/requirements-fungi.txt
-      - uses: actions/download-artifact@v4
+      - name: Önbellek silinmişse fotoğrafları yeniden indir
+        run: |
+          N=$(find training/data -type f -name '*.jpg' 2>/dev/null | wc -l)
+          echo "Önbellekteki fotoğraf: $N"
+          if [ "$N" -lt 20000 ] && [ "${{ inputs.smoke }}" != "true" ]; then
+            python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
+          elif [ "${{ inputs.smoke }}" = "true" ]; then
+            python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
+          fi
+      - name: Devir dosyası (önceki çalıştırmadan)
+        if: ${{ inputs.resume_run_id != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: devir-1
+          path: training/out
+          run-id: ${{ inputs.resume_run_id }}
+          github-token: ${{ github.token }}
+      - name: Devir dosyası (bu çalıştırmadan)
+        if: ${{ inputs.resume_run_id == '' }}
+        uses: actions/download-artifact@v4
         with:
           name: devir-1
           path: training/out
       - name: Eğitim – 2. aşama
-        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --resume --hours ${{ env.STAGE_HOURS }} --max-epochs ${{ env.MAX_EPOCHS }}
+        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --resume --hours $(python -c "import time; e=(time.time()-${{ steps.t0.outputs.start }})/3600; print(max(0.3, min(${{ env.STAGE_HOURS }}, 5.55 - e)))") --max-epochs ${{ env.MAX_EPOCHS }}
       - uses: actions/upload-artifact@v4
         with:
           name: devir-2
           path: training/out/ckpt.pt
-          retention-days: 3
+          retention-days: 5
 
   stage3:
     needs: [fetch, stage2]
+    if: ${{ always() && needs.fetch.result == 'success' && needs.stage2.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 355
     steps:
+      - id: t0
+        run: echo "start=$(date +%s)" >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v4
       - uses: actions/cache/restore@v4
         with:
           path: training/data
           key: ${{ needs.fetch.outputs.key }}
-          fail-on-cache-miss: true
+          restore-keys: inat-
       - uses: actions/cache/restore@v4
         with:
           path: training/data_df20
@@ -161,12 +201,21 @@ jobs:
           cache: pip
           cache-dependency-path: training/requirements-fungi.txt
       - run: pip install -r training/requirements-fungi.txt
+      - name: Önbellek silinmişse fotoğrafları yeniden indir
+        run: |
+          N=$(find training/data -type f -name '*.jpg' 2>/dev/null | wc -l)
+          echo "Önbellekteki fotoğraf: $N"
+          if [ "$N" -lt 20000 ] && [ "${{ inputs.smoke }}" != "true" ]; then
+            python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
+          elif [ "${{ inputs.smoke }}" = "true" ]; then
+            python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
+          fi
       - uses: actions/download-artifact@v4
         with:
           name: devir-2
           path: training/out
       - name: Eğitim – 3. aşama ve dışa aktarma
-        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --resume --final --hours ${{ env.STAGE_HOURS }} --max-epochs ${{ env.MAX_EPOCHS }}
+        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --resume --final --hours $(python -c "import time; e=(time.time()-${{ steps.t0.outputs.start }})/3600; print(max(0.3, min(${{ env.STAGE_HOURS }}, 5.55 - e)))") --max-epochs ${{ env.MAX_EPOCHS }}
 
       - name: Eski modelle karşılaştır
         id: compare
