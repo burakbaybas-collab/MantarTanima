@@ -14,3 +14,4 @@
 # Eğitim verisi (her eğitimde yeniden indirilir)
 /training/data/
 /training/out/
+__pycache__/

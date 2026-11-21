@@ -1,0 +1,173 @@
+name: Modeli eğit (uzun, 3 aşamalı)
+
+# Bulut sunucusunda tek iş en fazla 6 saat sürebilir. Eğitim üç aşamaya bölünür;
+# her aşama kaldığı yeri (devir dosyası) bir sonrakine aktarır. Fotoğraflar bir kez indirilir.
+
+on:
+  workflow_dispatch:
+    inputs:
+      per_species:
+        description: "Tür başına en fazla fotoğraf"
+        default: "300"
+      max_epochs:
+        description: "Toplam epoch (1'i yalnızca sınıflandırıcı)"
+        default: "10"
+      smoke:
+        description: "Hızlı deneme (az fotoğraf, kısa aşamalar; sonucu kaydetmez)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: ${{ inputs.smoke && 'deneme' || 'model-egitimi' }}
+  cancel-in-progress: false
+
+env:
+  PER_SPECIES: ${{ inputs.smoke && '25' || inputs.per_species }}
+  MAX_EPOCHS: ${{ inputs.smoke && '3' || inputs.max_epochs }}
+  STAGE_HOURS: ${{ inputs.smoke && '0.02' || '5.0' }}
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    outputs:
+      key: ${{ steps.k.outputs.key }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: k
+        run: echo "key=inat-${{ hashFiles('app/src/main/assets/species.tsv') }}-${{ env.PER_SPECIES }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache/restore@v4
+        with:
+          path: training/data
+          key: ${{ steps.k.outputs.key }}
+          restore-keys: ${{ inputs.smoke && 'yok-' || 'inat-' }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+      - name: iNaturalist fotoğraflarını indir
+        run: python training/fetch_inat.py --per-species ${{ env.PER_SPECIES }}
+      - name: Önbelleğe kaydet
+        uses: actions/cache/save@v4
+        continue-on-error: true
+        with:
+          path: training/data
+          key: ${{ steps.k.outputs.key }}
+
+  stage1:
+    needs: fetch
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
+        with:
+          path: training/data
+          key: ${{ needs.fetch.outputs.key }}
+          fail-on-cache-miss: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: training/requirements-fungi.txt
+      - run: pip install -r training/requirements-fungi.txt
+      - name: Eğitim – 1. aşama
+        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --hours ${{ env.STAGE_HOURS }} --max-epochs ${{ env.MAX_EPOCHS }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: devir-1
+          path: training/out/ckpt.pt
+          retention-days: 3
+
+  stage2:
+    needs: [fetch, stage1]
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
+        with:
+          path: training/data
+          key: ${{ needs.fetch.outputs.key }}
+          fail-on-cache-miss: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: training/requirements-fungi.txt
+      - run: pip install -r training/requirements-fungi.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: devir-1
+          path: training/out
+      - name: Eğitim – 2. aşama
+        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --resume --hours ${{ env.STAGE_HOURS }} --max-epochs ${{ env.MAX_EPOCHS }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: devir-2
+          path: training/out/ckpt.pt
+          retention-days: 3
+
+  stage3:
+    needs: [fetch, stage2]
+    runs-on: ubuntu-latest
+    timeout-minutes: 355
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache/restore@v4
+        with:
+          path: training/data
+          key: ${{ needs.fetch.outputs.key }}
+          fail-on-cache-miss: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: training/requirements-fungi.txt
+      - run: pip install -r training/requirements-fungi.txt
+      - uses: actions/download-artifact@v4
+        with:
+          name: devir-2
+          path: training/out
+      - name: Eğitim – 3. aşama ve dışa aktarma
+        run: python training/train_fungi.py --limit-per-class ${{ env.PER_SPECIES }} --resume --final --hours ${{ env.STAGE_HOURS }} --max-epochs ${{ env.MAX_EPOCHS }}
+
+      - name: Eski modelle karşılaştır
+        id: compare
+        run: |
+          if python training/compare_models.py; then echo "better=true" >> "$GITHUB_OUTPUT"; else echo "better=false" >> "$GITHUB_OUTPUT"; fi
+          cat training/out/karsilastirma.md >> training/rapor_fungi.md
+          cat training/out/karsilastirma.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Daha iyiyse uygulamaya ekle ve kaydet
+        if: ${{ !inputs.smoke }}
+        run: |
+          if [ "${{ steps.compare.outputs.better }}" = "true" ]; then
+            cp training/out/model.tflite training/out/labels.txt app/src/main/assets/
+            cp training/rapor_fungi.md training/rapor.md
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add training/rapor_fungi.md training/rapor.md app/src/main/assets/model.tflite app/src/main/assets/labels.txt
+          git commit -m "Uzun eğitim sonucu (${{ steps.compare.outputs.better == 'true' && 'uygulamaya alındı' || 'alınmadı' }})" || exit 0
+          git pull --rebase
+          git push
+
+      - name: Yeni APK derlemesini başlat
+        if: ${{ !inputs.smoke && steps.compare.outputs.better == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-apk.yml --ref main
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sonuc
+          path: |
+            training/rapor_fungi.md
+            training/out/karsilastirma.md
+          retention-days: 7

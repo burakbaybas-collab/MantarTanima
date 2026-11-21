@@ -100,6 +100,10 @@ def main():
     ap.add_argument("--head-epochs", type=int, default=1)
     ap.add_argument("--max-epochs", type=int, default=4)
     ap.add_argument("--limit-per-class", type=int, default=None, help="Hızlı deneme için")
+    ap.add_argument("--ckpt", default="training/out/ckpt.pt", help="Aşamalar arası devir dosyası")
+    ap.add_argument("--resume", action="store_true", help="Önceki aşamanın kaldığı yerden devam et")
+    ap.add_argument("--final", action="store_true", help="Son aşama: eğitimi bitir ve modeli dışa aktar")
+    ap.add_argument("--patience", type=int, default=3, help="Bu kadar epoch iyileşme olmazsa dur")
     args = ap.parse_args()
 
     torch.manual_seed(SEED)
@@ -142,18 +146,43 @@ def main():
     weights = torch.tensor([total / (len(classes) * counts[c]) for c in classes], dtype=torch.float32)
     loss_fn = nn.CrossEntropyLoss(weight=weights, label_smoothing=0.1)
 
-    best_acc, best_state = -1.0, None
-    budget = args.hours * 3600
-    for epoch in range(args.max_epochs):
-        head_only = epoch < args.head_epochs
+    def make_opt(phase):
+        head = phase == "head"
         for name, p in model.named_parameters():
-            p.requires_grad = (not head_only) or name.startswith("classifier")
-        if epoch == 0 or epoch == args.head_epochs:
-            lr = 1e-3 if head_only else 1.5e-4
-            opt = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=lr, weight_decay=1e-4)
-            remaining = args.max_epochs - epoch
-            sched = torch.optim.lr_scheduler.CosineAnnealingLR(opt, T_max=len(train_dl) * remaining)
+            p.requires_grad = (not head) or name.startswith("classifier")
+        o = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
+                              lr=1e-3 if head else 1.5e-4, weight_decay=1e-4)
+        n_epochs = args.head_epochs if head else args.max_epochs - args.head_epochs
+        return o, torch.optim.lr_scheduler.CosineAnnealingLR(o, T_max=max(1, len(train_dl) * n_epochs))
 
+    start_epoch, best_acc, best_state, since_best, done = 0, -1.0, None, 0, False
+    opt = sched = None
+    phase = None
+    if args.resume and os.path.exists(args.ckpt):
+        ck = torch.load(args.ckpt, map_location="cpu", weights_only=False)
+        assert ck["classes"] == classes, "Tür listesi aşamalar arasında değişmiş"
+        model.load_state_dict(ck["model"])
+        start_epoch, best_acc, best_state = ck["epoch"], ck["best_acc"], ck["best_state"]
+        since_best, done, phase = ck["since_best"], ck["done"], ck["phase"]
+        opt, sched = make_opt(phase)
+        opt.load_state_dict(ck["opt"])
+        sched.load_state_dict(ck["sched"])
+        print(f"Devam: epoch {start_epoch}, en iyi doğrulama %{best_acc * 100:.1f}", flush=True)
+
+    def save_ckpt(next_epoch):
+        os.makedirs(os.path.dirname(args.ckpt), exist_ok=True)
+        torch.save({"classes": classes, "model": model.state_dict(), "epoch": next_epoch,
+                    "best_acc": best_acc, "best_state": best_state, "since_best": since_best,
+                    "done": done, "phase": phase, "opt": opt.state_dict(), "sched": sched.state_dict()},
+                   args.ckpt)
+
+    budget = args.hours * 3600
+    epoch = start_epoch
+    while not done and epoch < args.max_epochs:
+        want = "head" if epoch < args.head_epochs else "full"
+        if want != phase:
+            phase = want
+            opt, sched = make_opt(phase)
         model.train()
         t0, seen, run_loss = time.time(), 0, 0.0
         for x, y in train_dl:
@@ -166,14 +195,28 @@ def main():
             run_loss += loss.item() * len(y)
         acc, _, _ = evaluate(model, val_dl, len(classes))
         dt = time.time() - t0
-        print(f"Epoch {epoch + 1} ({'sınıflandırıcı' if head_only else 'tam ince ayar'}): "
+        print(f"Epoch {epoch + 1}/{args.max_epochs} ({'sınıflandırıcı' if phase == 'head' else 'tam ince ayar'}): "
               f"kayıp {run_loss / seen:.3f}, doğrulama %{acc * 100:.1f}, {dt / 60:.1f} dk", flush=True)
         if acc > best_acc:
-            best_acc, best_state = acc, {k: v.clone() for k, v in model.state_dict().items()}
-        # Bir sonraki epoch süreye sığmayacaksa dur
+            best_acc, best_state, since_best = acc, {k: v.clone() for k, v in model.state_dict().items()}, 0
+        else:
+            since_best += 1
+            if phase == "full" and since_best >= args.patience:
+                print("Doğruluk artmıyor; eğitim tamamlandı.", flush=True)
+                done = True
+        epoch += 1
+        save_ckpt(epoch)
         if time.time() - start + dt * 1.15 > budget:
-            print("Süre sınırına ulaşıldı, eğitim durduruluyor.", flush=True)
+            print("Bu aşamanın süresi doldu.", flush=True)
             break
+    if epoch >= args.max_epochs:
+        done = True
+    if opt is not None:
+        save_ckpt(epoch)
+
+    if not args.final:
+        print(f"Aşama bitti (epoch {epoch}, en iyi %{best_acc * 100:.1f}); devir dosyası kaydedildi.", flush=True)
+        return
 
     model.load_state_dict(best_state)
     acc, y_true, y_pred = evaluate(model, val_dl, len(classes))
@@ -195,6 +238,11 @@ def main():
         lines += ["", "Az fotoğraf nedeniyle modele alınmayan türler: " + ", ".join(skipped)]
     with open(args.report, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
+    import json
+    os.makedirs(args.out, exist_ok=True)
+    per_class = {c: float((y_pred[y_true == i] == i).mean()) for i, c in enumerate(classes) if (y_true == i).any()}
+    with open(os.path.join(args.out, "per_class.json"), "w") as f:
+        json.dump({"overall": acc, "per_class": per_class}, f)
     print("\n".join(lines[:6]), flush=True)
 
     # --- TFLite'a dışa aktar ---
