@@ -37,10 +37,6 @@ data class Species(
 object SpeciesCatalog {
     private var byId: Map<String, Species> = emptyMap()
 
-    /** Yüklü tanıma modelinin tanıyabildiği türler (labels.txt). */
-    var recognizable: Set<String> = emptySet()
-        private set
-
     val all: List<Species> get() = byId.values.sortedBy { it.latinName }
 
     fun load(context: Context) {
@@ -51,14 +47,6 @@ object SpeciesCatalog {
                 .mapNotNull { parse(it) }
                 .associateBy { it.id }
         }
-        recognizable = runCatching {
-            context.assets.open("labels.txt").bufferedReader().readLines().map { it.trim() }.filter { it.isNotEmpty() }.toSet()
-        }.getOrDefault(emptySet())
-    }
-
-    fun findByLatin(name: String): Species? {
-        val key = name.substringBefore('(').trim().lowercase()
-        return byId.values.firstOrNull { it.latinName.lowercase() == key }
     }
 
     private fun parse(line: String): Species? {

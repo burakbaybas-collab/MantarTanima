@@ -80,7 +80,6 @@ fun ResultScreen(
     onBack: () -> Unit,
     onStartOver: () -> Unit,
     noMushroom: UiState.NoMushroom? = null,
-    onOpenEmergency: () -> Unit = {},
 ) {
     Scaffold(
         topBar = {
@@ -148,7 +147,7 @@ fun ResultScreen(
                             )
                         }
                     }
-                    itemsIndexed(predictions) { i, p -> PredictionCard(p, i, onOpenEmergency) }
+                    itemsIndexed(predictions) { i, p -> PredictionCard(p, i) }
                 }
             }
             item { SafetyNotice() }
@@ -167,7 +166,7 @@ fun ResultScreen(
 }
 
 @Composable
-private fun PredictionCard(prediction: Prediction, rank: Int, onOpenEmergency: () -> Unit) {
+private fun PredictionCard(prediction: Prediction, rank: Int) {
     val species = SpeciesCatalog.find(prediction.label)
     var expanded by rememberSaveable(prediction.label) { mutableStateOf(rank == 0) }
     val uriHandler = LocalUriHandler.current
@@ -253,13 +252,6 @@ private fun PredictionCard(prediction: Prediction, rank: Int, onOpenEmergency: (
                             color = fg,
                         )
                         Text(species.note, style = MaterialTheme.typography.bodySmall, color = fg)
-                        if (dangerous) {
-                            Spacer(Modifier.height(6.dp))
-                            AssistChip(
-                                onClick = onOpenEmergency,
-                                label = { Text("Zehirlenme durumunda ne yapmalı?") },
-                            )
-                        }
                     }
                 }
             }
