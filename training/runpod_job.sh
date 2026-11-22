@@ -12,11 +12,14 @@ exec > >(tee -a "$LOG") 2>&1
 API="https://api.github.com/repos/$REPO"
 AUTH="Authorization: Bearer $GH_TOKEN"
 
-upload() {  # upload <dosya> <ad>
+upload() {  # upload <dosya> <ad>  (ağ/DNS kesintilerine karşı 10 deneme)
   [ -f "$1" ] || return 0
-  curl -sS -X POST -H "$AUTH" -H "Content-Type: application/octet-stream" \
-    --data-binary @"$1" "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=$2" >/dev/null \
-    || echo "Yükleme başarısız: $2"
+  for i in 1 2 3 4 5 6 7 8 9 10; do
+    curl -sS --retry 3 -X POST -H "$AUTH" -H "Content-Type: application/octet-stream" \
+      --data-binary @"$1" "https://uploads.github.com/repos/$REPO/releases/$RELEASE_ID/assets?name=$2" >/dev/null && return 0
+    echo "Yükleme denemesi $i başarısız: $2"; sleep $((i * 20))
+  done
+  echo "Yükleme başarısız: $2"
 }
 
 finish() {
