@@ -39,6 +39,18 @@ nproc; free -g | head -2
 RELEASE_ID=$(curl -sS -H "$AUTH" "$API/releases/tags/$RUN_TAG" | python -c "import sys,json; print(json.load(sys.stdin)['id'])")
 echo "Sonuç sürümü: $RUN_TAG ($RELEASE_ID)"
 
+# Her 10 dakikada bir günlüğün sonunu "ilerleme.log" olarak yükle (canlı takip için)
+progress_loop() {
+  while true; do
+    sleep 600
+    tail -n 120 "$LOG" > /work/ilerleme.log
+    OLD=$(curl -sS -H "$AUTH" "$API/releases/$RELEASE_ID/assets" | python -c "import sys,json; print(' '.join(str(a['id']) for a in json.load(sys.stdin) if a['name']=='ilerleme.log'))")
+    for ID in $OLD; do curl -sS -X DELETE -H "$AUTH" "$API/releases/assets/$ID" >/dev/null; done
+    upload /work/ilerleme.log ilerleme.log
+  done
+}
+progress_loop &
+
 set -o pipefail
 (
   set -e
@@ -64,13 +76,29 @@ set -o pipefail
   python training/fetch_fungitastic.py --species "$SPECIES" --per-species "$PER_SPECIES" --splits "$FT_SPLITS" \
     > /work/ft.log 2>&1 &
   FT_PID=$!
-  python training/fetch_inat.py --species "$SPECIES" --per-species "$PER_SPECIES" --workers 64 --species-workers 6
+  if [ -n "$DATA_TAG" ]; then
+    # iNaturalist fotoğrafları önceden hazırlanmış paketlerden (GitHub sürümü) alınır
+    curl -sS -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
+import sys,json
+for a in json.load(sys.stdin)['assets']:
+    if a['name'].startswith('veri-inat-'): print(a['id'], a['name'])" > /work/paketler.txt
+    echo "Hazır paket sayısı: $(wc -l < /work/paketler.txt)"
+    while read -r ID NAME; do
+      curl -sSL --retry 5 -H "$AUTH" -H "Accept: application/octet-stream" "$API/releases/assets/$ID" -o "/work/$NAME"
+      tar -xf "/work/$NAME" -C training && rm -f "/work/$NAME"
+      echo "  $NAME açıldı"
+    done < /work/paketler.txt
+    echo "iNaturalist türleri: $(ls training/data | wc -l)"
+  else
+    python training/fetch_inat.py --species "$SPECIES" --per-species "$PER_SPECIES" --workers 64 --species-workers 6
+  fi
   wait $FT_PID || echo "FungiTastic indirmesi başarısız; yalnızca iNaturalist kullanılacak"
   cat /work/ft.log
   df -h /work | tail -1
   du -sh training/data training/data_ft 2>/dev/null || true
 
   echo "=== Eğitim başlıyor ($(date -u)) ==="
+  tail -n 120 "$LOG" > /work/ilerleme.log; upload /work/ilerleme.log ilerleme-baslangic.log
   python training/train_fungi.py --species "$SPECIES" --df20 training/data_ft --model "$MODEL" --img "$IMG" --batch "$BATCH" \
     --limit-per-class "$PER_SPECIES" --head-epochs 1 --max-epochs "$MAX_EPOCHS" --patience 4 \
     --hours "$HOURS" --final --no-export

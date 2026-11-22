@@ -132,10 +132,14 @@ def main():
     ap.add_argument("--per-species", type=int, default=300)
     ap.add_argument("--workers", type=int, default=6, help="Eşzamanlı fotoğraf indirme sayısı")
     ap.add_argument("--species-workers", type=int, default=1, help="Aynı anda işlenen tür sayısı")
+    ap.add_argument("--shard", type=int, default=0, help="Paralel indirmede bu parçanın sırası")
+    ap.add_argument("--shards", type=int, default=1, help="Toplam parça sayısı")
     args = ap.parse_args()
 
     with open(args.species, encoding="utf-8") as f:
         species = list(csv.DictReader(f, delimiter="\t"))
+    species = [sp for i, sp in enumerate(species) if i % args.shards == args.shard]
+    print(f"Parça {args.shard + 1}/{args.shards}: {len(species)} tür", flush=True)
 
     dl_pool = ThreadPoolExecutor(max_workers=args.workers)
 

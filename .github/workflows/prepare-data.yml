@@ -1,0 +1,86 @@
+name: Eğitim verisini hazırla (iNaturalist, paralel)
+
+# iNaturalist fotoğraflarını 12 ücretsiz sunucuda paralel indirir, küçültür ve
+# "egitim-verisi" sürümüne paketler halinde yükler. Bitince GPU eğitimini başlatır.
+
+on:
+  workflow_dispatch:
+    inputs:
+      per_species:
+        description: "Tür başına en fazla iNaturalist fotoğrafı"
+        default: "500"
+      start_training:
+        description: "Bitince GPU eğitimini başlat"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  DATA_TAG: egitim-verisi
+  SHARDS: 12
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Veri sürümünü hazırla (eski paketleri sil)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$DATA_TAG" >/dev/null 2>&1 || \
+            gh release create "$DATA_TAG" --title "Eğitim verisi (iNaturalist)" --notes "Otomatik hazırlanan eğitim fotoğrafları" --prerelease
+          for A in $(gh release view "$DATA_TAG" --json assets -q '.assets[].name'); do
+            gh release delete-asset "$DATA_TAG" "$A" --yes || true
+          done
+
+  fetch:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests pillow
+      - name: Fotoğrafları indir
+        run: |
+          python training/fetch_inat.py --per-species ${{ inputs.per_species }} --workers 24 --species-workers 3 \
+            --shard ${{ matrix.shard }} --shards $SHARDS
+      - name: Küçült ve paketle
+        run: |
+          python training/shrink_images.py training/data
+          du -sh training/data
+          tar -cf veri-inat-${{ matrix.shard }}.tar -C training data
+          ls -la veri-inat-${{ matrix.shard }}.tar
+      - name: Yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in 1 2 3 4 5; do
+            gh release upload "$DATA_TAG" veri-inat-${{ matrix.shard }}.tar --clobber && exit 0
+            sleep 20
+          done
+          exit 1
+
+  train:
+    needs: fetch
+    if: ${{ always() && inputs.start_training }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Paketleri kontrol et ve GPU eğitimini başlat
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          N=$(gh release view "$DATA_TAG" -R ${{ github.repository }} --json assets -q '[.assets[] | select(.name | startswith("veri-inat-"))] | length')
+          echo "Hazır paket: $N / $SHARDS"
+          if [ "$N" -lt "$SHARDS" ]; then echo "Eksik paket var; eğitim başlatılmadı."; exit 1; fi
+          gh workflow run train-gpu.yml -R ${{ github.repository }} --ref main -f data_tag="$DATA_TAG"

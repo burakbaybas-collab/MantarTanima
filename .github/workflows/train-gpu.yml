@@ -19,6 +19,9 @@ on:
       img:
         description: "Çözünürlük (piksel)"
         default: "299"
+      data_tag:
+        description: "Önceden hazırlanmış iNaturalist paketleri (sürüm etiketi; boşsa sunucu kendisi indirir)"
+        default: ""
       smoke:
         description: "Hızlı deneme (5 tür, az fotoğraf; sonucu uygulamaya eklemez)"
         type: boolean
@@ -78,6 +81,7 @@ jobs:
               "PER_SPECIES": os.environ["PER_SPECIES"], "MAX_EPOCHS": os.environ["MAX_EPOCHS"],
               "MODEL": "${{ inputs.model }}", "IMG": "${{ inputs.img }}", "BATCH": "64",
               "HOURS": os.environ["HOURS"], "LIMIT_SPECIES": os.environ["LIMIT_SPECIES"],
+              "DATA_TAG": "${{ inputs.data_tag }}",
             },
           }))
           PY
@@ -120,6 +124,10 @@ jobs:
               POD=$(curl -sS -H "Authorization: Bearer $RP_KEY" "https://api.runpod.io/v2/pods/$POD_ID" \
                     | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','?'), d.get('cost','?'), 'USD/saat')" 2>/dev/null || echo "yok")
               echo "$ELAPSED dk | sunucu: $POD | dosyalar: $ASSETS"
+              case "$ASSETS" in *ilerleme.log*)
+                rm -f /tmp/ilerleme.log
+                gh release download "$RUN_TAG" -p ilerleme.log -D /tmp >/dev/null 2>&1 && tail -n 3 /tmp/ilerleme.log | sed 's/^/    > /';;
+              esac
               case "$ASSETS" in *basarili.txt*) RESULT=ok; break;; *hata.txt*) RESULT=hata; break;; *gpuyok.txt*) RESULT=gpuyok; break;; esac
               if [ $ELAPSED -gt 330 ]; then echo "Süre doldu."; RESULT=sure; break; fi
             done
