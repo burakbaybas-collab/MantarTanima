@@ -58,14 +58,20 @@ set -o pipefail
   fi
 
   echo "=== Fotoğraflar indiriliyor ($(date -u)) ==="
+  # FungiTastic (uzman doğrulamalı) ve iNaturalist aynı anda indirilir
+  FT_SPLITS=train,val,test
+  [ -n "$LIMIT_SPECIES" ] && FT_SPLITS=val
+  python training/fetch_fungitastic.py --species "$SPECIES" --per-species "$PER_SPECIES" --splits "$FT_SPLITS" \
+    > /work/ft.log 2>&1 &
+  FT_PID=$!
   python training/fetch_inat.py --species "$SPECIES" --per-species "$PER_SPECIES" --workers 64 --species-workers 6
-  if [ -z "$LIMIT_SPECIES" ]; then
-    python training/fetch_df20.py --species "$SPECIES" --per-species 300 || echo "DF20 atlandı"
-  fi
-  du -sh training/data training/data_df20 2>/dev/null || true
+  wait $FT_PID || echo "FungiTastic indirmesi başarısız; yalnızca iNaturalist kullanılacak"
+  cat /work/ft.log
+  df -h /work | tail -1
+  du -sh training/data training/data_ft 2>/dev/null || true
 
   echo "=== Eğitim başlıyor ($(date -u)) ==="
-  python training/train_fungi.py --species "$SPECIES" --model "$MODEL" --img "$IMG" --batch "$BATCH" \
+  python training/train_fungi.py --species "$SPECIES" --df20 training/data_ft --model "$MODEL" --img "$IMG" --batch "$BATCH" \
     --limit-per-class "$PER_SPECIES" --head-epochs 1 --max-epochs "$MAX_EPOCHS" --patience 4 \
     --hours "$HOURS" --final --no-export
 )

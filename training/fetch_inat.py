@@ -62,35 +62,49 @@ def resolve_taxon(name):
     raise SystemExit(f"Takson bulunamadı: {name}")
 
 
+# Önce Avrupa + Türkiye gözlemleri, yetmezse dünyanın geri kalanı
+REGIONS = ["97391,7183", None]
+
+
 def collect_photos(taxon_id, limit):
-    photos, seen, page = [], set(), 1
-    while len(photos) < limit and page <= 20:
-        data = api_get("/observations", {
-            "taxon_id": taxon_id,
-            "quality_grade": "research",
-            "photos": "true",
-            "photo_license": LICENSES,
-            "per_page": 200,
-            "page": page,
-            "order_by": "votes",
-        })
-        results = data["results"]
-        if not results:
-            break
-        for obs in results:
-            # Her gözlemden en fazla 3 fotoğraf: genelde farklı açılardır (üst, yan, alt)
-            for p in obs.get("photos", [])[:3]:
-                if p["id"] in seen or p.get("license_code") not in LICENSES.split(","):
+    photos, seen, seen_obs = [], set(), set()
+    for region in REGIONS:
+        page = 1
+        while len(photos) < limit and page <= 20:
+            params = {
+                "taxon_id": taxon_id,
+                "quality_grade": "research",
+                "photos": "true",
+                "photo_license": LICENSES,
+                "per_page": 200,
+                "page": page,
+                "order_by": "votes",
+            }
+            if region:
+                params["place_id"] = region
+            data = api_get("/observations", params)
+            results = data["results"]
+            if not results:
+                break
+            for obs in results:
+                if obs["id"] in seen_obs:
                     continue
-                seen.add(p["id"])
-                photos.append({
-                    "photo_id": p["id"],
-                    "url": p["url"].replace("square", "medium"),
-                    "license": p.get("license_code"),
-                    "attribution": p.get("attribution", ""),
-                    "observation": f"https://www.inaturalist.org/observations/{obs['id']}",
-                })
-        page += 1
+                seen_obs.add(obs["id"])
+                # Her gözlemden en fazla 3 fotoğraf: genelde farklı açılardır (üst, yan, alt)
+                for p in obs.get("photos", [])[:3]:
+                    if p["id"] in seen or p.get("license_code") not in LICENSES.split(","):
+                        continue
+                    seen.add(p["id"])
+                    photos.append({
+                        "photo_id": p["id"],
+                        "url": p["url"].replace("square", "medium"),
+                        "license": p.get("license_code"),
+                        "attribution": p.get("attribution", ""),
+                        "observation": f"https://www.inaturalist.org/observations/{obs['id']}",
+                    })
+            page += 1
+        if len(photos) >= limit:
+            break
     return photos[:limit]
 
 

@@ -38,23 +38,33 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
     rng = random.Random(SEED)
     classes, counts, skipped = [], {}, []
     for c in sorted(species_ids):
-        files = []
-        own = []
+        by_src = {"inat": [], "df20": [], "own": []}
         for src_root, prefix in ((data_dir, "inat"), (df20_dir, "df20"), (own_dir, "own")):
             src = os.path.join(src_root, c) if src_root else None
             if not src or not os.path.isdir(src):
                 continue
             for f in sorted(os.listdir(src)):
                 if f.lower().endswith((".jpg", ".jpeg", ".png")):
-                    (own if prefix == "own" else files).append((os.path.abspath(os.path.join(src, f)), f"{prefix}_{f}"))
-        if len(files) + len(own) < MIN_PHOTOS:
-            skipped.append(f"{c} ({len(files) + len(own)})")
+                    by_src[prefix].append((os.path.abspath(os.path.join(src, f)), f"{prefix}_{f}"))
+        total = sum(len(v) for v in by_src.values())
+        if total < MIN_PHOTOS:
+            skipped.append(f"{c} ({total})")
             continue
         classes.append(c)
-        rng.shuffle(files)
+        # Öncelik: kendi fotoğraflarınız > uzman doğrulamalı (FungiTastic/DF20) > iNaturalist
+        for v in by_src.values():
+            rng.shuffle(v)
+        own, ft, inat = by_src["own"], by_src["df20"], by_src["inat"]
         if limit:
-            files = files[:max(0, limit - len(own))]
-        files = own + files  # kendi fotoğraflarınız her zaman dahil edilir
+            # Uzman fotoğrafları en fazla %70; kalanı iNaturalist'ten (çeşitlilik için),
+            # iNaturalist yetmezse yine uzman fotoğraflarıyla tamamlanır.
+            room = max(0, limit - len(own))
+            n_ft = min(len(ft), int(room * 0.7))
+            n_in = min(len(inat), room - n_ft)
+            n_ft = min(len(ft), room - n_in)
+            files = own + ft[:n_ft] + inat[:n_in]
+        else:
+            files = own + ft + inat
         rng.shuffle(files)
         n_val = max(1, int(len(files) * val_frac))
         for i, (path, name) in enumerate(files):
