@@ -12,7 +12,7 @@ on:
         default: "1000"
       max_epochs:
         description: "Toplam epoch"
-        default: "25"
+        default: "18"
       model:
         description: "Temel model"
         default: "hf-hub:BVRA/tf_efficientnet_b3.in1k_ft_df20_299"
@@ -37,7 +37,7 @@ env:
   PER_SPECIES: ${{ inputs.smoke && '60' || inputs.per_species }}
   MAX_EPOCHS: ${{ inputs.smoke && '2' || inputs.max_epochs }}
   LIMIT_SPECIES: ${{ inputs.smoke && '5' || '' }}
-  HOURS: ${{ inputs.smoke && '0.3' || '3.6' }}
+  HOURS: ${{ inputs.smoke && '0.3' || '3.3' }}
 
 jobs:
   train:
@@ -69,7 +69,7 @@ jobs:
             "cloud": sys.argv[2],
             "gpu": {"id": sys.argv[1], "count": 1, "minRamPerGpu": 24, "minVcpuCountPerGpu": 8,
                     "minCudaVersion": "12.8"},
-            "disk": 150,
+            "disk": 200,
             "entrypoint": ["bash", "-c"],
             "cmd": [os.environ["START_CMD"]],
             "env": {
