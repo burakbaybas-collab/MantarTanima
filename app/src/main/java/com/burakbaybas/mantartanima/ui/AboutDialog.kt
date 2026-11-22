@@ -210,6 +210,7 @@ private fun Paragraph(text: String) {
         color = Body,
         fontSize = 14.sp,
         lineHeight = 19.sp,
+        textAlign = TextAlign.Justify,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
     )
 }
