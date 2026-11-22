@@ -58,7 +58,7 @@ set -o pipefail
   fi
 
   echo "=== Fotoğraflar indiriliyor ($(date -u)) ==="
-  python training/fetch_inat.py --species "$SPECIES" --per-species "$PER_SPECIES" --workers 32
+  python training/fetch_inat.py --species "$SPECIES" --per-species "$PER_SPECIES" --workers 64 --species-workers 6
   if [ -z "$LIMIT_SPECIES" ]; then
     python training/fetch_df20.py --species "$SPECIES" --per-species 300 || echo "DF20 atlandı"
   fi

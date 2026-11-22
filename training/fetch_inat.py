@@ -17,6 +17,7 @@ import csv
 import os
 import sys
 import time
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 import requests
@@ -26,14 +27,28 @@ HEADERS = {"User-Agent": "MantarTanima/0.1 (egitim verisi; github.com/burakbayba
 LICENSES = "cc0,cc-by,cc-by-nc"
 
 
-def api_get(path, params, retries=4):
+_api_lock = threading.Lock()
+_last_call = [0.0]
+API_INTERVAL = 1.0  # iNaturalist'in istediği nazik hız: saniyede en fazla ~1 istek (tüm iş parçacıkları toplamı)
+
+
+def api_get(path, params, retries=8):
+    last_err = None
     for attempt in range(retries):
-        r = requests.get(f"{API}{path}", params=params, headers=HEADERS, timeout=60)
-        if r.status_code == 200:
-            time.sleep(1.0)  # iNaturalist'in istediği nazik hız
-            return r.json()
-        time.sleep(5 * (attempt + 1))
-    r.raise_for_status()
+        with _api_lock:
+            wait = _last_call[0] + API_INTERVAL - time.time()
+            if wait > 0:
+                time.sleep(wait)
+            _last_call[0] = time.time()
+        try:
+            r = requests.get(f"{API}{path}", params=params, headers=HEADERS, timeout=60)
+            if r.status_code == 200:
+                return r.json()
+            last_err = f"HTTP {r.status_code}"
+        except (requests.RequestException, ValueError) as e:  # bağlantı kopması, bozuk yanıt
+            last_err = repr(e)
+        time.sleep(min(120, 5 * 2 ** attempt))
+    raise RuntimeError(f"iNaturalist yanıt vermedi ({path}): {last_err}")
 
 
 def resolve_taxon(name):
@@ -102,29 +117,36 @@ def main():
     ap.add_argument("--out", default="training/data")
     ap.add_argument("--per-species", type=int, default=300)
     ap.add_argument("--workers", type=int, default=6, help="Eşzamanlı fotoğraf indirme sayısı")
+    ap.add_argument("--species-workers", type=int, default=1, help="Aynı anda işlenen tür sayısı")
     args = ap.parse_args()
 
     with open(args.species, encoding="utf-8") as f:
         species = list(csv.DictReader(f, delimiter="\t"))
 
-    summary = []
-    for sp in species:
+    dl_pool = ThreadPoolExecutor(max_workers=args.workers)
+
+    def one(sp):
         try:
             taxon_id, name, rank = resolve_taxon(sp["taxon"])
-        except SystemExit as e:
-            print(f"ATLANDI: {e}", flush=True)
-            continue
-        photos = collect_photos(taxon_id, args.per_species)
+            photos = collect_photos(taxon_id, args.per_species)
+        except (SystemExit, RuntimeError) as e:  # bir türdeki sorun tüm işi durdurmasın
+            print(f"ATLANDI {sp['id']}: {e}", flush=True)
+            return sp["id"], 0
         folder = os.path.join(args.out, sp["id"])
         os.makedirs(folder, exist_ok=True)
-        with ThreadPoolExecutor(max_workers=args.workers) as ex:
-            ok = sum(ex.map(lambda it: download(it, folder), photos))
+        ok = sum(dl_pool.map(lambda it: download(it, folder), photos))
         with open(os.path.join(folder, "_kaynaklar.csv"), "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=["photo_id", "url", "license", "attribution", "observation"])
             w.writeheader()
             w.writerows(photos)
         print(f"{sp['id']:<24} {name} ({rank}, takson {taxon_id}): {ok} fotoğraf", flush=True)
-        summary.append((sp["id"], ok))
+        return sp["id"], ok
+
+    # Birkaç tür aynı anda: API sırası tek, fotoğraf indirmeleri paralel ilerler
+    with ThreadPoolExecutor(max_workers=args.species_workers) as ex:
+        summary = list(ex.map(one, species))
+    dl_pool.shutdown()
+    print(f"Toplam: {sum(n for _, n in summary)} fotoğraf, {sum(1 for _, n in summary if n)} tür", flush=True)
 
     low = [s for s, n in summary if n < 50]
     if low:
