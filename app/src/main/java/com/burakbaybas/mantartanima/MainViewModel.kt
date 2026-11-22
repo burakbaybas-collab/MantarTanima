@@ -64,11 +64,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 _state.value = withContext(Dispatchers.Default) {
                     val bitmaps = uris.map { decodeBitmap(it) ?: error("Fotoğraf açılamadı") }
+                    val predictions = classifier.classify(bitmaps)
                     val mushroomPhotos = detector?.let { d -> bitmaps.count { d.looksLikeMushroom(it) } }
-                    if (mushroomPhotos != null && mushroomPhotos < MIN_MUSHROOM_PHOTOS) {
+                    // Genel algılayıcı kâse, kulak ve jöle mantarlarını tanımayabilir. Tür modeli yeterince
+                    // eminse sonucu yine gösteririz; ikisi de emin değilse "mantar algılanamadı" deriz.
+                    val classifierSure = (predictions.firstOrNull()?.confidence ?: 0f) >= CLASSIFIER_OVERRIDE
+                    if (mushroomPhotos != null && mushroomPhotos < MIN_MUSHROOM_PHOTOS && !classifierSure) {
                         UiState.NoMushroom(mushroomPhotos, bitmaps.size)
                     } else {
-                        UiState.Result(classifier.classify(bitmaps), classifier.isDemo)
+                        UiState.Result(predictions, classifier.isDemo)
                     }
                 }
             } catch (e: Exception) {
@@ -107,5 +111,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     companion object {
         /** Üç fotoğraftan en az bu kadarında mantar algılanmalı. */
         const val MIN_MUSHROOM_PHOTOS = 2
+
+        /** Algılayıcı mantar görmese de tür modeli bu güvenin üstündeyse sonuç gösterilir. */
+        const val CLASSIFIER_OVERRIDE = 0.40f
     }
 }
