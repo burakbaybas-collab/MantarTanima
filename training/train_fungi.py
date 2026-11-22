@@ -81,12 +81,17 @@ class ExportWrapper(nn.Module):
         return torch.softmax(self.model(x), dim=-1)
 
 
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
 def evaluate(model, loader, n_classes):
     model.eval()
     ys, ps = [], []
     with torch.no_grad():
         for x, y in loader:
-            ps.append(model(x).argmax(1).numpy())
+            with torch.autocast(DEVICE.type, enabled=DEVICE.type == "cuda"):
+                out = model(x.to(DEVICE, non_blocking=True))
+            ps.append(out.argmax(1).cpu().numpy())
             ys.append(y.numpy())
     y, p = np.concatenate(ys), np.concatenate(ps)
     return float((y == p).mean()), y, p
@@ -108,6 +113,12 @@ def main():
     ap.add_argument("--resume", action="store_true", help="Önceki aşamanın kaldığı yerden devam et")
     ap.add_argument("--final", action="store_true", help="Son aşama: eğitimi bitir ve modeli dışa aktar")
     ap.add_argument("--patience", type=int, default=3, help="Bu kadar epoch iyileşme olmazsa dur")
+    ap.add_argument("--model", default=BASE_MODEL, help="timm / Hugging Face temel model adı")
+    ap.add_argument("--img", type=int, default=IMG, help="Girdi çözünürlüğü (piksel)")
+    ap.add_argument("--batch", type=int, default=48)
+    ap.add_argument("--lr", type=float, default=1.5e-4, help="Tam ince ayar öğrenme hızı")
+    ap.add_argument("--no-export", action="store_true",
+                    help="TFLite dışa aktarmayı atla (GPU sunucusunda; dışa aktarma export_model.py ile yapılır)")
     args = ap.parse_args()
 
     torch.manual_seed(SEED)
@@ -131,11 +142,14 @@ def main():
         limit=args.limit_per_class, df20_dir=args.df20 if use_df20 else None)
     print(f"{len(classes)} tür, {sum(counts.values())} fotoğraf; atlanan: {skipped}", flush=True)
 
-    model = timm.create_model(BASE_MODEL, pretrained=True)
+    IMG = args.img
+    print(f"Cihaz: {DEVICE}, model: {args.model}, çözünürlük: {IMG}", flush=True)
+    model = timm.create_model(args.model, pretrained=True)
     cfg = resolve_data_config({}, model=model)
     mean, std = list(cfg["mean"]), list(cfg["std"])
     print("Temel model normalizasyonu:", mean, std, flush=True)
     model.reset_classifier(len(classes))
+    model.to(DEVICE)
 
     norm = transforms.Normalize(mean, std)
     train_tf = transforms.Compose([
@@ -152,19 +166,23 @@ def main():
     val_ds = datasets.ImageFolder(os.path.join(tmp, "val"), transform=val_tf)
     assert train_ds.classes == classes == val_ds.classes
     workers = max(1, (os.cpu_count() or 4) - 1)
-    train_dl = DataLoader(train_ds, batch_size=48, shuffle=True, num_workers=workers, persistent_workers=True)
-    val_dl = DataLoader(val_ds, batch_size=96, shuffle=False, num_workers=workers, persistent_workers=True)
+    pin = DEVICE.type == "cuda"
+    train_dl = DataLoader(train_ds, batch_size=args.batch, shuffle=True, num_workers=workers,
+                          persistent_workers=True, pin_memory=pin, drop_last=True)
+    val_dl = DataLoader(val_ds, batch_size=args.batch * 2, shuffle=False, num_workers=workers,
+                        persistent_workers=True, pin_memory=pin)
+    scaler = torch.amp.GradScaler(DEVICE.type, enabled=DEVICE.type == "cuda")
 
     total = sum(counts.values())
     weights = torch.tensor([total / (len(classes) * counts[c]) for c in classes], dtype=torch.float32)
-    loss_fn = nn.CrossEntropyLoss(weight=weights, label_smoothing=0.1)
+    loss_fn = nn.CrossEntropyLoss(weight=weights.to(DEVICE), label_smoothing=0.1)
 
     def make_opt(phase):
         head = phase == "head"
         for name, p in model.named_parameters():
             p.requires_grad = (not head) or name.startswith("classifier")
         o = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],
-                              lr=1e-3 if head else 1.5e-4, weight_decay=1e-4)
+                              lr=1e-3 if head else args.lr, weight_decay=1e-4)
         n_epochs = args.head_epochs if head else args.max_epochs - args.head_epochs
         return o, torch.optim.lr_scheduler.CosineAnnealingLR(o, T_max=max(1, len(train_dl) * n_epochs))
 
@@ -175,6 +193,7 @@ def main():
         ck = torch.load(args.ckpt, map_location="cpu", weights_only=False)
         assert ck["classes"] == classes, "Tür listesi aşamalar arasında değişmiş"
         model.load_state_dict(ck["model"])
+        model.to(DEVICE)
         start_epoch, best_acc, best_state = ck["epoch"], ck["best_acc"], ck["best_state"]
         since_best, done, phase = ck["since_best"], ck["done"], ck["phase"]
         opt, sched = make_opt(phase)
@@ -199,10 +218,13 @@ def main():
         model.train()
         t0, seen, run_loss = time.time(), 0, 0.0
         for x, y in train_dl:
-            opt.zero_grad()
-            loss = loss_fn(model(x), y)
-            loss.backward()
-            opt.step()
+            x, y = x.to(DEVICE, non_blocking=True), y.to(DEVICE, non_blocking=True)
+            opt.zero_grad(set_to_none=True)
+            with torch.autocast(DEVICE.type, enabled=DEVICE.type == "cuda"):
+                loss = loss_fn(model(x), y)
+            scaler.scale(loss).backward()
+            scaler.step(opt)
+            scaler.update()
             sched.step()
             seen += len(y)
             run_loss += loss.item() * len(y)
@@ -211,7 +233,7 @@ def main():
         print(f"Epoch {epoch + 1}/{args.max_epochs} ({'sınıflandırıcı' if phase == 'head' else 'tam ince ayar'}): "
               f"kayıp {run_loss / seen:.3f}, doğrulama %{acc * 100:.1f}, {dt / 60:.1f} dk", flush=True)
         if acc > best_acc:
-            best_acc, best_state, since_best = acc, {k: v.clone() for k, v in model.state_dict().items()}, 0
+            best_acc, best_state, since_best = acc, {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}, 0
         else:
             since_best += 1
             if phase == "full" and since_best >= args.patience:
@@ -236,7 +258,7 @@ def main():
 
     lines = [
         "# Model doğrulama raporu (mantar modeli temelli)", "",
-        f"Temel model: `{BASE_MODEL.replace('hf-hub:', '')}` (Danish Fungi 2020, CC-BY-NC-4.0)  ",
+        f"Temel model: `{args.model.replace('hf-hub:', '')}` (Danish Fungi 2020, CC-BY-NC-4.0), {IMG} piksel  ",
         f"Genel doğruluk (tek fotoğraf): **%{acc * 100:.1f}**  ",
         f"Doğrulama fotoğrafı: {len(y_true)}, tür sayısı: {len(classes)}", "",
         "| Tür | Fotoğraf (toplam) | Doğruluk | En çok karıştığı tür |", "|---|---|---|---|",
@@ -257,6 +279,20 @@ def main():
     with open(os.path.join(args.out, "per_class.json"), "w") as f:
         json.dump({"overall": acc, "per_class": per_class}, f)
     print("\n".join(lines[:6]), flush=True)
+
+    # En iyi model ağırlıkları (dışa aktarma ayrı makinede de yapılabilsin diye)
+    os.makedirs(args.out, exist_ok=True)
+    torch.save({"state_dict": {k: v.cpu() for k, v in model.state_dict().items()}, "classes": classes,
+                "model": args.model, "img": IMG, "mean": mean, "std": std, "accuracy": acc},
+               os.path.join(args.out, "best_model.pt"))
+    with open(os.path.join(args.out, "labels.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(classes) + "\n")
+    with open(os.path.join(args.out, "accuracy.txt"), "w") as f:
+        f.write(f"{acc:.4f}\n")
+    if args.no_export:
+        print("Dışa aktarma atlandı (best_model.pt kaydedildi).", flush=True)
+        return
+    model.cpu()
 
     # --- TFLite'a dışa aktar ---
     os.makedirs(args.out, exist_ok=True)

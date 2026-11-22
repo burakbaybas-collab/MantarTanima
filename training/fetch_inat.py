@@ -101,6 +101,7 @@ def main():
     ap.add_argument("--species", default="app/src/main/assets/species.tsv")
     ap.add_argument("--out", default="training/data")
     ap.add_argument("--per-species", type=int, default=300)
+    ap.add_argument("--workers", type=int, default=6, help="Eşzamanlı fotoğraf indirme sayısı")
     args = ap.parse_args()
 
     with open(args.species, encoding="utf-8") as f:
@@ -116,7 +117,7 @@ def main():
         photos = collect_photos(taxon_id, args.per_species)
         folder = os.path.join(args.out, sp["id"])
         os.makedirs(folder, exist_ok=True)
-        with ThreadPoolExecutor(max_workers=6) as ex:
+        with ThreadPoolExecutor(max_workers=args.workers) as ex:
             ok = sum(ex.map(lambda it: download(it, folder), photos))
         with open(os.path.join(folder, "_kaynaklar.csv"), "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=["photo_id", "url", "license", "attribution", "observation"])
