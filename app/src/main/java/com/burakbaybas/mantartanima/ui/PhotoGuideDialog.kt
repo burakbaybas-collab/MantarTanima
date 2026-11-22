@@ -68,15 +68,15 @@ private data class GuideStep(
 private val steps = listOf(
     GuideStep(
         1, "Üstten", R.drawable.example_top,
-        listOf("Şapkanın tamamı görünsün", "Renk, pul ve lekeler net olsun", "Telefonu mantarın tam üstünde tutun"),
+        listOf("Şapkanın tamamı", "Renk ve pullar net"),
     ),
     GuideStep(
         2, "Yandan", R.drawable.example_side,
-        listOf("Şapka, sap ve sap tabanı birlikte", "Halka ve torba (volva) varsa görünsün", "Mantar boyunda, yere yakın çekin"),
+        listOf("Şapka, sap, taban", "Halka ve torba"),
     ),
     GuideStep(
         3, "Alttan", R.drawable.example_bottom,
-        listOf("Lameller veya gözenekler net görünsün", "Sapın şapkaya bağlandığı yer görünsün", "Mantarı nazikçe çevirip çekin"),
+        listOf("Lamel / gözenek", "Sap bağlantısı"),
     ),
 )
 
@@ -90,7 +90,7 @@ fun PhotoGuideDialog(onDismiss: () -> Unit) {
             colors = CardDefaults.cardColors(containerColor = Color.White),
             border = BorderStroke(1.5.dp, Color(0xFFB9E2C6)),
         ) {
-            Column(Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
+            Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 14.dp, vertical = 10.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         Modifier.size(38.dp).background(Color(0xFFEAF7EE), CircleShape),
@@ -105,15 +105,15 @@ fun PhotoGuideDialog(onDismiss: () -> Unit) {
                     IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, "Kapat") }
                 }
 
-                Spacer(Modifier.height(12.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    steps.forEach { StepCard(it) }
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    steps.forEach { StepCard(it, Modifier.weight(1f)) }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(12.dp))
                 Text("Doğru ve yanlış çekim", fontWeight = FontWeight.Bold, color = GuideGreen,
                     style = MaterialTheme.typography.titleSmall)
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(6.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     ExampleTile("Doğru", "Yakın, net", good = true, Modifier.weight(1f)) {
                         GuideImage(R.drawable.example_side)
@@ -138,34 +138,32 @@ fun PhotoGuideDialog(onDismiss: () -> Unit) {
                     }
                 }
 
-                Spacer(Modifier.height(14.dp))
-                TipRow(Icons.Filled.CheckCircle, GoodGreen, "Her fotoğrafta yalnızca tek mantar olsun ve kadrajı doldursun.")
-                TipRow(Icons.Filled.CheckCircle, GoodGreen, "Gün ışığında, flaşsız çekin; arka plan sade olsun.")
-                TipRow(Icons.Filled.Cancel, BadRed, "Farklı mantarların fotoğraflarını karıştırmayın.")
+                Spacer(Modifier.height(8.dp))
+                TipRow(Icons.Filled.CheckCircle, GoodGreen, "Üç fotoğraf da aynı mantarın olsun; tek mantar kadrajı doldursun.")
+                TipRow(Icons.Filled.CheckCircle, GoodGreen, "Gün ışığında, flaşsız çekin.")
 
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(6.dp))
                 Row(
                     Modifier
                         .fillMaxWidth()
                         .background(Color(0xFFFFF1E4), RoundedCornerShape(12.dp))
                         .border(1.dp, Color(0xFFF5C99A), RoundedCornerShape(12.dp))
-                        .padding(12.dp),
-                    verticalAlignment = Alignment.Top,
+                        .padding(horizontal = 10.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(Icons.Filled.Warning, null, tint = Color(0xFFD97706), modifier = Modifier.size(22.dp))
+                    Icon(Icons.Filled.Warning, null, tint = Color(0xFFD97706), modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(10.dp))
                     Text(
-                        "Mantarı toplarken sap tabanını koparmayın. Ölümcül Amanita türlerini ayırt eden torba " +
-                            "(volva) çoğu zaman toprağın içindedir.",
+                        "Sap tabanını koparmayın: ölümcül Amanita'ların torbası (volva) toprağın içindedir.",
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFF7A3E00),
                     )
                 }
 
-                Spacer(Modifier.height(14.dp))
+                Spacer(Modifier.height(10.dp))
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().height(44.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = GuideGreen),
                     shape = RoundedCornerShape(14.dp),
                 ) { Text("Anladım", fontWeight = FontWeight.SemiBold) }
@@ -175,40 +173,32 @@ fun PhotoGuideDialog(onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun StepCard(step: GuideStep) {
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .background(Color(0xFFF4F9F1), RoundedCornerShape(14.dp))
-            .border(1.dp, Color(0xFFD5E8CC), RoundedCornerShape(14.dp))
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
+private fun StepCard(step: GuideStep, modifier: Modifier) {
+    Column(
+        modifier
+            .background(Color(0xFFF4F9F1), RoundedCornerShape(12.dp))
+            .border(1.dp, Color(0xFFD5E8CC), RoundedCornerShape(12.dp))
+            .padding(6.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Box {
             Image(
                 painterResource(step.image), step.title,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier.size(92.dp).clip(RoundedCornerShape(12.dp)),
+                modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(9.dp)),
             )
             Box(
                 Modifier
                     .padding(4.dp)
-                    .size(24.dp)
+                    .size(22.dp)
                     .background(GuideGreen, CircleShape),
                 contentAlignment = Alignment.Center,
-            ) { Text("${step.number}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp) }
+            ) { Text("${step.number}", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 12.sp) }
         }
-        Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f)) {
-            Text(step.title, fontWeight = FontWeight.Bold, color = GuideGreen, fontSize = 16.sp)
-            Spacer(Modifier.height(4.dp))
-            step.points.forEach { p ->
-                Row(verticalAlignment = Alignment.Top, modifier = Modifier.padding(vertical = 1.dp)) {
-                    Icon(Icons.Filled.CheckCircle, null, tint = GoodGreen, modifier = Modifier.size(14.dp).padding(top = 2.dp))
-                    Spacer(Modifier.width(6.dp))
-                    Text(p, style = MaterialTheme.typography.bodySmall, color = Color(0xFF33373D))
-                }
-            }
+        Spacer(Modifier.height(4.dp))
+        Text(step.title, fontWeight = FontWeight.Bold, color = GuideGreen, fontSize = 15.sp)
+        step.points.forEach { p ->
+            Text(p, fontSize = 11.sp, lineHeight = 13.sp, color = Color(0xFF33373D), textAlign = TextAlign.Center, maxLines = 1)
         }
     }
 }
