@@ -153,14 +153,25 @@ fun ResultScreen(
                 }
                 predictions.isEmpty() -> item { InfoCard("Bu fotoğraflar için tahmin üretilemedi.") }
                 else -> {
-                    if (predictions.first().confidence < LOW_CONFIDENCE) {
+                    val low = predictions.first().confidence < LOW_CONFIDENCE
+                    val uncertainText = "Model bu fotoğraflardan emin değil. Mantar, veri tabanında olmayan " +
+                        "bir tür olabilir ya da fotoğraflar yeterince net değil. " +
+                        "Aşağıdaki sonuçlara güvenmeyin; iyi ışıkta yeniden deneyin."
+                    // İlk 3 sonuçta ölümcül bir tür varsa ve sonuç kesin değilse (ya da ölümcül tür
+                    // ilk sırada değilse) kırmızı uyarı göster.
+                    val deadly = predictions.take(3)
+                        .mapNotNull { SpeciesCatalog.find(it.label) }
+                        .filter { it.edibility == Edibility.DEADLY }
+                    val topIsDeadly = SpeciesCatalog.find(predictions.first().label)?.edibility == Edibility.DEADLY
+                    if (deadly.isNotEmpty() && (low || !topIsDeadly)) {
                         item {
-                            InfoCard(
-                                "Model bu fotoğraflardan emin değil. Mantar, veri tabanında olmayan " +
-                                    "bir tür olabilir ya da fotoğraflar yeterince net değil. " +
-                                    "Aşağıdaki sonuçlara güvenmeyin; iyi ışıkta yeniden deneyin."
+                            DeadlyRiskCard(
+                                names = deadly.map { it.displayName },
+                                extra = if (low) uncertainText else null,
                             )
                         }
+                    } else if (low) {
+                        item { InfoCard(uncertainText) }
                     }
                     itemsIndexed(predictions) { i, p -> PredictionCard(p, i) }
                 }
@@ -350,6 +361,37 @@ private fun InfoRow(icon: ImageVector, title: String, value: String) {
             Text(title, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary)
             Text(value, style = MaterialTheme.typography.bodySmall)
+        }
+    }
+}
+
+@Composable
+private fun DeadlyRiskCard(names: List<String>, extra: String?) {
+    val red = Color(0xFFC62828)
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFDECEC), RoundedCornerShape(16.dp))
+            .border(1.5.dp, Color(0xFFE57373), RoundedCornerShape(16.dp))
+            .padding(14.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        EdibilityIcon(Edibility.DEADLY, 30.dp)
+        Spacer(Modifier.width(12.dp))
+        Column {
+            Text("Ölümcül türlerle karışma riski var", fontWeight = FontWeight.Bold, color = red,
+                style = MaterialTheme.typography.titleSmall)
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Olası sonuçlar arasında ölümcül zehirli " +
+                    (if (names.size == 1) "bir tür" else "türler") + " var: " + names.joinToString(", ") +
+                    ". Bu mantarı kesinlikle tüketmeyin; bir uzmana gösterin.",
+                style = MaterialTheme.typography.bodyMedium, color = Color(0xFF8C1D18),
+            )
+            if (extra != null) {
+                Spacer(Modifier.height(6.dp))
+                Text(extra, style = MaterialTheme.typography.bodySmall, color = Color(0xFF5F2120))
+            }
         }
     }
 }
