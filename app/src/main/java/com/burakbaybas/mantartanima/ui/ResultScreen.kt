@@ -166,8 +166,10 @@ fun ResultScreen(
                     val deadly = shown.take(3)
                         .mapNotNull { SpeciesCatalog.find(it.label) }
                         .filter { it.edibility == Edibility.DEADLY }
-                    val topIsDeadly = SpeciesCatalog.find(predictions.first().label)?.edibility == Edibility.DEADLY
-                    if (deadly.isNotEmpty() && (low || !topIsDeadly)) {
+                    // En olası tür zaten zehirli/ölümcülse kartın kendisi uyarır; üstte ayrı kutu gerekmez.
+                    val topEdibility = SpeciesCatalog.find(predictions.first().label)?.edibility
+                    val topIsDangerous = topEdibility == Edibility.POISONOUS || topEdibility == Edibility.DEADLY
+                    if (deadly.isNotEmpty() && !topIsDangerous) {
                         item {
                             DeadlyRiskCard(
                                 names = deadly.map { it.displayName },
