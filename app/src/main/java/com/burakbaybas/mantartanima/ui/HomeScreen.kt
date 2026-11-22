@@ -249,7 +249,7 @@ fun HomeScreen(
                 label = if (allReady) "Tanımla" else "Tanımla (${photos.size}/3)",
                 onClick = analyzeWithLocation,
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(6.dp))
             Surface(
                 shape = RoundedCornerShape(50),
                 color = PillGlass,
@@ -257,13 +257,13 @@ fun HomeScreen(
                 onClick = onOpenHistory,
             ) {
                 Row(
-                    Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    Modifier.padding(horizontal = 16.dp, vertical = 5.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(Icons.Outlined.History, null, tint = DeepGreen, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(
-                        if (historyCount > 0) "Geçmiş tanımalar ($historyCount)" else "Geçmiş tanımalar",
+                        if (historyCount > 0) "Geçmiş Tanımlamalar ($historyCount)" else "Geçmiş Tanımlamalar",
                         color = DeepGreen, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                     )
                 }
@@ -278,7 +278,7 @@ fun HomeScreen(
             }
 
 
-            Spacer(Modifier.height(20.dp))
+            Spacer(Modifier.height(8.dp))
             Text("Geliştirici", style = MaterialTheme.typography.labelSmall, color = DeepGreen.copy(alpha = 0.7f))
             Text(
                 DEVELOPER_NAME,

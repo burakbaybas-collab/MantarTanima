@@ -85,7 +85,7 @@ fun HistoryScreen(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Geçmiş tanımalar", fontWeight = FontWeight.Bold) },
+                title = { Text("Geçmiş Tanımlamalar", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") }
                 },
@@ -101,9 +101,9 @@ fun HistoryScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Outlined.History, null, tint = HGreen.copy(alpha = 0.5f), modifier = Modifier.size(56.dp))
                     Spacer(Modifier.height(12.dp))
-                    Text("Henüz kayıtlı tanıma yok.", fontWeight = FontWeight.SemiBold, color = HGreen)
+                    Text("Henüz kayıtlı tanımlama yok.", fontWeight = FontWeight.SemiBold, color = HGreen)
                     Text(
-                        "Yaptığınız her tanıma; tarihi, fotoğrafları ve konumuyla birlikte burada saklanır.",
+                        "Yaptığınız her tanımlama; tarihi, fotoğrafları ve konumuyla birlikte burada saklanır.",
                         style = MaterialTheme.typography.bodySmall, color = Color(0xFF4B5563),
                     )
                 }
@@ -122,7 +122,7 @@ fun HistoryScreen(
         AlertDialog(
             onDismissRequest = { toDelete = null },
             title = { Text("Kaydı sil") },
-            text = { Text("Bu tanıma kaydı ve fotoğrafları silinsin mi?") },
+            text = { Text("Bu tanımlama kaydı ve fotoğrafları silinsin mi?") },
             confirmButton = { TextButton(onClick = { onDelete(e); toDelete = null }) { Text("Sil") } },
             dismissButton = { TextButton(onClick = { toDelete = null }) { Text("Vazgeç") } },
         )
