@@ -122,7 +122,8 @@ def main():
     args = ap.parse_args()
 
     torch.manual_seed(SEED)
-    torch.set_num_threads(os.cpu_count() or 4)
+    ncpu = len(os.sched_getaffinity(0)) if hasattr(os, 'sched_getaffinity') else (os.cpu_count() or 4)
+    torch.set_num_threads(min(ncpu, 16))
     start = time.time()
 
     with open(args.species, encoding="utf-8") as f:
@@ -165,7 +166,7 @@ def main():
     train_ds = datasets.ImageFolder(os.path.join(tmp, "train"), transform=train_tf)
     val_ds = datasets.ImageFolder(os.path.join(tmp, "val"), transform=val_tf)
     assert train_ds.classes == classes == val_ds.classes
-    workers = max(1, (os.cpu_count() or 4) - 1)
+    workers = max(1, min(ncpu - 1, 12))
     pin = DEVICE.type == "cuda"
     train_dl = DataLoader(train_ds, batch_size=args.batch, shuffle=True, num_workers=workers,
                           persistent_workers=True, pin_memory=pin, drop_last=True)

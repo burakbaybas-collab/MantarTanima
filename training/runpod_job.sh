@@ -46,6 +46,10 @@ set -o pipefail
   cd /work/repo
   pip install -q timm requests
   python -c "import torch, timm; print('torch', torch.__version__, 'cuda', torch.cuda.is_available(), 'timm', timm.__version__)"
+  if ! python -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)"; then
+    echo "GPU kullanılamıyor (sürücü uyumsuz); başka sunucu istenecek."
+    exit 3
+  fi
 
   SPECIES=app/src/main/assets/species.tsv
   if [ -n "$LIMIT_SPECIES" ]; then   # hızlı deneme: yalnızca ilk N tür
@@ -64,4 +68,8 @@ set -o pipefail
   python training/train_fungi.py --species "$SPECIES" --model "$MODEL" --img "$IMG" --batch "$BATCH" \
     --limit-per-class "$PER_SPECIES" --head-epochs 1 --max-epochs "$MAX_EPOCHS" --patience 4 \
     --hours "$HOURS" --final --no-export
-) && finish basarili || finish hata
+)
+RC=$?
+if [ $RC -eq 0 ]; then finish basarili
+elif [ $RC -eq 3 ]; then finish gpuyok
+else finish hata; fi
