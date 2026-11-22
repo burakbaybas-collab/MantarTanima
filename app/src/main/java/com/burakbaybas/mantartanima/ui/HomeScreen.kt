@@ -178,6 +178,7 @@ fun HomeScreen(
                 shape = RoundedCornerShape(50),
                 color = PillGlass,
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)),
+                onClick = { showTips = true },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Row(
@@ -299,21 +300,7 @@ fun HomeScreen(
     }
 
     if (showTips) {
-        AlertDialog(
-            onDismissRequest = { showTips = false },
-            confirmButton = { TextButton(onClick = { showTips = false }) { Text("Tamam") } },
-            title = { Text("İyi fotoğraf için ipuçları") },
-            text = {
-                Text(
-                    "• Mantar kadrajın büyük kısmını kaplasın.\n" +
-                        "• Gün ışığında, flaşsız çekin.\n" +
-                        "• Üstten: şapkanın tamamı görünsün.\n" +
-                        "• Yandan: şapka, sap ve sapın tabanı (torba/halka varsa) birlikte görünsün.\n" +
-                        "• Alttan: lameller veya gözenekler net görünsün.\n" +
-                        "• Mantarı topraktan çıkarırken sap tabanını koparmayın; ayırt edici özellikler oradadır."
-                )
-            },
-        )
+        PhotoGuideDialog(onDismiss = { showTips = false })
     }
 }
 
