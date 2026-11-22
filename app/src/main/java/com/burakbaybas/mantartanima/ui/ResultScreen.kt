@@ -401,16 +401,16 @@ private fun VerdictBanner(shown: List<Prediction>) {
             null, grey.first, grey.second, grey.third)
         low -> V(
             "Emin değil – yemeyin",
-            "Muhtemelen $name ($pct), ancak model bu fotoğraflardan emin değil. Aşağıdaki sonuçları yalnızca fikir için kullanın.",
+            "En olası tür: $name ($pct), ancak model bu fotoğraflardan emin değil. Aşağıdaki sonuçları yalnızca fikir için kullanın.",
             null, grey.first, grey.second, grey.third)
         e == Edibility.INEDIBLE || e == null -> V(
             "YENMEZ",
-            "Muhtemelen $name ($pct). Zehirli olmayabilir, ancak yenen bir mantar değildir.",
+            "$name ($pct). Zehirli olmayabilir, ancak yenen bir mantar değildir.",
             Edibility.INEDIBLE, st(Edibility.INEDIBLE).color, st(Edibility.INEDIBLE).background, st(Edibility.INEDIBLE).border)
         else -> {
             val x = if (poisonOthers.isNotEmpty()) Edibility.EDIBLE_WITH_CAUTION else (e ?: Edibility.INEDIBLE)
             V(
-                "Muhtemelen $name – " + if (e == Edibility.EDIBLE) "yenir" else "dikkatle yenir",
+                "$name – " + if (e == Edibility.EDIBLE) "yenir" else "dikkatle yenir",
                 (if (poisonOthers.isNotEmpty()) "Zehirli " + poisonOthers.joinToString(", ") { it.displayName } +
                     " ile karışabilir. " else "") +
                     "Yemeden önce mutlaka bir uzmana doğrulatın.",
