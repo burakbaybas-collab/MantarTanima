@@ -25,6 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.width
@@ -246,6 +247,8 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
             }
             if (species != null && expanded) {
             Spacer(Modifier.height(10.dp))
+            EdibilityStatusBox(species.edibility)
+            Spacer(Modifier.height(10.dp))
             Text(species.description, style = MaterialTheme.typography.bodyMedium)
 
             if (species.note.isNotBlank()) {
@@ -277,14 +280,30 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
                 }
             }
 
-            Spacer(Modifier.height(10.dp))
-            InfoRow(Icons.Outlined.CalendarMonth, "Mevsim", species.season)
-            InfoRow(Icons.Outlined.Forest, "Yetişme ortamı", species.habitat)
-            InfoRow(Icons.Outlined.Fingerprint, "Spor izi", species.sporePrint)
-            if (species.lookalikes.isNotEmpty()) {
-                InfoRow(Icons.AutoMirrored.Outlined.CompareArrows, "Karışabilen türler", species.lookalikes.joinToString(", "))
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.Info, null, tint = Color(0xFF1B5E2E), modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Temel Bilgiler", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             }
-
+            Spacer(Modifier.height(6.dp))
+            val rows = buildList {
+                add("Cins" to species.latinName.substringBefore(' '))
+                add("Sezon" to species.season)
+                add("Habitat" to species.habitat)
+                add("Spor izi" to species.sporePrint)
+                if (species.lookalikes.isNotEmpty()) add("Benzer türler" to species.lookalikes.joinToString(", "))
+            }.filter { it.second.isNotBlank() }
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(10.dp))
+                    .border(1.dp, Color(0xFFE3E7E1), RoundedCornerShape(10.dp)),
+            ) {
+                rows.forEachIndexed { i, (k, v) ->
+                    InfoTableRow(k, v, shaded = i % 2 == 0)
+                }
+            }
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 val q = Uri.encode(species.latinName)
@@ -307,6 +326,21 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
 }
 
 @Composable
+private fun InfoTableRow(title: String, value: String, shaded: Boolean) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(if (shaded) Color(0xFFF4F7F2) else Color.White)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.Top,
+    ) {
+        Text(title, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold,
+            modifier = Modifier.width(104.dp))
+        Text(value, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
 private fun InfoRow(icon: ImageVector, title: String, value: String) {
     if (value.isBlank()) return
     Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.Top) {
@@ -318,25 +352,6 @@ private fun InfoRow(icon: ImageVector, title: String, value: String) {
             Text(value, style = MaterialTheme.typography.bodySmall)
         }
     }
-}
-
-@Composable
-private fun EdibilityBadge(edibility: Edibility) {
-    val color = when (edibility) {
-        Edibility.EDIBLE -> Color(0xFF2E7D32)
-        Edibility.EDIBLE_WITH_CAUTION -> Color(0xFFF9A825)
-        Edibility.INEDIBLE -> Color(0xFF6D6D6D)
-        Edibility.POISONOUS -> Color(0xFFE65100)
-        Edibility.DEADLY -> Color(0xFFB71C1C)
-    }
-    Text(
-        edibility.label,
-        color = Color.White,
-        style = MaterialTheme.typography.labelLarge,
-        modifier = Modifier
-            .background(color, RoundedCornerShape(8.dp))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-    )
 }
 
 @Composable
