@@ -1,6 +1,19 @@
 package com.burakbaybas.mantartanima.ui
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.outlined.Share
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.runtime.rememberCoroutineScope
+import com.burakbaybas.mantartanima.data.HistoryExport
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -84,20 +97,44 @@ fun HistoryScreen(
 ) {
     var toDelete by remember { mutableStateOf<HistoryEntry?>(null) }
     var confirmAll by remember { mutableStateOf(false) }
+    var selecting by remember { mutableStateOf(false) }
+    var selected by remember { mutableStateOf(setOf<Long>()) }
+    var exportAsk by remember { mutableStateOf(false) }
+    var exporting by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    fun toggle(id: Long) { selected = if (id in selected) selected - id else selected + id }
+    BackHandler(enabled = selecting) { selecting = false; selected = emptySet() }
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
             TopAppBar(
-                title = { Text("Geçmiş Tanımlamalar", fontWeight = FontWeight.Bold) },
+                title = {
+                    Text(if (selecting) "${selected.size} seçildi" else "Geçmiş Tanımlamalar", fontWeight = FontWeight.Bold)
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") }
+                    if (selecting) {
+                        IconButton(onClick = { selecting = false; selected = emptySet() }) { Icon(Icons.Filled.Close, "Seçimi bitir") }
+                    } else {
+                        IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") }
+                    }
                 },
                 actions = {
-                    if (entries.isNotEmpty()) {
-                        TextButton(onClick = { confirmAll = true }) {
-                            Icon(Icons.Outlined.DeleteSweep, null, tint = Color(0xFFC62828), modifier = Modifier.size(20.dp))
+                    if (selecting) {
+                        TextButton(onClick = {
+                            selected = if (selected.size == entries.size) emptySet() else entries.map { it.id }.toSet()
+                        }) { Text(if (selected.size == entries.size) "Hiçbiri" else "Tümü", color = HGreen) }
+                        IconButton(enabled = selected.isNotEmpty(), onClick = { exportAsk = true }) {
+                            Icon(Icons.Outlined.Share, "Dışa aktar", tint = if (selected.isNotEmpty()) HGreen else Color.Gray)
+                        }
+                    } else if (entries.isNotEmpty()) {
+                        TextButton(onClick = { selecting = true }) {
+                            Icon(Icons.Outlined.Share, null, tint = HGreen, modifier = Modifier.size(18.dp))
                             Spacer(Modifier.width(4.dp))
-                            Text("Tümünü sil", color = Color(0xFFC62828), fontWeight = FontWeight.SemiBold)
+                            Text("Dışa aktar", color = HGreen, fontWeight = FontWeight.SemiBold)
+                        }
+                        IconButton(onClick = { confirmAll = true }) {
+                            Icon(Icons.Outlined.DeleteSweep, "Tümünü sil", tint = Color(0xFFC62828))
                         }
                     }
                 },
@@ -126,9 +163,64 @@ fun HistoryScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                items(entries, key = { it.id }) { e -> HistoryCard(e, onClick = { onOpen(e) }, onDelete = { toDelete = e }) }
+                if (selecting) {
+                    item {
+                        Text(
+                            "Dışa aktarmak istediğiniz kayıtları işaretleyin, sonra sağ üstteki paylaş simgesine dokunun.",
+                            fontSize = 13.sp, color = Color(0xFF4B5563),
+                        )
+                    }
+                }
+                items(entries, key = { it.id }) { e ->
+                    HistoryCard(
+                        e,
+                        selecting = selecting,
+                        checked = e.id in selected,
+                        onClick = { if (selecting) toggle(e.id) else onOpen(e) },
+                        onLongClick = { selecting = true; toggle(e.id) },
+                        onDelete = { toDelete = e },
+                    )
+                }
             }
         }
+    }
+    if (exportAsk) {
+        val chosen = entries.filter { it.id in selected }
+        AlertDialog(
+            onDismissRequest = { exportAsk = false },
+            title = { Text("${chosen.size} kaydı dışa aktar") },
+            text = {
+                Column {
+                    Text("Nasıl dışa aktarılsın?")
+                    Spacer(Modifier.height(10.dp))
+                    OutlinedButton(onClick = {
+                        exportAsk = false; exporting = true
+                        scope.launch {
+                            val (f, m) = withContext(Dispatchers.IO) { HistoryExport.build(context, chosen, withPhotos = false) }
+                            exporting = false; HistoryExport.send(context, f, m)
+                        }
+                    }, modifier = Modifier.fillMaxWidth()) { Text("Tablo (Excel / CSV)") }
+                    Spacer(Modifier.height(6.dp))
+                    OutlinedButton(onClick = {
+                        exportAsk = false; exporting = true
+                        scope.launch {
+                            val (f, m) = withContext(Dispatchers.IO) { HistoryExport.build(context, chosen, withPhotos = true) }
+                            exporting = false; HistoryExport.send(context, f, m)
+                        }
+                    }, modifier = Modifier.fillMaxWidth()) { Text("Tablo + fotoğraflar + harita (ZIP)") }
+                }
+            },
+            confirmButton = {},
+            dismissButton = { TextButton(onClick = { exportAsk = false }) { Text("Vazgeç") } },
+        )
+    }
+    if (exporting) {
+        AlertDialog(
+            onDismissRequest = {},
+            confirmButton = {},
+            title = { Text("Hazırlanıyor…") },
+            text = { LinearProgressIndicator(Modifier.fillMaxWidth()) },
+        )
     }
     if (confirmAll) {
         AlertDialog(
@@ -154,14 +246,22 @@ fun HistoryScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun HistoryCard(e: HistoryEntry, onClick: () -> Unit, onDelete: () -> Unit) {
+private fun HistoryCard(
+    e: HistoryEntry,
+    selecting: Boolean,
+    checked: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    onDelete: () -> Unit,
+) {
     val top = e.predictions.firstOrNull()
     val sp = top?.let { SpeciesCatalog.find(it.label) }
     Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        border = BorderStroke(1.dp, Color(0xFFCFE2C3)),
+        modifier = Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        colors = CardDefaults.cardColors(containerColor = if (checked) Color(0xFFEAF7EE) else Color.White),
+        border = BorderStroke(if (checked) 2.dp else 1.dp, if (checked) HGreen else Color(0xFFCFE2C3)),
     ) {
         Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
@@ -195,7 +295,12 @@ private fun HistoryCard(e: HistoryEntry, onClick: () -> Unit, onDelete: () -> Un
                     }
                 }
             }
-            IconButton(onClick = onDelete) { Icon(Icons.Outlined.DeleteOutline, "Sil", tint = Color(0xFF9CA3AF)) }
+            if (selecting) {
+                Checkbox(checked = checked, onCheckedChange = { onClick() },
+                    colors = CheckboxDefaults.colors(checkedColor = HGreen))
+            } else {
+                IconButton(onClick = onDelete) { Icon(Icons.Outlined.DeleteOutline, "Sil", tint = Color(0xFF9CA3AF)) }
+            }
         }
     }
 }
