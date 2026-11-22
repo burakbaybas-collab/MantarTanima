@@ -85,6 +85,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun deleteHistoryEntries(entries: List<HistoryEntry>) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val app = getApplication<Application>()
+            if (entries.size == _history.value.size) HistoryStore.clear(app)
+            else entries.forEach { HistoryStore.delete(app, it.id) }
+            _history.value = HistoryStore.load(app)
+        }
+    }
+
     fun clearHistory() {
         viewModelScope.launch(Dispatchers.IO) {
             HistoryStore.clear(getApplication())

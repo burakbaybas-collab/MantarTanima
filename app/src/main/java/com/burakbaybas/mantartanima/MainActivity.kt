@@ -95,7 +95,7 @@ private fun AppContent() {
             onBack = vm::backToHome,
             onOpen = vm::openHistoryEntry,
             onDelete = vm::deleteHistoryEntry,
-            onDeleteAll = vm::clearHistory,
+            onDeleteMany = vm::deleteHistoryEntries,
         )
         is UiState.HistoryDetail -> ResultScreen(
             photos = s.entry.photos.mapValues { Uri.fromFile(it.value) },

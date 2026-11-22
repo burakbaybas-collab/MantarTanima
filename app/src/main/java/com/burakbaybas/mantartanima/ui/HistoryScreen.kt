@@ -93,18 +93,21 @@ fun HistoryScreen(
     onBack: () -> Unit,
     onOpen: (HistoryEntry) -> Unit,
     onDelete: (HistoryEntry) -> Unit,
-    onDeleteAll: () -> Unit = {},
+    onDeleteMany: (List<HistoryEntry>) -> Unit = {},
 ) {
     var toDelete by remember { mutableStateOf<HistoryEntry?>(null) }
     var confirmAll by remember { mutableStateOf(false) }
-    var selecting by remember { mutableStateOf(false) }
+    // Seçim modu: null = kapalı, "aktar" = dışa aktarma, "sil" = silme
+    var mode by remember { mutableStateOf<String?>(null) }
+    val selecting = mode != null
     var selected by remember { mutableStateOf(setOf<Long>()) }
     var exportAsk by remember { mutableStateOf(false) }
     var exporting by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     fun toggle(id: Long) { selected = if (id in selected) selected - id else selected + id }
-    BackHandler(enabled = selecting) { selecting = false; selected = emptySet() }
+    fun exitSelection() { mode = null; selected = emptySet() }
+    BackHandler(enabled = selecting) { exitSelection() }
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -114,27 +117,32 @@ fun HistoryScreen(
                 },
                 navigationIcon = {
                     if (selecting) {
-                        IconButton(onClick = { selecting = false; selected = emptySet() }) { Icon(Icons.Filled.Close, "Seçimi bitir") }
+                        IconButton(onClick = { exitSelection() }) { Icon(Icons.Filled.Close, "Seçimi bitir") }
                     } else {
                         IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") }
                     }
                 },
                 actions = {
-                    if (selecting) {
-                        TextButton(onClick = {
-                            selected = if (selected.size == entries.size) emptySet() else entries.map { it.id }.toSet()
-                        }) { Text(if (selected.size == entries.size) "Hiçbiri" else "Tümü", color = HGreen) }
-                        IconButton(enabled = selected.isNotEmpty(), onClick = { exportAsk = true }) {
-                            Icon(Icons.Outlined.Share, "Dışa aktar", tint = if (selected.isNotEmpty()) HGreen else Color.Gray)
+                    if (mode == "aktar") {
+                        TextButton(enabled = selected.isNotEmpty(), onClick = { exportAsk = true }) {
+                            Icon(Icons.Outlined.Share, null, tint = if (selected.isNotEmpty()) HGreen else Color.Gray,
+                                modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Aktar", color = if (selected.isNotEmpty()) HGreen else Color.Gray, fontWeight = FontWeight.Bold)
+                        }
+                    } else if (mode == "sil") {
+                        TextButton(enabled = selected.isNotEmpty(), onClick = { confirmAll = true }) {
+                            val c = if (selected.isNotEmpty()) Color(0xFFC62828) else Color.Gray
+                            Icon(Icons.Outlined.DeleteOutline, null, tint = c, modifier = Modifier.size(18.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Sil", color = c, fontWeight = FontWeight.Bold)
                         }
                     } else if (entries.isNotEmpty()) {
-                        TextButton(onClick = { selecting = true }) {
-                            Icon(Icons.Outlined.Share, null, tint = HGreen, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Dışa aktar", color = HGreen, fontWeight = FontWeight.SemiBold)
+                        IconButton(onClick = { mode = "aktar" }) {
+                            Icon(Icons.Outlined.Share, "Dışa aktar", tint = HGreen)
                         }
-                        IconButton(onClick = { confirmAll = true }) {
-                            Icon(Icons.Outlined.DeleteSweep, "Tümünü sil", tint = Color(0xFFC62828))
+                        IconButton(onClick = { mode = "sil" }) {
+                            Icon(Icons.Outlined.DeleteSweep, "Kayıtları sil", tint = Color(0xFFC62828))
                         }
                     }
                 },
@@ -165,10 +173,30 @@ fun HistoryScreen(
             ) {
                 if (selecting) {
                     item {
-                        Text(
-                            "Dışa aktarmak istediğiniz kayıtları işaretleyin, sonra sağ üstteki paylaş simgesine dokunun.",
-                            fontSize = 13.sp, color = Color(0xFF4B5563),
-                        )
+                        val all = selected.size == entries.size
+                        Card(
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                selected = if (all) emptySet() else entries.map { it.id }.toSet()
+                            },
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFF4F9F1)),
+                            border = BorderStroke(1.dp, Color(0xFFCFE2C3)),
+                        ) {
+                            Row(Modifier.padding(horizontal = 6.dp, vertical = 2.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = all,
+                                    onCheckedChange = { selected = if (all) emptySet() else entries.map { it.id }.toSet() },
+                                    colors = CheckboxDefaults.colors(checkedColor = HGreen),
+                                )
+                                Column(Modifier.weight(1f)) {
+                                    Text("Tümünü seç (${entries.size})", fontWeight = FontWeight.Bold, color = HGreen)
+                                    Text(
+                                        if (mode == "sil") "Silinecek kayıtları işaretleyin, sonra sağ üstteki Sil'e dokunun."
+                                        else "Aktarılacak kayıtları işaretleyin, sonra sağ üstteki Aktar'a dokunun.",
+                                        fontSize = 12.sp, color = Color(0xFF4B5563),
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
                 items(entries, key = { it.id }) { e ->
@@ -177,7 +205,7 @@ fun HistoryScreen(
                         selecting = selecting,
                         checked = e.id in selected,
                         onClick = { if (selecting) toggle(e.id) else onOpen(e) },
-                        onLongClick = { selecting = true; toggle(e.id) },
+                        onLongClick = { if (mode == null) mode = "aktar"; toggle(e.id) },
                         onDelete = { toDelete = e },
                     )
                 }
@@ -223,12 +251,13 @@ fun HistoryScreen(
         )
     }
     if (confirmAll) {
+        val chosen = entries.filter { it.id in selected }
         AlertDialog(
             onDismissRequest = { confirmAll = false },
-            title = { Text("Tüm kayıtları sil") },
-            text = { Text("${entries.size} tanımlama kaydının ve fotoğraflarının tamamı silinsin mi? Bu işlem geri alınamaz.") },
+            title = { Text(if (chosen.size == entries.size) "Tüm kayıtları sil" else "Kayıtları sil") },
+            text = { Text("${chosen.size} tanımlama kaydı ve fotoğrafları silinsin mi? Bu işlem geri alınamaz.") },
             confirmButton = {
-                TextButton(onClick = { onDeleteAll(); confirmAll = false }) {
+                TextButton(onClick = { onDeleteMany(chosen); confirmAll = false; exitSelection() }) {
                     Text("Sil", color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
                 }
             },
