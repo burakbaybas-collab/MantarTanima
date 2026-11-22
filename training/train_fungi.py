@@ -114,7 +114,7 @@ def main():
     ap.add_argument("--final", action="store_true", help="Son aşama: eğitimi bitir ve modeli dışa aktar")
     ap.add_argument("--patience", type=int, default=3, help="Bu kadar epoch iyileşme olmazsa dur")
     ap.add_argument("--model", default=BASE_MODEL, help="timm / Hugging Face temel model adı")
-    ap.add_argument("--img", type=int, default=IMG, help="Girdi çözünürlüğü (piksel)")
+    ap.add_argument("--img", type=int, default=224, help="Girdi çözünürlüğü (piksel)")
     ap.add_argument("--batch", type=int, default=48)
     ap.add_argument("--lr", type=float, default=1.5e-4, help="Tam ince ayar öğrenme hızı")
     ap.add_argument("--no-export", action="store_true",
