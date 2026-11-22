@@ -166,7 +166,13 @@ fun ResultScreen(
                 predictions.isEmpty() -> item { InfoCard("Bu fotoğraflar için tahmin üretilemedi.") }
                 else -> {
                     val shown = predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }
-                    item { VerdictBox(verdictOf(shown)) }
+                    // Hüküm kutusu yalnızca kartta yazmayan önemli bir bilgi varsa gösterilir:
+                    // en olası tür zararsız görünse de diğer olasılıklarda ölümcül tür varsa.
+                    val topE = SpeciesCatalog.find(shown.first().label)?.edibility
+                    val deadlyOther = shown.drop(1).any { SpeciesCatalog.find(it.label)?.edibility == Edibility.DEADLY }
+                    if (deadlyOther && topE != Edibility.DEADLY && topE != Edibility.POISONOUS) {
+                        item { VerdictBox(verdictOf(shown)) }
+                    }
                     itemsIndexed(shown) { i, p -> PredictionCard(p, i) }
                 }
             }
@@ -458,6 +464,15 @@ private fun VerdictHeader(v: Verdict) {
             color = v.color,
             trackColor = Color.White.copy(alpha = 0.8f),
         )
+        if (v.confidence < LOW_CONFIDENCE) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                if (v.confidence < VERY_LOW_CONFIDENCE)
+                    "Tanınamadı: bu mantar veri tabanında olmayabilir. Yakından ve iyi ışıkta yeniden çekin."
+                else "Model bu fotoğraflardan emin değil; sonuçları yalnızca fikir için kullanın.",
+                fontSize = 14.sp, lineHeight = 18.sp, color = Color(0xFF4B5563),
+            )
+        }
     }
 }
 
