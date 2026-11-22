@@ -122,8 +122,7 @@ fun ResultScreen(
         ) {
             if (noMushroom == null && !isDemo && !predictions.isNullOrEmpty()) {
                 item {
-                    val shownTop = predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }
-                    VerdictBanner(shownTop)
+                    VerdictHeader(verdictOf(predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }))
                 }
             }
             item {
@@ -167,6 +166,7 @@ fun ResultScreen(
                 predictions.isEmpty() -> item { InfoCard("Bu fotoğraflar için tahmin üretilemedi.") }
                 else -> {
                     val shown = predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }
+                    item { VerdictBox(verdictOf(shown)) }
                     itemsIndexed(shown) { i, p -> PredictionCard(p, i) }
                 }
             }
@@ -361,17 +361,21 @@ private fun InfoRow(icon: ImageVector, title: String, value: String) {
     }
 }
 
+private data class Verdict(
+    val title: String, val sub: String, val icon: Edibility?,
+    val color: Color, val bg: Color, val border: Color,
+    val name: String, val latin: String?, val confidence: Float,
+)
+
 /**
- * Sonuç sayfasının en üstündeki tek cümlelik hüküm. En olası türün yenilebilirliğine, modelin
- * ne kadar emin olduğuna ve diğer olasılıklar arasında tehlikeli tür olup olmadığına göre oluşur.
+ * En olası türün yenilebilirliğine, modelin ne kadar emin olduğuna ve diğer olasılıklar
+ * arasında tehlikeli tür olup olmadığına göre sonuç sayfasının hükmünü oluşturur.
  * Yenir bir tür için bile hiçbir zaman "yiyebilirsiniz" denmez; uzman doğrulaması istenir.
  */
-@Composable
-private fun VerdictBanner(shown: List<Prediction>) {
+private fun verdictOf(shown: List<Prediction>): Verdict {
     val top = shown.first()
     val sp = SpeciesCatalog.find(top.label)
     val name = sp?.displayName ?: top.label
-    val pct = "%" + (top.confidence * 100).toInt()
     val others = shown.drop(1).mapNotNull { SpeciesCatalog.find(it.label) }
     val deadlyOthers = others.filter { it.edibility == Edibility.DEADLY }
     val poisonOthers = others.filter { it.edibility == Edibility.POISONOUS }
@@ -379,10 +383,12 @@ private fun VerdictBanner(shown: List<Prediction>) {
     val veryLow = top.confidence < VERY_LOW_CONFIDENCE
     val e = sp?.edibility
 
-    data class V(val title: String, val sub: String, val icon: Edibility?, val color: Color, val bg: Color, val border: Color)
     val grey = Triple(Color(0xFF4B5563), Color(0xFFF1F2F4), Color(0xFFD3D6DB))
     fun st(x: Edibility) = x.style
-    val v = when {
+    val V = { t: String, sub: String, ic: Edibility?, c: Color, bg: Color, br: Color ->
+        Verdict(t, sub, ic, c, bg, br, name, sp?.takeIf { it.turkishName.isNotBlank() }?.latinName, top.confidence)
+    }
+    return when {
         e == Edibility.DEADLY -> V(
             "ÖLÜMCÜL ZEHİRLİ – kesinlikle yemeyin",
             if (low) "Model tam emin değil, ancak bu mantarı kesinlikle tüketmeyin."
@@ -421,7 +427,11 @@ private fun VerdictBanner(shown: List<Prediction>) {
                 x, st(x).color, st(x).background, st(x).border)
         }
     }
+}
 
+/** En üstte: tür adı, Latince adı, oran ve çubuk. */
+@Composable
+private fun VerdictHeader(v: Verdict) {
     Column(
         Modifier
             .fillMaxWidth()
@@ -432,25 +442,36 @@ private fun VerdictBanner(shown: List<Prediction>) {
         // Tür adı ve oran
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(name, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, lineHeight = 30.sp,
+                Text(v.name, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, lineHeight = 30.sp,
                     color = Color(0xFF1F2A1F))
-                if (sp != null && sp.turkishName.isNotBlank()) {
-                    Text(sp.latinName, fontStyle = FontStyle.Italic, fontSize = 16.sp, color = Color(0xFF4B5563))
+                if (v.latin != null) {
+                    Text(v.latin, fontStyle = FontStyle.Italic, fontSize = 16.sp, color = Color(0xFF4B5563))
                 }
             }
             Spacer(Modifier.width(8.dp))
-            Text(pct, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, color = v.color)
+            Text("%" + (v.confidence * 100).toInt(), fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, color = v.color)
         }
         Spacer(Modifier.height(10.dp))
         LinearProgressIndicator(
-            progress = { top.confidence },
+            progress = { v.confidence },
             modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
             color = v.color,
             trackColor = Color.White.copy(alpha = 0.8f),
         )
-        Spacer(Modifier.height(14.dp))
-        // Hüküm
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    }
+}
+
+/** Fotoğrafların altında: tek cümlelik hüküm (ör. "ZEHİRLİ – yemeyin"). */
+@Composable
+private fun VerdictBox(v: Verdict) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .background(v.bg, RoundedCornerShape(18.dp))
+            .border(1.5.dp, v.border, RoundedCornerShape(18.dp))
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
             val ic = v.icon
             if (ic != null) {
                 EdibilityIcon(ic, 34.dp, tint = v.color)
@@ -463,7 +484,6 @@ private fun VerdictBanner(shown: List<Prediction>) {
                 Spacer(Modifier.height(2.dp))
                 Text(v.sub, fontSize = 14.5.sp, lineHeight = 19.sp, color = Color(0xFF33373D))
             }
-        }
     }
 }
 
