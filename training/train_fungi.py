@@ -25,7 +25,19 @@ import torch
 import torch.nn as nn
 from timm.data import resolve_data_config
 from torch.utils.data import DataLoader
+from PIL import Image, ImageFile
 from torchvision import datasets, transforms
+
+# Yarım inmiş / bozuk birkaç fotoğraf yüzünden eğitim durmasın
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
+
+def safe_loader(path):
+    try:
+        with open(path, "rb") as f:
+            return Image.open(f).convert("RGB")
+    except Exception:
+        return Image.new("RGB", (320, 320), (127, 127, 127))
 
 BASE_MODEL = "hf-hub:BVRA/tf_efficientnet_b0.in1k_ft_df20_224"
 IMG = 224
@@ -173,8 +185,8 @@ def main():
     # Uygulama fotoğrafı kırpmadan 224x224'e küçültür; doğrulama da aynısını yapar
     val_tf = transforms.Compose([transforms.Resize((IMG, IMG)), transforms.ToTensor(), norm])
 
-    train_ds = datasets.ImageFolder(os.path.join(tmp, "train"), transform=train_tf)
-    val_ds = datasets.ImageFolder(os.path.join(tmp, "val"), transform=val_tf)
+    train_ds = datasets.ImageFolder(os.path.join(tmp, "train"), transform=train_tf, loader=safe_loader)
+    val_ds = datasets.ImageFolder(os.path.join(tmp, "val"), transform=val_tf, loader=safe_loader)
     assert train_ds.classes == classes == val_ds.classes
     workers = max(1, min(ncpu - 1, 12))
     pin = DEVICE.type == "cuda"
