@@ -77,6 +77,9 @@ private val ResultGreen = Color(0xFF17502A)
 /** Bu güvenin altındaki en iyi tahmin "emin değil" olarak gösterilir. */
 private const val LOW_CONFIDENCE = 0.6f
 
+/** Bu olasılığın altındaki 2. ve 3. tahminler gösterilmez (anlamsız düşük olasılıklar). */
+private const val MIN_SHOWN = 0.05f
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
@@ -153,13 +156,14 @@ fun ResultScreen(
                 }
                 predictions.isEmpty() -> item { InfoCard("Bu fotoğraflar için tahmin üretilemedi.") }
                 else -> {
+                    val shown = predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }
                     val low = predictions.first().confidence < LOW_CONFIDENCE
                     val uncertainText = "Model bu fotoğraflardan emin değil. Mantar, veri tabanında olmayan " +
                         "bir tür olabilir ya da fotoğraflar yeterince net değil. " +
                         "Aşağıdaki sonuçlara güvenmeyin; iyi ışıkta yeniden deneyin."
                     // İlk 3 sonuçta ölümcül bir tür varsa ve sonuç kesin değilse (ya da ölümcül tür
                     // ilk sırada değilse) kırmızı uyarı göster.
-                    val deadly = predictions.take(3)
+                    val deadly = shown.take(3)
                         .mapNotNull { SpeciesCatalog.find(it.label) }
                         .filter { it.edibility == Edibility.DEADLY }
                     val topIsDeadly = SpeciesCatalog.find(predictions.first().label)?.edibility == Edibility.DEADLY
@@ -173,7 +177,7 @@ fun ResultScreen(
                     } else if (low) {
                         item { InfoCard(uncertainText) }
                     }
-                    itemsIndexed(predictions) { i, p -> PredictionCard(p, i) }
+                    itemsIndexed(shown) { i, p -> PredictionCard(p, i) }
                 }
             }
             item { SafetyNotice() }
