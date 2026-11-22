@@ -29,7 +29,7 @@ finish() {
   upload "$LOG" egitim.log
   upload /work/durum.txt "$status.txt"
   # Sunucuyu kapat (para harcamaya devam etmesin)
-  curl -sS -X DELETE -H "Authorization: Bearer $RP_KEY" "https://rest.runpod.io/v1/pods/$RUNPOD_POD_ID" || true
+  curl -sS -X DELETE -H "Authorization: Bearer $RP_KEY" "https://api.runpod.io/v2/pods/$RUNPOD_POD_ID" || true
   sleep 600
 }
 
