@@ -85,6 +85,13 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
+    fun clearHistory() {
+        viewModelScope.launch(Dispatchers.IO) {
+            HistoryStore.clear(getApplication())
+            _history.value = emptyList()
+        }
+    }
+
     /** Geri tuşu: ayrıntıdan listeye, diğer her yerden ana sayfaya. */
     fun back() {
         _state.value = if (_state.value is UiState.HistoryDetail) UiState.History else UiState.Home

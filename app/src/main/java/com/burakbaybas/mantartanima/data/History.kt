@@ -86,6 +86,11 @@ object HistoryStore {
         write(ctx, load(ctx).filter { it.id != id })
     }
 
+    @Synchronized
+    fun clear(ctx: Context) {
+        root(ctx).deleteRecursively()
+    }
+
     private fun write(ctx: Context, list: List<HistoryEntry>) {
         val arr = JSONArray()
         list.forEach { e ->

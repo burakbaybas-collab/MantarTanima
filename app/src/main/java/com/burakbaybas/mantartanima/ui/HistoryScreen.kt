@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.DeleteSweep
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Place
@@ -79,8 +80,10 @@ fun HistoryScreen(
     onBack: () -> Unit,
     onOpen: (HistoryEntry) -> Unit,
     onDelete: (HistoryEntry) -> Unit,
+    onDeleteAll: () -> Unit = {},
 ) {
     var toDelete by remember { mutableStateOf<HistoryEntry?>(null) }
+    var confirmAll by remember { mutableStateOf(false) }
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
@@ -88,6 +91,15 @@ fun HistoryScreen(
                 title = { Text("Geçmiş Tanımlamalar", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Geri") }
+                },
+                actions = {
+                    if (entries.isNotEmpty()) {
+                        TextButton(onClick = { confirmAll = true }) {
+                            Icon(Icons.Outlined.DeleteSweep, null, tint = Color(0xFFC62828), modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Tümünü sil", color = Color(0xFFC62828), fontWeight = FontWeight.SemiBold)
+                        }
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFFE6F0DC), titleContentColor = HGreen, navigationIconContentColor = HGreen,
@@ -117,6 +129,19 @@ fun HistoryScreen(
                 items(entries, key = { it.id }) { e -> HistoryCard(e, onClick = { onOpen(e) }, onDelete = { toDelete = e }) }
             }
         }
+    }
+    if (confirmAll) {
+        AlertDialog(
+            onDismissRequest = { confirmAll = false },
+            title = { Text("Tüm kayıtları sil") },
+            text = { Text("${entries.size} tanımlama kaydının ve fotoğraflarının tamamı silinsin mi? Bu işlem geri alınamaz.") },
+            confirmButton = {
+                TextButton(onClick = { onDeleteAll(); confirmAll = false }) {
+                    Text("Sil", color = Color(0xFFC62828), fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = { TextButton(onClick = { confirmAll = false }) { Text("Vazgeç") } },
+        )
     }
     toDelete?.let { e ->
         AlertDialog(
