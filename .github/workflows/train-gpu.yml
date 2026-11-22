@@ -82,11 +82,14 @@ jobs:
               "MODEL": "${{ inputs.model }}", "IMG": "${{ inputs.img }}", "BATCH": "64",
               "HOURS": os.environ["HOURS"], "LIMIT_SPECIES": os.environ["LIMIT_SPECIES"],
               "DATA_TAG": "${{ inputs.data_tag }}",
+              "DEADLINE": os.environ["DEADLINE"],
             },
           }))
           PY
           }
           export START_CMD
+          # Bekleme döngüsü 330 dk sürer; sunucuya kapanma saatini bildir
+          export DEADLINE=$(( $(date +%s) + 325 * 60 ))
           GPUS=("NVIDIA GeForce RTX 4090" "NVIDIA GeForce RTX 5090" "NVIDIA L40S" "NVIDIA RTX A6000"
                 "NVIDIA RTX 6000 Ada Generation" "NVIDIA A40" "NVIDIA GeForce RTX 3090")
           kill_pod() { curl -sS -X DELETE -H "Authorization: Bearer $RP_KEY" "https://api.runpod.io/v2/pods/$1" >/dev/null || true; }

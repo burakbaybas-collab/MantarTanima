@@ -9,6 +9,10 @@ on:
       per_species:
         description: "Tür başına en fazla iNaturalist fotoğrafı"
         default: "500"
+      only_fungitastic:
+        description: "Yalnızca FungiTastic paketini hazırla (iNaturalist paketleri hazırsa)"
+        type: boolean
+        default: false
       start_training:
         description: "Bitince GPU eğitimini başlat"
         type: boolean
@@ -33,12 +37,15 @@ jobs:
         run: |
           gh release view "$DATA_TAG" >/dev/null 2>&1 || \
             gh release create "$DATA_TAG" --title "Eğitim verisi (iNaturalist)" --notes "Otomatik hazırlanan eğitim fotoğrafları" --prerelease
-          for A in $(gh release view "$DATA_TAG" --json assets -q '.assets[].name'); do
+          PATTERN=""
+          [ "${{ inputs.only_fungitastic }}" = "true" ] && PATTERN="veri-ft"
+          for A in $(gh release view "$DATA_TAG" --json assets -q '.assets[].name' | grep "$PATTERN"); do
             gh release delete-asset "$DATA_TAG" "$A" --yes || true
           done
 
   fetch:
     needs: release
+    if: ${{ !inputs.only_fungitastic }}
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -71,9 +78,34 @@ jobs:
           done
           exit 1
 
+  fungitastic:
+    needs: release
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests stream-unzip
+      - name: FungiTastic fotoğraflarını akış halinde seç
+        run: |
+          df -h . /mnt || true
+          python training/fetch_fungitastic.py --stream --per-species 1000 --out training/data_ft --tmp /tmp/ft
+          du -sh training/data_ft
+      - name: Paketle (1,9 GB'lık parçalar) ve yükle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tar -cf - -C training data_ft | split -b 1900M -d -a 2 - veri-ft.tar.part-
+          ls -la veri-ft.tar.part-*
+          for f in veri-ft.tar.part-*; do
+            for i in 1 2 3 4 5; do gh release upload "$DATA_TAG" "$f" --clobber && break; sleep 20; done
+          done
+
   train:
-    needs: fetch
-    if: ${{ always() && inputs.start_training }}
+    needs: [fetch, fungitastic]
+    if: ${{ always() && inputs.start_training && needs.fungitastic.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Paketleri kontrol et ve GPU eğitimini başlat
@@ -82,5 +114,7 @@ jobs:
         run: |
           N=$(gh release view "$DATA_TAG" -R ${{ github.repository }} --json assets -q '[.assets[] | select(.name | startswith("veri-inat-"))] | length')
           echo "Hazır paket: $N / $SHARDS"
-          if [ "$N" -lt "$SHARDS" ]; then echo "Eksik paket var; eğitim başlatılmadı."; exit 1; fi
+          F=$(gh release view "$DATA_TAG" -R ${{ github.repository }} --json assets -q '[.assets[] | select(.name | startswith("veri-ft"))] | length')
+          echo "FungiTastic parçası: $F"
+          if [ "$N" -lt "$SHARDS" ] || [ "$F" -lt 1 ]; then echo "Eksik paket var; eğitim başlatılmadı."; exit 1; fi
           gh workflow run train-gpu.yml -R ${{ github.repository }} --ref main -f data_tag="$DATA_TAG"

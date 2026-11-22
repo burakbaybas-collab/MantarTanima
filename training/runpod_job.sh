@@ -76,8 +76,22 @@ set -o pipefail
   # FungiTastic (uzman doğrulamalı) ve iNaturalist aynı anda indirilir
   FT_SPLITS=train,val,test
   [ -n "$LIMIT_SPECIES" ] && FT_SPLITS=val
-  python training/fetch_fungitastic.py --species "$SPECIES" --per-species "$PER_SPECIES" --splits "$FT_SPLITS" \
-    > /work/ft.log 2>&1 &
+  FT_PARTS=""
+  if [ -n "$DATA_TAG" ]; then
+    FT_PARTS=$(curl -sS -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
+import sys,json
+a=sorted((x['name'],x['id']) for x in json.load(sys.stdin)['assets'] if x['name'].startswith('veri-ft.tar.part-'))
+print(' '.join(str(i) for _,i in a))")
+  fi
+  if [ -n "$FT_PARTS" ]; then
+    # Önceden hazırlanmış FungiTastic parçaları (sırayla birleştirilip açılır)
+    ( for ID in $FT_PARTS; do
+        curl -sSL --retry 5 -H "$AUTH" -H "Accept: application/octet-stream" "$API/releases/assets/$ID"
+      done | tar -xf - -C training && echo "FungiTastic paketleri açıldı: $(ls training/data_ft | wc -l) tür" ) > /work/ft.log 2>&1 &
+  else
+    python training/fetch_fungitastic.py --species "$SPECIES" --per-species "$PER_SPECIES" --splits "$FT_SPLITS" \
+      > /work/ft.log 2>&1 &
+  fi
   FT_PID=$!
   if [ -n "$DATA_TAG" ]; then
     # iNaturalist fotoğrafları önceden hazırlanmış paketlerden (GitHub sürümü) alınır
@@ -100,6 +114,11 @@ for a in json.load(sys.stdin)['assets']:
   df -h /work | tail -1
   du -sh training/data training/data_ft 2>/dev/null || true
 
+  # Eğitim süresini iş akışının kapanma saatine göre ayarla (sonuç yüklemeye 30 dk pay bırak)
+  if [ -n "$DEADLINE" ]; then
+    HOURS=$(python -c "import time; print(round(max(0.3, min(float('$HOURS'), ($DEADLINE - time.time() - 1800) / 3600)), 2))")
+    echo "Eğitim bütçesi: $HOURS saat (kapanma: $(date -u -d @$DEADLINE))"
+  fi
   echo "=== Eğitim başlıyor ($(date -u)) ==="
   tail -n 120 "$LOG" > /work/ilerleme.log; upload /work/ilerleme.log ilerleme-baslangic.log
   python training/train_fungi.py --species "$SPECIES" --df20 training/data_ft --model "$MODEL" --img "$IMG" --batch "$BATCH" \

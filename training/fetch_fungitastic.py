@@ -38,6 +38,8 @@ def main():
     ap.add_argument("--size", default="300")
     ap.add_argument("--tmp", default="/work/ft_tmp")
     ap.add_argument("--splits", default="train,val,test", help="Hızlı deneme için yalnızca val")
+    ap.add_argument("--stream", action="store_true",
+                    help="Zip'i diske indirmeden akış halinde aç (az diskli sunucular için)")
     args = ap.parse_args()
     os.makedirs(args.tmp, exist_ok=True)
 
@@ -73,6 +75,31 @@ def main():
     print("FungiTastic'te olmayan türler:", ", ".join(missing), flush=True)
 
     got = 0
+    if args.stream:
+        import requests
+        from stream_unzip import stream_unzip
+        for split in args.splits.split(","):
+            url = f"{ROOT}/FungiTastic-{split}-{args.size}p.zip"
+            print(f"Akış: {url}", flush=True)
+            t = time.time()
+            with requests.get(url, stream=True, timeout=600) as r:
+                r.raise_for_status()
+                for name, _size, chunks in stream_unzip(r.iter_content(chunk_size=1 << 20)):
+                    base = os.path.basename(name.decode("utf-8", "replace"))
+                    sid = wanted.get(base)
+                    if not sid:
+                        for _ in chunks:
+                            pass
+                        continue
+                    d = os.path.join(args.out, sid)
+                    os.makedirs(d, exist_ok=True)
+                    with open(os.path.join(d, f"ft_{base}"), "wb") as out:
+                        for c in chunks:
+                            out.write(c)
+                    got += 1
+            print(f"  {split}: toplam {got} fotoğraf ({time.time() - t:.0f} sn)", flush=True)
+        print(f"Bitti: {got} fotoğraf", flush=True)
+        return
     for split in args.splits.split(","):
         url = f"{ROOT}/FungiTastic-{split}-{args.size}p.zip"
         zpath = os.path.join(args.tmp, os.path.basename(url))
