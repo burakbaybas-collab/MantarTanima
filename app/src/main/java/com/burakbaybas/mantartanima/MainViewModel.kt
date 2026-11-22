@@ -9,7 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.burakbaybas.mantartanima.classifier.ClassifierFactory
 import com.burakbaybas.mantartanima.classifier.MushroomDetector
 import com.burakbaybas.mantartanima.classifier.Prediction
+import com.burakbaybas.mantartanima.data.Season
 import com.burakbaybas.mantartanima.data.SpeciesCatalog
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,6 +58,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     fun removePhoto(angle: PhotoAngle) = _photos.update { it - angle }
 
+    /** Bugünün ayına göre mevsim dışı türlerin olasılığını azaltır ve yeniden normalleştirir. */
+    private fun withSeason(all: List<Prediction>): List<Prediction> {
+        if (all.isEmpty()) return all
+        val month = Calendar.getInstance().get(Calendar.MONTH) + 1
+        val weighted = all.map { it.copy(confidence = it.confidence * Season.weight(SpeciesCatalog.find(it.label), month)) }
+        val sum = weighted.sumOf { it.confidence.toDouble() }.toFloat().takeIf { it > 0f } ?: return all
+        return weighted.map { it.copy(confidence = it.confidence / sum) }.sortedByDescending { it.confidence }
+    }
+
     fun analyze() {
         val uris = PhotoAngle.entries.mapNotNull { _photos.value[it] }
         if (uris.size < PhotoAngle.entries.size) return
@@ -64,7 +75,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 _state.value = withContext(Dispatchers.Default) {
                     val bitmaps = uris.map { decodeBitmap(it) ?: error("Fotoğraf açılamadı") }
-                    val predictions = classifier.classify(bitmaps)
+                    val predictions = withSeason(classifier.classify(bitmaps, topK = Int.MAX_VALUE)).take(3)
                     val mushroomPhotos = detector?.let { d -> bitmaps.count { d.looksLikeMushroom(it) } }
                     // Genel algılayıcı kâse, kulak ve jöle mantarlarını tanımayabilir. Tür modeli yeterince
                     // eminse sonucu yine gösteririz; ikisi de emin değilse "mantar algılanamadı" deriz.

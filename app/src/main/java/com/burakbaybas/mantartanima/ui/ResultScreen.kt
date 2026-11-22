@@ -65,6 +65,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.burakbaybas.mantartanima.PhotoAngle
 import com.burakbaybas.mantartanima.UiState
@@ -79,6 +80,9 @@ private const val LOW_CONFIDENCE = 0.6f
 
 /** Bu olasılığın altındaki 2. ve 3. tahminler gösterilmez (anlamsız düşük olasılıklar). */
 private const val MIN_SHOWN = 0.05f
+
+/** Bunun altında "Tanınamadı" denir. */
+private const val VERY_LOW_CONFIDENCE = 0.25f
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,6 +120,12 @@ fun ResultScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            if (noMushroom == null && !isDemo && !predictions.isNullOrEmpty()) {
+                item {
+                    val shownTop = predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }
+                    VerdictBanner(shownTop)
+                }
+            }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     PhotoAngle.entries.forEach { angle ->
@@ -157,28 +167,6 @@ fun ResultScreen(
                 predictions.isEmpty() -> item { InfoCard("Bu fotoğraflar için tahmin üretilemedi.") }
                 else -> {
                     val shown = predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }
-                    val low = predictions.first().confidence < LOW_CONFIDENCE
-                    val uncertainText = "Model bu fotoğraflardan emin değil. Mantar, veri tabanında olmayan " +
-                        "bir tür olabilir ya da fotoğraflar yeterince net değil. " +
-                        "Aşağıdaki sonuçlara güvenmeyin; iyi ışıkta yeniden deneyin."
-                    // İlk 3 sonuçta ölümcül bir tür varsa ve sonuç kesin değilse (ya da ölümcül tür
-                    // ilk sırada değilse) kırmızı uyarı göster.
-                    val deadly = shown.take(3)
-                        .mapNotNull { SpeciesCatalog.find(it.label) }
-                        .filter { it.edibility == Edibility.DEADLY }
-                    // En olası tür zaten zehirli/ölümcülse kartın kendisi uyarır; üstte ayrı kutu gerekmez.
-                    val topEdibility = SpeciesCatalog.find(predictions.first().label)?.edibility
-                    val topIsDangerous = topEdibility == Edibility.POISONOUS || topEdibility == Edibility.DEADLY
-                    if (deadly.isNotEmpty() && !topIsDangerous) {
-                        item {
-                            DeadlyRiskCard(
-                                names = deadly.map { it.displayName },
-                                extra = if (low) uncertainText else null,
-                            )
-                        }
-                    } else if (low) {
-                        item { InfoCard(uncertainText) }
-                    }
                     itemsIndexed(shown) { i, p -> PredictionCard(p, i) }
                 }
             }
@@ -371,33 +359,84 @@ private fun InfoRow(icon: ImageVector, title: String, value: String) {
     }
 }
 
+/**
+ * Sonuç sayfasının en üstündeki tek cümlelik hüküm. En olası türün yenilebilirliğine, modelin
+ * ne kadar emin olduğuna ve diğer olasılıklar arasında tehlikeli tür olup olmadığına göre oluşur.
+ * Yenir bir tür için bile hiçbir zaman "yiyebilirsiniz" denmez; uzman doğrulaması istenir.
+ */
 @Composable
-private fun DeadlyRiskCard(names: List<String>, extra: String?) {
-    val red = Color(0xFFC62828)
+private fun VerdictBanner(shown: List<Prediction>) {
+    val top = shown.first()
+    val sp = SpeciesCatalog.find(top.label)
+    val name = sp?.displayName ?: top.label
+    val pct = "%" + (top.confidence * 100).toInt()
+    val others = shown.drop(1).mapNotNull { SpeciesCatalog.find(it.label) }
+    val deadlyOthers = others.filter { it.edibility == Edibility.DEADLY }
+    val poisonOthers = others.filter { it.edibility == Edibility.POISONOUS }
+    val low = top.confidence < LOW_CONFIDENCE
+    val veryLow = top.confidence < VERY_LOW_CONFIDENCE
+    val e = sp?.edibility
+
+    data class V(val title: String, val sub: String, val icon: Edibility?, val color: Color, val bg: Color, val border: Color)
+    val grey = Triple(Color(0xFF4B5563), Color(0xFFF1F2F4), Color(0xFFD3D6DB))
+    fun st(x: Edibility) = x.style
+    val v = when {
+        e == Edibility.DEADLY -> V(
+            "ÖLÜMCÜL ZEHİRLİ – kesinlikle yemeyin",
+            "En olası tür: $name ($pct)." + if (low) " Model tam emin değil, ancak bu mantarı kesinlikle tüketmeyin." else "",
+            Edibility.DEADLY, st(Edibility.DEADLY).color, st(Edibility.DEADLY).background, st(Edibility.DEADLY).border)
+        e == Edibility.POISONOUS -> V(
+            "ZEHİRLİ – yemeyin",
+            "En olası tür: $name ($pct)." + if (low) " Model tam emin değil, ancak bu mantarı tüketmeyin." else "",
+            Edibility.POISONOUS, st(Edibility.POISONOUS).color, st(Edibility.POISONOUS).background, st(Edibility.POISONOUS).border)
+        deadlyOthers.isNotEmpty() -> V(
+            "Ölümcül türlerle karışabilir – yemeyin",
+            "En olası tür $name ($pct), ancak olası sonuçlar arasında ölümcül zehirli " +
+                deadlyOthers.joinToString(", ") { it.displayName } + " de var. Bir uzmana gösterin.",
+            Edibility.DEADLY, st(Edibility.DEADLY).color, st(Edibility.DEADLY).background, st(Edibility.DEADLY).border)
+        veryLow -> V(
+            "Tanınamadı – yemeyin",
+            "Bu mantar veri tabanında olmayabilir ya da fotoğraflar yeterince net değil. " +
+                "Yakından ve iyi ışıkta yeniden çekin.",
+            null, grey.first, grey.second, grey.third)
+        low -> V(
+            "Emin değil – yemeyin",
+            "Muhtemelen $name ($pct), ancak model bu fotoğraflardan emin değil. Aşağıdaki sonuçları yalnızca fikir için kullanın.",
+            null, grey.first, grey.second, grey.third)
+        e == Edibility.INEDIBLE || e == null -> V(
+            "YENMEZ",
+            "Muhtemelen $name ($pct). Zehirli olmayabilir, ancak yenen bir mantar değildir.",
+            Edibility.INEDIBLE, st(Edibility.INEDIBLE).color, st(Edibility.INEDIBLE).background, st(Edibility.INEDIBLE).border)
+        else -> {
+            val x = if (poisonOthers.isNotEmpty()) Edibility.EDIBLE_WITH_CAUTION else (e ?: Edibility.INEDIBLE)
+            V(
+                "Muhtemelen $name – " + if (e == Edibility.EDIBLE) "yenir" else "dikkatle yenir",
+                (if (poisonOthers.isNotEmpty()) "Zehirli " + poisonOthers.joinToString(", ") { it.displayName } +
+                    " ile karışabilir. " else "") +
+                    "Yemeden önce mutlaka bir uzmana doğrulatın.",
+                x, st(x).color, st(x).background, st(x).border)
+        }
+    }
+
     Row(
         Modifier
             .fillMaxWidth()
-            .background(Color(0xFFFDECEC), RoundedCornerShape(16.dp))
-            .border(1.5.dp, Color(0xFFE57373), RoundedCornerShape(16.dp))
+            .background(v.bg, RoundedCornerShape(16.dp))
+            .border(1.5.dp, v.border, RoundedCornerShape(16.dp))
             .padding(14.dp),
-        verticalAlignment = Alignment.Top,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        EdibilityIcon(Edibility.DEADLY, 30.dp)
+        val ic = v.icon
+        if (ic != null) {
+            EdibilityIcon(ic, 34.dp, tint = v.color)
+        } else {
+            Icon(Icons.Outlined.Info, null, tint = v.color, modifier = Modifier.size(34.dp))
+        }
         Spacer(Modifier.width(12.dp))
         Column {
-            Text("Ölümcül türlerle karışma riski var", fontWeight = FontWeight.Bold, color = red,
-                style = MaterialTheme.typography.titleSmall)
-            Spacer(Modifier.height(4.dp))
-            Text(
-                "Olası sonuçlar arasında ölümcül zehirli " +
-                    (if (names.size == 1) "bir tür" else "türler") + " var: " + names.joinToString(", ") +
-                    ". Bu mantarı kesinlikle tüketmeyin; bir uzmana gösterin.",
-                style = MaterialTheme.typography.bodyMedium, color = Color(0xFF8C1D18),
-            )
-            if (extra != null) {
-                Spacer(Modifier.height(6.dp))
-                Text(extra, style = MaterialTheme.typography.bodySmall, color = Color(0xFF5F2120))
-            }
+            Text(v.title, color = v.color, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, lineHeight = 23.sp)
+            Spacer(Modifier.height(3.dp))
+            Text(v.sub, style = MaterialTheme.typography.bodySmall, color = Color(0xFF33373D))
         }
     }
 }
