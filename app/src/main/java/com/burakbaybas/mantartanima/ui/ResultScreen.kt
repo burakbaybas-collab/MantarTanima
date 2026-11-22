@@ -199,6 +199,7 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(Modifier.padding(16.dp)) {
+            if (rank > 0) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable(enabled = species != null) { expanded = !expanded },
@@ -250,8 +251,9 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
                     modifier = Modifier.clickable { expanded = true },
                 )
             }
+            }
             if (species != null && expanded) {
-            Spacer(Modifier.height(10.dp))
+            if (rank > 0) Spacer(Modifier.height(10.dp))
             EdibilityStatusBox(species.edibility)
             Spacer(Modifier.height(10.dp))
             Text(species.description, style = MaterialTheme.typography.bodyMedium)
@@ -383,34 +385,36 @@ private fun VerdictBanner(shown: List<Prediction>) {
     val v = when {
         e == Edibility.DEADLY -> V(
             "ÖLÜMCÜL ZEHİRLİ – kesinlikle yemeyin",
-            "En olası tür: $name ($pct)." + if (low) " Model tam emin değil, ancak bu mantarı kesinlikle tüketmeyin." else "",
+            if (low) "Model tam emin değil, ancak bu mantarı kesinlikle tüketmeyin."
+            else "Bu mantarı kesinlikle tüketmeyin. Zehirlenme şüphesinde 112'yi arayın.",
             Edibility.DEADLY, st(Edibility.DEADLY).color, st(Edibility.DEADLY).background, st(Edibility.DEADLY).border)
         e == Edibility.POISONOUS -> V(
             "ZEHİRLİ – yemeyin",
-            "En olası tür: $name ($pct)." + if (low) " Model tam emin değil, ancak bu mantarı tüketmeyin." else "",
+            if (low) "Model tam emin değil, ancak bu mantarı tüketmeyin."
+            else "Tüketilmemelidir; sağlık açısından zararlı etkiler oluşturabilir.",
             Edibility.POISONOUS, st(Edibility.POISONOUS).color, st(Edibility.POISONOUS).background, st(Edibility.POISONOUS).border)
         deadlyOthers.isNotEmpty() -> V(
-            "Ölümcül türlerle karışabilir – yemeyin",
-            "En olası tür $name ($pct), ancak olası sonuçlar arasında ölümcül zehirli " +
-                deadlyOthers.joinToString(", ") { it.displayName } + " de var. Bir uzmana gösterin.",
+            "ÖLÜMCÜL TÜRLERLE KARIŞABİLİR – yemeyin",
+            "Olası sonuçlar arasında ölümcül zehirli " + deadlyOthers.joinToString(", ") { it.displayName } +
+                " de var. Bir uzmana gösterin.",
             Edibility.DEADLY, st(Edibility.DEADLY).color, st(Edibility.DEADLY).background, st(Edibility.DEADLY).border)
         veryLow -> V(
-            "Tanınamadı – yemeyin",
+            "TANINAMADI – yemeyin",
             "Bu mantar veri tabanında olmayabilir ya da fotoğraflar yeterince net değil. " +
                 "Yakından ve iyi ışıkta yeniden çekin.",
             null, grey.first, grey.second, grey.third)
         low -> V(
-            "Emin değil – yemeyin",
-            "En olası tür: $name ($pct), ancak model bu fotoğraflardan emin değil. Aşağıdaki sonuçları yalnızca fikir için kullanın.",
+            "EMİN DEĞİL – yemeyin",
+            "Model bu fotoğraflardan emin değil. Aşağıdaki sonuçları yalnızca fikir için kullanın.",
             null, grey.first, grey.second, grey.third)
         e == Edibility.INEDIBLE || e == null -> V(
             "YENMEZ",
-            "$name ($pct). Zehirli olmayabilir, ancak yenen bir mantar değildir.",
+            "Zehirli olmayabilir, ancak yenen bir mantar değildir.",
             Edibility.INEDIBLE, st(Edibility.INEDIBLE).color, st(Edibility.INEDIBLE).background, st(Edibility.INEDIBLE).border)
         else -> {
             val x = if (poisonOthers.isNotEmpty()) Edibility.EDIBLE_WITH_CAUTION else (e ?: Edibility.INEDIBLE)
             V(
-                "$name – " + if (e == Edibility.EDIBLE) "yenir" else "dikkatle yenir",
+                if (e == Edibility.EDIBLE) "YENİR" else "DİKKATLE YENİR",
                 (if (poisonOthers.isNotEmpty()) "Zehirli " + poisonOthers.joinToString(", ") { it.displayName } +
                     " ile karışabilir. " else "") +
                     "Yemeden önce mutlaka bir uzmana doğrulatın.",
@@ -418,25 +422,47 @@ private fun VerdictBanner(shown: List<Prediction>) {
         }
     }
 
-    Row(
+    Column(
         Modifier
             .fillMaxWidth()
-            .background(v.bg, RoundedCornerShape(16.dp))
-            .border(1.5.dp, v.border, RoundedCornerShape(16.dp))
-            .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .background(v.bg, RoundedCornerShape(18.dp))
+            .border(1.5.dp, v.border, RoundedCornerShape(18.dp))
+            .padding(16.dp),
     ) {
-        val ic = v.icon
-        if (ic != null) {
-            EdibilityIcon(ic, 34.dp, tint = v.color)
-        } else {
-            Icon(Icons.Outlined.Info, null, tint = v.color, modifier = Modifier.size(34.dp))
+        // Tür adı ve oran
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(name, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, lineHeight = 30.sp,
+                    color = Color(0xFF1F2A1F))
+                if (sp != null && sp.turkishName.isNotBlank()) {
+                    Text(sp.latinName, fontStyle = FontStyle.Italic, fontSize = 16.sp, color = Color(0xFF4B5563))
+                }
+            }
+            Spacer(Modifier.width(8.dp))
+            Text(pct, fontWeight = FontWeight.ExtraBold, fontSize = 28.sp, color = v.color)
         }
-        Spacer(Modifier.width(12.dp))
-        Column {
-            Text(v.title, color = v.color, fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, lineHeight = 23.sp)
-            Spacer(Modifier.height(3.dp))
-            Text(v.sub, style = MaterialTheme.typography.bodySmall, color = Color(0xFF33373D))
+        Spacer(Modifier.height(10.dp))
+        LinearProgressIndicator(
+            progress = { top.confidence },
+            modifier = Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)),
+            color = v.color,
+            trackColor = Color.White.copy(alpha = 0.8f),
+        )
+        Spacer(Modifier.height(14.dp))
+        // Hüküm
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            val ic = v.icon
+            if (ic != null) {
+                EdibilityIcon(ic, 34.dp, tint = v.color)
+            } else {
+                Icon(Icons.Outlined.Info, null, tint = v.color, modifier = Modifier.size(34.dp))
+            }
+            Spacer(Modifier.width(12.dp))
+            Column {
+                Text(v.title, color = v.color, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, lineHeight = 24.sp)
+                Spacer(Modifier.height(2.dp))
+                Text(v.sub, fontSize = 14.5.sp, lineHeight = 19.sp, color = Color(0xFF33373D))
+            }
         }
     }
 }
