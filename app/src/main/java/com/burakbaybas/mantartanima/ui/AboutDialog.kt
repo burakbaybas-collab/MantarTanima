@@ -148,7 +148,7 @@ fun AboutDialog(onDismiss: () -> Unit) {
                 Box(Modifier.fillMaxWidth().height(1.dp).background(GreenLine))
                 Spacer(Modifier.height(8.dp))
 
-                Paragraph("T.C. Tarım ve Orman Bakanlığı Tarımsal Araştırmalar ve Politikalar Genel Müdürlüğü bünyesinde bulunan Atatürk Bahçe Kültürleri Merkez Araştırma Enstitüsü'nde mantar yetiştiriciliği, misel teknolojileri ve mantar genetik kaynakları üzerine araştırmalar yürütüyorum.")
+                Paragraph("T.C. Tarım ve Orman Bakanlığı'na bağlı Tarımsal Araştırmalar ve Politikalar Genel Müdürlüğü'nün bünyesinde bulunan Atatürk Bahçe Kültürleri Merkez Araştırma Enstitüsü'nde mantar yetiştiriciliği, misel teknolojileri ve mantar genetik kaynakları üzerine araştırmalar yürütüyorum.")
                 Spacer(Modifier.height(6.dp))
                 Paragraph("FungiLens'i, tamamen ücretsiz olarak mantar türlerinin yapay zekâ destekli tanımlanmasını kolaylaştırmak ve mikolojik bilgiyi daha erişilebilir kılmak amacıyla geliştiriyorum.")
 
