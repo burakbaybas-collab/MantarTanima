@@ -1,5 +1,6 @@
 package com.burakbaybas.mantartanima
 
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -17,6 +18,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.burakbaybas.mantartanima.ui.Disclaimer
 import com.burakbaybas.mantartanima.ui.DisclaimerScreen
 import com.burakbaybas.mantartanima.ui.ErrorScreen
+import com.burakbaybas.mantartanima.ui.HistoryInfoCard
+import com.burakbaybas.mantartanima.ui.HistoryScreen
 import com.burakbaybas.mantartanima.ui.HomeScreen
 import com.burakbaybas.mantartanima.ui.ResultScreen
 import com.burakbaybas.mantartanima.ui.theme.MantarTanimaTheme
@@ -50,8 +53,9 @@ private fun AppContent() {
     val vm: MainViewModel = viewModel()
     val state by vm.state.collectAsState()
     val photos by vm.photos.collectAsState()
+    val history by vm.history.collectAsState()
 
-    BackHandler(enabled = state !is UiState.Home) { vm.backToHome() }
+    BackHandler(enabled = state !is UiState.Home) { vm.back() }
 
     when (val s = state) {
         UiState.Home -> HomeScreen(
@@ -60,6 +64,8 @@ private fun AppContent() {
             onPhotoSelected = vm::setPhoto,
             onPhotoRemoved = vm::removePhoto,
             onAnalyze = vm::analyze,
+            historyCount = history.size,
+            onOpenHistory = vm::openHistory,
         )
         UiState.Analyzing -> ResultScreen(
             photos = photos,
@@ -84,5 +90,20 @@ private fun AppContent() {
             noMushroom = s,
         )
         is UiState.Error -> ErrorScreen(message = s.message, onBack = vm::backToHome)
+        UiState.History -> HistoryScreen(
+            entries = history,
+            onBack = vm::backToHome,
+            onOpen = vm::openHistoryEntry,
+            onDelete = vm::deleteHistoryEntry,
+        )
+        is UiState.HistoryDetail -> ResultScreen(
+            photos = s.entry.photos.mapValues { Uri.fromFile(it.value) },
+            predictions = s.entry.predictions,
+            isDemo = false,
+            onBack = vm::openHistory,
+            onStartOver = vm::startOver,
+            infoCard = { HistoryInfoCard(s.entry) },
+            fromHistory = true,
+        )
     }
 }

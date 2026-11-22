@@ -3,6 +3,13 @@
 
     <!-- Kamera uygulaması dışarıdan çağrıldığı için CAMERA izni gerekmez;
          kamerası olmayan cihazlarda da galeri ile çalışır. -->
+    <!-- Geçmiş kayıtlarına tanımanın yapıldığı yeri eklemek için (isteğe bağlı) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-feature
+        android:name="android.hardware.location.gps"
+        android:required="false" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />

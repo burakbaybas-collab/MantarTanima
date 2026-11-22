@@ -9,6 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.burakbaybas.mantartanima.classifier.ClassifierFactory
 import com.burakbaybas.mantartanima.classifier.MushroomDetector
 import com.burakbaybas.mantartanima.classifier.Prediction
+import com.burakbaybas.mantartanima.data.HistoryEntry
+import com.burakbaybas.mantartanima.data.HistoryStore
+import com.burakbaybas.mantartanima.data.PlaceFinder
 import com.burakbaybas.mantartanima.data.Season
 import com.burakbaybas.mantartanima.data.SpeciesCatalog
 import java.util.Calendar
@@ -35,6 +38,12 @@ sealed interface UiState {
     /** Fotoğrafların çoğunda mantar algılanamadı; tür tahmini gösterilmez. */
     data class NoMushroom(val mushroomPhotos: Int, val totalPhotos: Int) : UiState
     data class Error(val message: String) : UiState
+
+    /** Geçmiş tanımalar listesi */
+    data object History : UiState
+
+    /** Geçmişteki bir tanımanın ayrıntısı */
+    data class HistoryDetail(val entry: HistoryEntry) : UiState
 }
 
 class MainViewModel(app: Application) : AndroidViewModel(app) {
@@ -53,6 +62,47 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _state = MutableStateFlow<UiState>(UiState.Home)
     val state: StateFlow<UiState> = _state.asStateFlow()
+
+    private val _history = MutableStateFlow<List<HistoryEntry>>(emptyList())
+    val history: StateFlow<List<HistoryEntry>> = _history.asStateFlow()
+
+    init {
+        viewModelScope.launch(Dispatchers.IO) { _history.value = HistoryStore.load(app) }
+    }
+
+    fun openHistory() {
+        _state.value = UiState.History
+    }
+
+    fun openHistoryEntry(entry: HistoryEntry) {
+        _state.value = UiState.HistoryDetail(entry)
+    }
+
+    fun deleteHistoryEntry(entry: HistoryEntry) {
+        viewModelScope.launch(Dispatchers.IO) {
+            HistoryStore.delete(getApplication(), entry.id)
+            _history.value = HistoryStore.load(getApplication())
+        }
+    }
+
+    /** Geri tuşu: ayrıntıdan listeye, diğer her yerden ana sayfaya. */
+    fun back() {
+        _state.value = if (_state.value is UiState.HistoryDetail) UiState.History else UiState.Home
+    }
+
+    /** Sonucu, fotoğrafları ve (izin varsa) konumu geçmişe kaydeder; arka planda çalışır. */
+    private fun saveToHistory(predictions: List<Prediction>, uris: List<Uri>, bitmaps: List<Bitmap>) {
+        val app = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val place = PlaceFinder.find(app, uris)
+                HistoryStore.add(app, predictions, PhotoAngle.entries.zip(bitmaps).toMap(), place)
+                _history.value = HistoryStore.load(app)
+            } catch (e: Exception) {
+                // Geçmişe kayıt başarısız olsa da tanıma etkilenmez
+            }
+        }
+    }
 
     fun setPhoto(angle: PhotoAngle, uri: Uri) = _photos.update { it + (angle to uri) }
 
@@ -83,6 +133,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     if (mushroomPhotos != null && mushroomPhotos < MIN_MUSHROOM_PHOTOS && !classifierSure) {
                         UiState.NoMushroom(mushroomPhotos, bitmaps.size)
                     } else {
+                        if (!classifier.isDemo && predictions.isNotEmpty()) saveToHistory(predictions, uris, bitmaps)
                         UiState.Result(predictions, classifier.isDemo)
                     }
                 }

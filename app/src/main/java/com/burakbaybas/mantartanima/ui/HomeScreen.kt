@@ -1,5 +1,11 @@
 package com.burakbaybas.mantartanima.ui
 
+import com.burakbaybas.mantartanima.data.PlaceFinder
+
+import androidx.compose.material.icons.outlined.History
+
+import android.Manifest
+
 import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -116,8 +122,25 @@ fun HomeScreen(
     onPhotoSelected: (PhotoAngle, Uri) -> Unit,
     onPhotoRemoved: (PhotoAngle) -> Unit,
     onAnalyze: () -> Unit,
+    historyCount: Int = 0,
+    onOpenHistory: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    // Konum izni ilk tanımada bir kez sorulur; verilmese de tanıma yapılır.
+    val locationLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { onAnalyze() }
+    val analyzeWithLocation: () -> Unit = {
+        val prefs = context.getSharedPreferences("ayarlar", android.content.Context.MODE_PRIVATE)
+        if (!PlaceFinder.hasPermission(context) && !prefs.getBoolean("konum_soruldu", false)) {
+            prefs.edit().putBoolean("konum_soruldu", true).apply()
+            locationLauncher.launch(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+            )
+        } else {
+            onAnalyze()
+        }
+    }
     // Kamera açıkken uygulama arka planda kapanabilir; bu yüzden saklanabilir durum.
     var pendingAngle by rememberSaveable { mutableStateOf<PhotoAngle?>(null) }
     var pendingCameraUri by rememberSaveable { mutableStateOf<Uri?>(null) }
@@ -224,8 +247,27 @@ fun HomeScreen(
             AnalyzeButton(
                 enabled = allReady,
                 label = if (allReady) "Tanımla" else "Tanımla (${photos.size}/3)",
-                onClick = onAnalyze,
+                onClick = analyzeWithLocation,
             )
+            Spacer(Modifier.height(10.dp))
+            Surface(
+                shape = RoundedCornerShape(50),
+                color = PillGlass,
+                border = BorderStroke(1.dp, Color.White.copy(alpha = 0.7f)),
+                onClick = onOpenHistory,
+            ) {
+                Row(
+                    Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(Icons.Outlined.History, null, tint = DeepGreen, modifier = Modifier.size(20.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        if (historyCount > 0) "Geçmiş tanımalar ($historyCount)" else "Geçmiş tanımalar",
+                        color = DeepGreen, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                    )
+                }
+            }
             if (isDemo) {
                 Spacer(Modifier.height(8.dp))
                 Text(

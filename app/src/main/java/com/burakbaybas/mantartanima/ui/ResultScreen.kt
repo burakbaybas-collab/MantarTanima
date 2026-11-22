@@ -93,6 +93,10 @@ fun ResultScreen(
     onBack: () -> Unit,
     onStartOver: () -> Unit,
     noMushroom: UiState.NoMushroom? = null,
+    /** Fotoğrafların altında gösterilecek ek kart (geçmiş ayrıntısında tarih ve konum). */
+    infoCard: (@Composable () -> Unit)? = null,
+    /** Geçmiş ayrıntısında "Fotoğrafları değiştir" düğmesi gizlenir. */
+    fromHistory: Boolean = false,
 ) {
     Scaffold(
         containerColor = Color.Transparent,
@@ -144,6 +148,7 @@ fun ResultScreen(
                     }
                 }
             }
+            if (infoCard != null) item { infoCard() }
             when {
                 noMushroom != null -> item {
                     InfoCard(
@@ -179,8 +184,10 @@ fun ResultScreen(
             item { SafetyNotice() }
             item {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) {
-                        Text("Fotoğrafları değiştir")
+                    if (!fromHistory) {
+                        OutlinedButton(onClick = onBack, modifier = Modifier.weight(1f)) {
+                            Text("Fotoğrafları değiştir")
+                        }
                     }
                     OutlinedButton(onClick = onStartOver, modifier = Modifier.weight(1f)) {
                         Text("Yeni tanıma")
