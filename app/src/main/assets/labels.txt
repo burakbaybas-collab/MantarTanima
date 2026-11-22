@@ -18,6 +18,7 @@ amanita_phalloides
 amanita_proxima
 amanita_rubescens
 amanita_strobiliformis
+amanita_vaginata
 amanita_verna
 amanita_virosa
 apioperdon_pyriforme
@@ -48,6 +49,7 @@ clathrus_ruber
 clavariadelphus_pistillaris
 clavulina_cristata
 clitocybe_nebularis
+clitocybe_odora
 clitopilus_prunulus
 coprinellus_disseminatus
 coprinellus_micaceus
