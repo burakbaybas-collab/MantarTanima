@@ -1,0 +1,54 @@
+name: Tür verisi denetimi
+
+on:
+  workflow_dispatch:
+    inputs:
+      species:
+        description: "Denetlenecek tür kimlikleri (boşlukla)"
+        default: "amanita_gemmata amanita_muscaria amanita_pantherina"
+      data_tag:
+        default: "egitim-verisi"
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      GH_TOKEN: ${{ github.token }}
+      BASE: https://github.com/${{ github.repository }}/releases/download
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Kütüphaneler
+        run: pip install --index-url https://download.pytorch.org/whl/cpu torch && pip install timm pillow numpy
+      - name: Model
+        run: curl -sSfL -o best_model.pt "$BASE/deneme-model/best_model.pt"
+      - name: Yalnızca istenen türlerin fotoğraflarını çıkar
+        run: |
+          set -e
+          PAT=()
+          for s in ${{ inputs.species }}; do PAT+=("data/$s/*" "data_ft/$s/*"); done
+          mkdir -p veri
+          for i in $(seq 0 11); do
+            curl -sSfL "$BASE/${{ inputs.data_tag }}/veri-inat-$i.tar" | tar -xf - -C veri --wildcards "${PAT[@]}" 2>/dev/null || true
+          done
+          for p in 00 01 02 03 04 05; do
+            curl -sSfL "$BASE/${{ inputs.data_tag }}/veri-ft.tar.part-$p" 2>/dev/null || true
+          done | tar -xf - -C veri --wildcards "${PAT[@]}" 2>/dev/null || true
+          mkdir -p veri/own
+          [ -d training/own ] && cp -r training/own/* veri/own/ 2>/dev/null || true
+          for d in veri/*/; do echo "$d"; ls "$d" | while read s; do echo "  $s: $(ls "$d/$s" | wc -l)"; done; done
+      - name: Denetim
+        run: |
+          python training/audit_species.py --ckpt best_model.pt --dirs veri/data veri/data_ft veri/own \
+            --species ${{ inputs.species }} --test training/audit_test --out denetim
+          tar -czf denetim.tar.gz denetim
+      - name: Sonuçları yükle
+        run: |
+          gh release view denetim >/dev/null 2>&1 || gh release create denetim --title "Veri denetimi" --notes "Tür verisi denetim çıktıları" --prerelease
+          gh release upload denetim denetim.tar.gz --clobber
