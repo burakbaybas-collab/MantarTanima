@@ -57,9 +57,14 @@ progress_loop &
 set -o pipefail
 (
   set -e
-  git clone --depth 1 "https://github.com/$REPO" /work/repo
+  for i in 1 2 3 4 5 6; do
+    rm -rf /work/repo
+    git clone --depth 1 "https://github.com/$REPO" /work/repo && break
+    echo "git clone başarısız ($i), tekrar deneniyor"; sleep 20
+  done
+  [ -d /work/repo/training ]
   cd /work/repo
-  pip install -q timm requests
+  for i in 1 2 3; do pip install -q timm requests && break; sleep 15; done
   python -c "import torch, timm; print('torch', torch.__version__, 'cuda', torch.cuda.is_available(), 'timm', timm.__version__)"
   if ! python -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)"; then
     echo "GPU kullanılamıyor (sürücü uyumsuz); başka sunucu istenecek."
