@@ -1,0 +1,16 @@
+name: Takson eşleşme denetimi
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+      - run: python training/fetch_inat.py --resolve-only | tee taksonlar.txt

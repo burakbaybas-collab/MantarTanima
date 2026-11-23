@@ -51,14 +51,30 @@ def api_get(path, params, retries=8):
     raise RuntimeError(f"iNaturalist yanıt vermedi ({path}): {last_err}")
 
 
+# Listedeki başka bir türle aynı taksona düşen adlar için açık eşleme
+# (iNaturalist "Amanita gemmata" aramasında Amanita muscaria'yı döndürüyordu)
+OVERRIDES = {
+    "Amanita gemmata": ["Amanita gemmata", "Amanita junquillea"],
+}
+RESERVED = set()  # listedeki tüm türlerin adları (küçük harf); main() doldurur
+
+
 def resolve_taxon(name):
     """Adı iNaturalist'teki geçerli taksona çevirir; eski/eş anlamlı adları da tanır
-    (ör. Lepista nuda -> Collybia nuda)."""
-    data = api_get("/taxa", {"q": name, "per_page": 30, "is_active": "true"})
-    for t in data["results"]:
-        names = {t["name"].lower(), (t.get("matched_term") or "").lower()}
-        if name.lower() in names:
-            return t["id"], t["name"], t["rank"]
+    (ör. Lepista nuda -> Collybia nuda). Önce birebir ad eşleşmesi aranır; eş anlamlı
+    eşleşme, listedeki başka bir türün adına çıkıyorsa reddedilir."""
+    for q in OVERRIDES.get(name, [name]):
+        data = api_get("/taxa", {"q": q, "per_page": 30, "is_active": "true"})
+        res = data["results"]
+        for t in res:
+            if t["name"].lower() == q.lower() and t["rank"] in ("species", "subspecies", "variety", "complex"):
+                return t["id"], t["name"], t["rank"]
+        for t in res:
+            if (t.get("matched_term") or "").lower() == q.lower():
+                if t["name"].lower() in RESERVED and t["name"].lower() != name.lower():
+                    print(f"UYARI {name}: eş anlamlı eşleşme listedeki başka türe ({t['name']}) çıktı, atlandı", flush=True)
+                    continue
+                return t["id"], t["name"], t["rank"]
     raise SystemExit(f"Takson bulunamadı: {name}")
 
 
@@ -134,10 +150,29 @@ def main():
     ap.add_argument("--species-workers", type=int, default=1, help="Aynı anda işlenen tür sayısı")
     ap.add_argument("--shard", type=int, default=0, help="Paralel indirmede bu parçanın sırası")
     ap.add_argument("--shards", type=int, default=1, help="Toplam parça sayısı")
+    ap.add_argument("--resolve-only", action="store_true", help="Yalnızca takson eşleşmelerini denetle")
     args = ap.parse_args()
 
     with open(args.species, encoding="utf-8") as f:
         species = list(csv.DictReader(f, delimiter="\t"))
+    RESERVED.update(sp["taxon"].lower() for sp in species)
+    if args.resolve_only:
+        seen, bad = {}, 0
+        for sp in species:
+            try:
+                tid, name, rank = resolve_taxon(sp["taxon"])
+            except SystemExit as e:
+                print(f"BULUNAMADI {sp['id']}: {e}", flush=True)
+                bad += 1
+                continue
+            mark = "" if name.lower() == sp["taxon"].lower() else "  (eş anlamlı)"
+            if tid in seen:
+                mark += f"  !!! {seen[tid]} ile AYNI takson"
+                bad += 1
+            seen[tid] = sp["id"]
+            print(f"{sp['id']:<28} {sp['taxon']} -> {name} ({rank}, {tid}){mark}", flush=True)
+        print(f"Sorunlu: {bad}", flush=True)
+        sys.exit(1 if bad else 0)
     species = [sp for i, sp in enumerate(species) if i % args.shards == args.shard]
     print(f"Parça {args.shard + 1}/{args.shards}: {len(species)} tür", flush=True)
 
