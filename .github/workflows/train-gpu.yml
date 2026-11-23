@@ -12,7 +12,7 @@ on:
         default: "1000"
       max_epochs:
         description: "Toplam epoch"
-        default: "18"
+        default: "12"
       model:
         description: "Temel model"
         default: "hf-hub:BVRA/tf_efficientnet_b3.in1k_ft_df20_299"
