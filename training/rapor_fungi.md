@@ -500,12 +500,3 @@ Doğrulama fotoğrafı: 57831, tür sayısı: 492
 | xylobolus_frustulatus | 531 | %97 | hapalopilus_rutilans |
 
 Az fotoğraf nedeniyle modele alınmayan türler: clitocybe_dealbata (33)
-## Eski modelle karşılaştırma
-
-- Ortak tür sayısı: 232 (eski modelde 233, yeni modelde 492)
-- Ortak türlerde ortalama doğruluk: eski **%85.6** → yeni **%82.8**
-- Yeni modelin tüm türlerdeki genel doğruluğu: %83.6
-- Karar: uygulamaya ALINMADI (eski model korunuyor)
-
-En çok gerileyen türler: morchella_elata (-45), lepiota_brunneoincarnata (-34), russula_delica (-28), exidia_glandulosa (-21), neoboletus_erythropus (-21)
-En çok gelişen türler: amanita_gemmata (+34), amanita_muscaria (+30), pleurotus_ostreatus (+17), pleurotus_pulmonarius (+14), agaricus_campestris (+14)
