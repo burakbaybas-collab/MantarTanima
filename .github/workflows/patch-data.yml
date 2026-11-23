@@ -1,0 +1,50 @@
+name: Eğitim verisine yama (seçili türleri yeniden indir)
+
+# Seçilen türlerin iNaturalist fotoğraflarını yeniden indirir ve "veri-yama.tar" olarak
+# yükler. GPU işi bu paketi açarken o türlerin eski klasörlerini siler.
+
+on:
+  workflow_dispatch:
+    inputs:
+      species:
+        description: "Tür kimlikleri (virgülle)"
+        default: "amanita_gemmata,amanita_verna"
+      per_species:
+        default: "500"
+      start_training:
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  actions: write
+
+env:
+  DATA_TAG: egitim-verisi
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests pillow
+      - name: İndir
+        run: python training/fetch_inat.py --only "${{ inputs.species }}" --per-species ${{ inputs.per_species }} --workers 24
+      - name: Küçült ve paketle
+        run: |
+          rm -f training/data/*/_kaynaklar.csv.bak
+          python training/shrink_images.py training/data
+          for d in training/data/*/; do echo "$d: $(ls $d | wc -l)"; done
+          tar -cf veri-yama.tar -C training data
+      - name: Yükle
+        run: |
+          for i in 1 2 3 4 5; do gh release upload "$DATA_TAG" veri-yama.tar --clobber && break; sleep 20; done
+      - name: GPU eğitimini başlat
+        if: ${{ inputs.start_training }}
+        run: gh workflow run train-gpu.yml --ref main -f data_tag="$DATA_TAG"

@@ -105,6 +105,18 @@ for a in json.load(sys.stdin)['assets']:
       tar -xf "/work/$NAME" -C training && rm -f "/work/$NAME"
       echo "  $NAME açıldı"
     done < /work/paketler.txt
+    # Yama paketleri: içindeki türlerin eski klasörleri silinip yenisiyle değiştirilir
+    curl -sS -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
+import sys,json
+for a in json.load(sys.stdin)['assets']:
+    if a['name'].startswith('veri-yama'): print(a['id'], a['name'])" > /work/yamalar.txt
+    while read -r ID NAME; do
+      curl -sSL --retry 5 -H "$AUTH" -H "Accept: application/octet-stream" "$API/releases/assets/$ID" -o "/work/$NAME"
+      for D in $(tar -tf "/work/$NAME" | awk -F/ 'NF>2 && $1=="data" {print $2}' | sort -u); do
+        rm -rf "training/data/$D"; echo "  yama: $D yenilendi"
+      done
+      tar -xf "/work/$NAME" -C training && rm -f "/work/$NAME"
+    done < /work/yamalar.txt
     echo "iNaturalist türleri: $(ls training/data | wc -l)"
   else
     python training/fetch_inat.py --species "$SPECIES" --per-species "$PER_SPECIES" --workers 64 --species-workers 6

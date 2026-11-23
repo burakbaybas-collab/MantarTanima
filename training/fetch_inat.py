@@ -83,7 +83,7 @@ def resolve_taxon(name):
 REGIONS = ["97391,7183", None]
 
 
-def collect_photos(taxon_id, limit):
+def collect_photos(taxon_id, limit, per_obs=3):
     photos, seen, seen_obs = [], set(), set()
     for region in REGIONS:
         page = 1
@@ -108,7 +108,7 @@ def collect_photos(taxon_id, limit):
                     continue
                 seen_obs.add(obs["id"])
                 # Her gözlemden en fazla 3 fotoğraf: genelde farklı açılardır (üst, yan, alt)
-                for p in obs.get("photos", [])[:3]:
+                for p in obs.get("photos", [])[:per_obs]:
                     if p["id"] in seen or p.get("license_code") not in LICENSES.split(","):
                         continue
                     seen.add(p["id"])
@@ -151,6 +151,7 @@ def main():
     ap.add_argument("--species-workers", type=int, default=1, help="Aynı anda işlenen tür sayısı")
     ap.add_argument("--shard", type=int, default=0, help="Paralel indirmede bu parçanın sırası")
     ap.add_argument("--shards", type=int, default=1, help="Toplam parça sayısı")
+    ap.add_argument("--only", default="", help="Yalnızca bu tür kimlikleri (virgülle)")
     ap.add_argument("--resolve-only", action="store_true", help="Yalnızca takson eşleşmelerini denetle")
     args = ap.parse_args()
 
@@ -174,6 +175,9 @@ def main():
             print(f"{sp['id']:<28} {sp['taxon']} -> {name} ({rank}, {tid}){mark}", flush=True)
         print(f"Sorunlu: {bad}", flush=True)
         sys.exit(1 if bad else 0)
+    if args.only:
+        wanted = set(args.only.split(","))
+        species = [sp for sp in species if sp["id"] in wanted]
     species = [sp for i, sp in enumerate(species) if i % args.shards == args.shard]
     print(f"Parça {args.shard + 1}/{args.shards}: {len(species)} tür", flush=True)
 
@@ -183,6 +187,9 @@ def main():
         try:
             taxon_id, name, rank = resolve_taxon(sp["taxon"])
             photos = collect_photos(taxon_id, args.per_species)
+            if len(photos) < 200:
+                # Az gözlemi olan türler: her gözlemin tüm fotoğrafları (farklı açılar) alınır
+                photos = collect_photos(taxon_id, args.per_species, per_obs=12)
         except (SystemExit, RuntimeError) as e:  # bir türdeki sorun tüm işi durdurmasın
             print(f"ATLANDI {sp['id']}: {e}", flush=True)
             return sp["id"], 0
