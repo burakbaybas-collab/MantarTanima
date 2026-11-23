@@ -54,6 +54,16 @@ progress_loop() {
 }
 progress_loop &
 
+# Sağlam indirme: HTTP/1.1, her hatada yeniden dene, kaldığı yerden sürdür
+dl() {
+  for i in 1 2 3 4 5 6 7 8; do
+    curl -sSL --http1.1 --retry 5 --retry-all-errors --retry-delay 5 -C - \
+      -H "$AUTH" -H "Accept: application/octet-stream" "$1" -o "$2" && return 0
+    echo "indirme kesildi ($i): $2"; sleep 10
+  done
+  return 1
+}
+
 set -o pipefail
 (
   set -e
@@ -83,16 +93,23 @@ set -o pipefail
   [ -n "$LIMIT_SPECIES" ] && FT_SPLITS=val
   FT_PARTS=""
   if [ -n "$DATA_TAG" ]; then
-    FT_PARTS=$(curl -sS -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
+    FT_PARTS=$(curl -sS --http1.1 --retry 5 --retry-all-errors -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
 import sys,json
 a=sorted((x['name'],x['id']) for x in json.load(sys.stdin)['assets'] if x['name'].startswith('veri-ft.tar.part-'))
 print(' '.join(str(i) for _,i in a))")
   fi
   if [ -n "$FT_PARTS" ]; then
     # Önceden hazırlanmış FungiTastic parçaları (sırayla birleştirilip açılır)
-    ( for ID in $FT_PARTS; do
-        curl -sSL --retry 5 -H "$AUTH" -H "Accept: application/octet-stream" "$API/releases/assets/$ID"
-      done | tar -xf - -C training && echo "FungiTastic paketleri açıldı: $(ls training/data_ft | wc -l) tür" ) > /work/ft.log 2>&1 &
+    # Her parça önce dosyaya indirilir (kopan bağlantı kaldığı yerden sürdürülür), sonra açılır
+    ( set -e
+      N=0
+      for ID in $FT_PARTS; do
+        N=$((N+1)); F="/work/ft_part_$(printf %02d $N)"
+        dl "$API/releases/assets/$ID" "$F"
+      done
+      cat /work/ft_part_* | tar -xf - -C training
+      rm -f /work/ft_part_*
+      echo "FungiTastic paketleri açıldı: $(ls training/data_ft | wc -l) tür" ) > /work/ft.log 2>&1 &
   else
     python training/fetch_fungitastic.py --species "$SPECIES" --per-species "$PER_SPECIES" --splits "$FT_SPLITS" \
       > /work/ft.log 2>&1 &
@@ -100,23 +117,23 @@ print(' '.join(str(i) for _,i in a))")
   FT_PID=$!
   if [ -n "$DATA_TAG" ]; then
     # iNaturalist fotoğrafları önceden hazırlanmış paketlerden (GitHub sürümü) alınır
-    curl -sS -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
+    curl -sS --http1.1 --retry 5 --retry-all-errors -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
 import sys,json
 for a in json.load(sys.stdin)['assets']:
     if a['name'].startswith('veri-inat-'): print(a['id'], a['name'])" > /work/paketler.txt
     echo "Hazır paket sayısı: $(wc -l < /work/paketler.txt)"
     while read -r ID NAME; do
-      curl -sSL --retry 5 -H "$AUTH" -H "Accept: application/octet-stream" "$API/releases/assets/$ID" -o "/work/$NAME"
+      dl "$API/releases/assets/$ID" "/work/$NAME"
       tar -xf "/work/$NAME" -C training && rm -f "/work/$NAME"
       echo "  $NAME açıldı"
     done < /work/paketler.txt
     # Yama paketleri: içindeki türlerin eski klasörleri silinip yenisiyle değiştirilir
-    curl -sS -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
+    curl -sS --http1.1 --retry 5 --retry-all-errors -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
 import sys,json
 for a in json.load(sys.stdin)['assets']:
     if a['name'].startswith('veri-yama'): print(a['id'], a['name'])" > /work/yamalar.txt
     while read -r ID NAME; do
-      curl -sSL --retry 5 -H "$AUTH" -H "Accept: application/octet-stream" "$API/releases/assets/$ID" -o "/work/$NAME"
+      dl "$API/releases/assets/$ID" "/work/$NAME"
       for D in $(tar -tf "/work/$NAME" | awk -F/ 'NF>2 && $1=="data" {print $2}' | sort -u); do
         rm -rf "training/data/$D"; echo "  yama: $D yenilendi"
       done
