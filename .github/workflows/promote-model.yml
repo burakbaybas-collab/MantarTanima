@@ -9,6 +9,9 @@ on:
       wait_run_id:
         description: "Önce bitmesi beklenecek test-apk çalışması (boş bırakılabilir)"
         default: ""
+      source:
+        description: "Modelin alınacağı sürüm (deneme-model veya son-egitim)"
+        default: "son-egitim"
 
 permissions:
   contents: write
@@ -37,7 +40,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p model
-          gh release download deneme-model -p best_model.pt -p rapor_fungi.md -D model
+          gh release download "${{ inputs.source }}" -p best_model.pt -p rapor_fungi.md -D model
           ls -la model
       - uses: actions/setup-python@v5
         with:

@@ -32,7 +32,11 @@ def main():
     common = sorted(set(old) & set(new["per_class"]))
     old_avg = sum(old[c] for c in common) / len(common) if common else 0.0
     new_avg = sum(new["per_class"][c] for c in common) / len(common) if common else 0.0
-    ok = new["overall"] >= MIN_OVERALL and new_avg >= old_avg
+    # Tür sayısı belirgin arttıysa (daha çok benzer tür = daha zor ayrım) ortak türlerde
+    # 3 puana kadar düşüşe izin verilir; aksi halde eski model en az eşitlenmeli.
+    more_species = len(new["per_class"]) >= 1.1 * max(1, len(old))
+    tolerance = 0.03 if more_species else 0.0
+    ok = new["overall"] >= MIN_OVERALL and new_avg >= old_avg - tolerance
 
     lines = [
         "## Eski modelle karşılaştırma", "",

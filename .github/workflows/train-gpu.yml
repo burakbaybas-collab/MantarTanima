@@ -191,6 +191,17 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run build-apk.yml --ref main
 
+      - name: Modeli her durumda yedekle (son-egitim sürümü)
+        if: ${{ !inputs.smoke && always() }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f training/out/best_model.pt ] || exit 0
+          gh release view son-egitim >/dev/null 2>&1 || gh release create son-egitim --title "Son GPU eğitimi (yedek)" --notes "Uygulamaya alınsın ya da alınmasın, son eğitimin modeli." --prerelease
+          F="training/out/best_model.pt training/rapor_fungi.md"
+          [ -f training/out/model.tflite ] && F="$F training/out/model.tflite training/out/labels.txt"
+          for i in 1 2 3; do gh release upload son-egitim $F --clobber && break; sleep 15; done
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
