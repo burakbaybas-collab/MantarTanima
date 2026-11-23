@@ -1,0 +1,24 @@
+name: iNaturalist gözlem sayıları
+on:
+  workflow_dispatch:
+    inputs:
+      list:
+        default: "training/kitap_eksik.txt"
+permissions:
+  contents: write
+jobs:
+  count:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install requests
+      - run: python training/count_inat.py "${{ inputs.list }}" sayilar.csv
+      - run: |
+          gh release view denetim >/dev/null 2>&1 || gh release create denetim --title "Veri denetimi" --notes "-" --prerelease
+          gh release upload denetim sayilar.csv --clobber
