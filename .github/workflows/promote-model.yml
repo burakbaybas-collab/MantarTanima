@@ -59,3 +59,7 @@ jobs:
           git add app/src/main/assets/model.tflite app/src/main/assets/labels.txt training/rapor.md training/rapor_fungi.md
           git commit -m "Yeni model uygulamaya alındı ($(wc -l < app/src/main/assets/labels.txt) tür)"
           git push
+      - name: Yeni APK derlemesini başlat
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run build-apk.yml --ref main
