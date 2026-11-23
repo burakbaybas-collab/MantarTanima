@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Kütüphaneler
-        run: pip install --index-url https://download.pytorch.org/whl/cpu torch && pip install timm pillow numpy
+        run: pip install --index-url https://download.pytorch.org/whl/cpu torch torchvision && pip install timm pillow numpy
       - name: Model
         run: curl -sSfL -o best_model.pt "$BASE/deneme-model/best_model.pt"
       - name: Yalnızca istenen türlerin fotoğraflarını çıkar
