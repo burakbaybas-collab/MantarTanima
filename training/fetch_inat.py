@@ -64,8 +64,9 @@ def resolve_taxon(name):
     (ör. Lepista nuda -> Collybia nuda). Önce birebir ad eşleşmesi aranır; eş anlamlı
     eşleşme, listedeki başka bir türün adına çıkıyorsa reddedilir."""
     for q in OVERRIDES.get(name, [name]):
-        data = api_get("/taxa", {"q": q, "per_page": 30, "is_active": "true"})
-        res = data["results"]
+        res = api_get("/taxa", {"q": q, "per_page": 30, "is_active": "true"})["results"]
+        # Bazı yaygın adlarda birebir tür ilk 30 sonuçta çıkmıyor; tür düzeyinde yeniden ara
+        res += api_get("/taxa", {"q": q, "per_page": 100, "is_active": "true", "rank": "species"})["results"]
         for t in res:
             if t["name"].lower() == q.lower() and t["rank"] in ("species", "subspecies", "variety", "complex"):
                 return t["id"], t["name"], t["rank"]
