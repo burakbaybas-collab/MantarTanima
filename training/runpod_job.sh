@@ -102,11 +102,12 @@ print(' '.join(str(i) for _,i in a))")
     # Önceden hazırlanmış FungiTastic parçaları (sırayla birleştirilip açılır)
     # Her parça önce dosyaya indirilir (kopan bağlantı kaldığı yerden sürdürülür), sonra açılır
     ( set -e
-      N=0
+      N=0; PIDS=""
       for ID in $FT_PARTS; do
         N=$((N+1)); F="/work/ft_part_$(printf %02d $N)"
-        dl "$API/releases/assets/$ID" "$F"
+        dl "$API/releases/assets/$ID" "$F" & PIDS="$PIDS $!"
       done
+      for P in $PIDS; do wait $P; done
       cat /work/ft_part_* | tar -xf - -C training
       rm -f /work/ft_part_*
       echo "FungiTastic paketleri açıldı: $(ls training/data_ft | wc -l) tür" ) > /work/ft.log 2>&1 &
@@ -122,8 +123,11 @@ import sys,json
 for a in json.load(sys.stdin)['assets']:
     if a['name'].startswith('veri-inat-'): print(a['id'], a['name'])" > /work/paketler.txt
     echo "Hazır paket sayısı: $(wc -l < /work/paketler.txt)"
+    # Paketler aynı anda 6'şar indirilir (tek bağlantı yavaş olabiliyor), sonra sırayla açılır
+    export -f dl; export AUTH
+    awk '{print $1" "$2}' /work/paketler.txt | xargs -P 6 -n 2 bash -c 'dl "'"$API"'/releases/assets/$0" "/work/$1" && echo "  $1 indi"'
     while read -r ID NAME; do
-      dl "$API/releases/assets/$ID" "/work/$NAME"
+      [ -f "/work/$NAME" ] || dl "$API/releases/assets/$ID" "/work/$NAME"
       tar -xf "/work/$NAME" -C training && rm -f "/work/$NAME"
       echo "  $NAME açıldı"
     done < /work/paketler.txt
