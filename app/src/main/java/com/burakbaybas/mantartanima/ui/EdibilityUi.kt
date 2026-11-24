@@ -135,10 +135,12 @@ fun EdibilityBadge(edibility: Edibility) {
 
 /** Yenilebilirlik: kutucuk (simge + Yenir/Zehirli…, dokununca kategoriler penceresi) ve altında açıklaması. */
 @Composable
-fun EdibilityStatusBox(edibility: Edibility) {
+fun EdibilityStatusBox(edibility: Edibility, showBadge: Boolean = true) {
     Column {
-        EdibilityBadge(edibility)
-        Spacer(Modifier.height(8.dp))
+        if (showBadge) {
+            EdibilityBadge(edibility)
+            Spacer(Modifier.height(8.dp))
+        }
         val st = edibility.style
         Text(
             st.description,

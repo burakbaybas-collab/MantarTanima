@@ -273,7 +273,8 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
             }
             if (species != null && expanded) {
             if (rank > 0) Spacer(Modifier.height(10.dp))
-            EdibilityStatusBox(species.edibility)
+            // Diğer olasılıklarda kutucuk başlıkta zaten var; açılınca yalnızca açıklama kutusu
+            EdibilityStatusBox(species.edibility, showBadge = rank == 0)
             Spacer(Modifier.height(10.dp))
             Text(species.description, style = MaterialTheme.typography.bodyMedium)
 
