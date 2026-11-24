@@ -35,6 +35,9 @@ sealed interface UiState {
     data object Analyzing : UiState
     data class Result(val predictions: List<Prediction>, val isDemo: Boolean) : UiState
 
+    /** Fotoğraflar farklı mantarlara ait görünüyor; her fotoğrafın kendi tahmini gösterilir. */
+    data class Mismatch(val guesses: List<Prediction>) : UiState
+
     /** Fotoğrafların çoğunda mantar algılanamadı; tür tahmini gösterilmez. */
     data class NoMushroom(val mushroomPhotos: Int, val totalPhotos: Int) : UiState
     data class Error(val message: String) : UiState
@@ -148,6 +151,8 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     val classifierSure = (predictions.firstOrNull()?.confidence ?: 0f) >= CLASSIFIER_OVERRIDE
                     if (mushroomPhotos != null && mushroomPhotos < MIN_MUSHROOM_PHOTOS && !classifierSure) {
                         UiState.NoMushroom(mushroomPhotos, bitmaps.size)
+                    } else if (classifier.photosDisagree) {
+                        UiState.Mismatch(classifier.lastPhotoGuesses)
                     } else {
                         if (!classifier.isDemo && predictions.isNotEmpty()) saveToHistory(predictions, uris, bitmaps)
                         UiState.Result(predictions, classifier.isDemo)

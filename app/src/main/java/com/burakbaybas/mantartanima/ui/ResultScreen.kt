@@ -42,6 +42,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import kotlin.math.roundToInt
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
@@ -93,6 +94,8 @@ fun ResultScreen(
     onBack: () -> Unit,
     onStartOver: () -> Unit,
     noMushroom: UiState.NoMushroom? = null,
+    /** Fotoğraflar farklı mantarlara aitse her fotoğrafın kendi tahmini (fotoğraf sırasıyla). */
+    mismatch: List<Prediction>? = null,
     /** Fotoğrafların altında gösterilecek ek kart (geçmiş ayrıntısında tarih ve konum). */
     infoCard: (@Composable () -> Unit)? = null,
     /** Geçmiş ayrıntısında "Fotoğrafları değiştir" düğmesi gizlenir. */
@@ -124,7 +127,7 @@ fun ResultScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            if (noMushroom == null && !isDemo && !predictions.isNullOrEmpty()) {
+            if (noMushroom == null && mismatch == null && !isDemo && !predictions.isNullOrEmpty()) {
                 item {
                     VerdictHeader(verdictOf(predictions.filterIndexed { i, p -> i == 0 || p.confidence >= MIN_SHOWN }))
                 }
@@ -150,6 +153,7 @@ fun ResultScreen(
             }
             if (infoCard != null) item { infoCard() }
             when {
+                mismatch != null -> item { MismatchCard(mismatch) }
                 noMushroom != null -> item {
                     InfoCard(
                         "Fotoğraflarda mantar algılanamadı " +
@@ -506,6 +510,45 @@ private fun VerdictBox(v: Verdict) {
                 Spacer(Modifier.height(2.dp))
                 Text(v.sub, fontSize = 14.5.sp, lineHeight = 19.sp, color = Color(0xFF33373D))
             }
+    }
+}
+
+@Composable
+private fun MismatchCard(guesses: List<Prediction>) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF4E5)),
+        border = BorderStroke(1.dp, Color(0xFFE8B86A)),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Warning, contentDescription = null, tint = Color(0xFFC77700))
+                Spacer(Modifier.width(10.dp))
+                Text(
+                    "Fotoğraflar farklı mantarlara ait görünüyor",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF8A5300),
+                )
+            }
+            Text(
+                "Doğru sonuç için üç fotoğrafın da aynı mantarın üstten, yandan ve alttan " +
+                    "görünüşü olması gerekir. Her fotoğraf ayrı ayrı değerlendirildiğinde:",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            PhotoAngle.entries.zip(guesses).forEach { (angle, g) ->
+                val name = SpeciesCatalog.find(g.label)?.displayName ?: g.label.replace('_', ' ')
+                Text(
+                    "• ${angle.title}: $name (%${(g.confidence * 100).roundToInt()})",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                )
+            }
+            Text(
+                "Aynı mantarın fotoğraflarıyla yeniden deneyin.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        }
     }
 }
 

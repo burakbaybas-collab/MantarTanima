@@ -19,6 +19,15 @@ interface MushroomClassifier {
      */
     fun classify(bitmaps: List<Bitmap>, topK: Int = 3): List<Prediction>
 
+    /** Son [classify] çağrısında her fotoğrafın kendi başına en olası türü (fotoğraf sırasıyla). */
+    val lastPhotoGuesses: List<Prediction> get() = emptyList()
+
+    /**
+     * Son [classify] çağrısında fotoğraflar farklı mantarlara ait görünüyorsa true:
+     * en az iki fotoğraf ayrı ayrı farklı türlerden emin ve birbirinin türüne neredeyse hiç olasılık vermiyor.
+     */
+    val photosDisagree: Boolean get() = false
+
     fun close() {}
 }
 

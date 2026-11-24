@@ -38,12 +38,26 @@ class TfliteClassifier(
         inputWidth = shape[2]
     }
 
+    override var lastPhotoGuesses: List<Prediction> = emptyList()
+        private set
+    override var photosDisagree: Boolean = false
+        private set
+
     override fun classify(bitmaps: List<Bitmap>, topK: Int): List<Prediction> {
         if (bitmaps.isEmpty()) return emptyList()
         val probs = FloatArray(labels.size)
-        for (bitmap in bitmaps) {
-            val p = probabilitiesFor(bitmap)
+        val each = bitmaps.map { probabilitiesFor(it) }
+        for (p in each) {
             for (i in probs.indices) probs[i] += p[i] / bitmaps.size
+        }
+        val tops = each.map { p -> p.indices.maxByOrNull { p[it] } ?: 0 }
+        lastPhotoGuesses = each.mapIndexed { k, p -> Prediction(labels[tops[k]], p[tops[k]]) }
+        photosDisagree = each.indices.any { a ->
+            each.indices.any { b ->
+                a < b && tops[a] != tops[b] &&
+                    each[a][tops[a]] >= SURE && each[b][tops[b]] >= SURE &&
+                    each[a][tops[b]] < CROSS && each[b][tops[a]] < CROSS
+            }
         }
         return probs.indices
             .sortedByDescending { probs[it] }
@@ -91,3 +105,9 @@ class TfliteClassifier(
             }
         }
 }
+
+/** Bir fotoğrafın kendi türünden "emin" sayılması için gereken olasılık. */
+private const val SURE = 0.5f
+
+/** Diğer fotoğrafın türüne verilen olasılık bundan düşükse, iki fotoğraf birbiriyle çelişiyor sayılır. */
+private const val CROSS = 0.05f

@@ -89,6 +89,14 @@ private fun AppContent() {
             onStartOver = vm::startOver,
             noMushroom = s,
         )
+        is UiState.Mismatch -> ResultScreen(
+            photos = photos,
+            predictions = emptyList(),
+            isDemo = false,
+            onBack = vm::backToHome,
+            onStartOver = vm::startOver,
+            mismatch = s.guesses,
+        )
         is UiState.Error -> ErrorScreen(message = s.message, onBack = vm::backToHome)
         UiState.History -> HistoryScreen(
             entries = history,
