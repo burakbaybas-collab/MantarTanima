@@ -52,11 +52,25 @@ class TfliteClassifier(
         }
         val tops = each.map { p -> p.indices.maxByOrNull { p[it] } ?: 0 }
         lastPhotoGuesses = each.mapIndexed { k, p -> Prediction(labels[tops[k]], p[tops[k]]) }
-        photosDisagree = each.indices.any { a ->
+        // Türler yerine cinsler karşılaştırılır: bir fotoğraf tür düzeyinde kararsız kalsa da
+        // (ör. birçok Russula türüne bölünmüş olasılık) cins düzeyinde genelde emindir.
+        val genusProbs = each.map { p ->
+            val m = HashMap<String, Float>()
+            for (i in p.indices) {
+                val g = labels[i].substringBefore('_')
+                m[g] = (m[g] ?: 0f) + p[i]
+            }
+            m
+        }
+        val topGenus = genusProbs.map { m -> m.maxByOrNull { it.value }!! }
+        val averagedTop = probs.maxOrNull() ?: 0f
+        photosDisagree = averagedTop < OVERALL_SURE && each.indices.any { a ->
             each.indices.any { b ->
-                a < b && tops[a] != tops[b] &&
-                    each[a][tops[a]] >= SURE && each[b][tops[b]] >= SURE &&
-                    each[a][tops[b]] < CROSS && each[b][tops[a]] < CROSS
+                val ga = topGenus[a]
+                val gb = topGenus[b]
+                a < b && ga.key != gb.key &&
+                    ga.value >= SURE && gb.value >= SURE &&
+                    (genusProbs[a][gb.key] ?: 0f) < CROSS && (genusProbs[b][ga.key] ?: 0f) < CROSS
             }
         }
         return probs.indices
@@ -106,8 +120,11 @@ class TfliteClassifier(
         }
 }
 
-/** Bir fotoğrafın kendi türünden "emin" sayılması için gereken olasılık. */
+/** Bir fotoğrafın kendi cinsinden "emin" sayılması için gereken olasılık. */
 private const val SURE = 0.5f
 
-/** Diğer fotoğrafın türüne verilen olasılık bundan düşükse, iki fotoğraf birbiriyle çelişiyor sayılır. */
+/** Fotoğrafların ortalamasında bir tür bu kadar öne çıkıyorsa çelişki uyarısı verilmez. */
+private const val OVERALL_SURE = 0.5f
+
+/** Diğer fotoğrafın cinsine verilen olasılık bundan düşükse, iki fotoğraf birbiriyle çelişiyor sayılır. */
 private const val CROSS = 0.05f
