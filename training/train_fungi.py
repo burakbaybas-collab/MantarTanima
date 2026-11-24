@@ -45,10 +45,40 @@ SEED = 42
 MIN_PHOTOS = 40
 
 
-def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None, df20_dir=None):
+def load_exclusions(path):
+    """Veri temizliğinde işaretlenen fotoğraflar: kaynak,tür,dosya satırları (training/haric.csv)."""
+    out = set()
+    if path and os.path.exists(path):
+        import csv as _csv
+        with open(path, encoding="utf-8") as f:
+            for r in _csv.reader(f):
+                if len(r) >= 3 and not r[0].startswith("#") and r[0] != "kaynak":
+                    out.add(({"inat": "inat", "ft": "df20", "own": "own"}.get(r[0], r[0]), r[1], r[2]))
+    return out
+
+
+def cross_class_duplicates(data_dir):
+    """Aynı iNaturalist fotoğrafı birden çok tür klasöründe varsa (ör. 'complex' takson) adını döndürür."""
+    seen, dup = {}, set()
+    if data_dir and os.path.isdir(data_dir):
+        for c in os.listdir(data_dir):
+            d = os.path.join(data_dir, c)
+            if not os.path.isdir(d):
+                continue
+            for f in os.listdir(d):
+                if f in seen and seen[f] != c:
+                    dup.add(f)
+                seen.setdefault(f, c)
+    return dup
+
+
+def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None, df20_dir=None, exclude=None):
     """Her türü ayrı ayrı eğitim/doğrulama olarak böler (train.py ile aynı bölme)."""
     rng = random.Random(SEED)
     classes, counts, skipped = [], {}, []
+    exclude = exclude or set()
+    dup_inat = cross_class_duplicates(data_dir)
+    n_excl = n_dup = 0
     for c in sorted(species_ids):
         by_src = {"inat": [], "df20": [], "own": []}
         for src_root, prefix in ((data_dir, "inat"), (df20_dir, "df20"), (own_dir, "own")):
@@ -57,6 +87,12 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
                 continue
             for f in sorted(os.listdir(src)):
                 if f.lower().endswith((".jpg", ".jpeg", ".png")):
+                    if (prefix, c, f) in exclude:
+                        n_excl += 1
+                        continue
+                    if prefix == "inat" and f in dup_inat:
+                        n_dup += 1
+                        continue
                     by_src[prefix].append((os.path.abspath(os.path.join(src, f)), f"{prefix}_{f}"))
         total = sum(len(v) for v in by_src.values())
         if total < MIN_PHOTOS:
@@ -85,6 +121,7 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
             os.makedirs(dst, exist_ok=True)
             os.symlink(path, os.path.join(dst, name))
         counts[c] = len(files)
+    print(f"Veri temizliği: {n_excl} işaretli fotoğraf ve {n_dup} türler arası kopya çıkarıldı", flush=True)
     return classes, counts, skipped
 
 
@@ -125,6 +162,7 @@ def main():
     ap.add_argument("--data", default="training/data")
     ap.add_argument("--own", default="training/own")
     ap.add_argument("--df20", default="training/data_df20")
+    ap.add_argument("--exclude", default="training/haric.csv", help="Veri temizliğinde çıkarılacak fotoğraflar")
     ap.add_argument("--out", default="training/out")
     ap.add_argument("--report", default="training/rapor_fungi.md")
     ap.add_argument("--hours", type=float, default=3.5, help="İnce ayar için en fazla süre")
@@ -162,7 +200,8 @@ def main():
     tmp = tempfile.mkdtemp()
     classes, counts, skipped = merge_sources(
         species_ids, args.data, args.own if os.path.isdir(args.own) else None, tmp,
-        limit=args.limit_per_class, df20_dir=args.df20 if use_df20 else None)
+        limit=args.limit_per_class, df20_dir=args.df20 if use_df20 else None,
+        exclude=load_exclusions(args.exclude))
     print(f"{len(classes)} tür, {sum(counts.values())} fotoğraf; atlanan: {skipped}", flush=True)
 
     IMG = args.img

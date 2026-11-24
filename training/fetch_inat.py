@@ -67,9 +67,12 @@ def resolve_taxon(name):
         res = api_get("/taxa", {"q": q, "per_page": 30, "is_active": "true"})["results"]
         # Bazı yaygın adlarda birebir tür ilk 30 sonuçta çıkmıyor; tür düzeyinde yeniden ara
         res += api_get("/taxa", {"q": q, "per_page": 100, "is_active": "true", "rank": "species"})["results"]
-        for t in res:
-            if t["name"].lower() == q.lower() and t["rank"] in ("species", "subspecies", "variety", "complex"):
-                return t["id"], t["name"], t["rank"]
+        # Önce tür düzeyi: "complex" taksonlar listedeki başka türleri de kapsayabiliyor
+        # (ör. Pleurotus ostreatus complex -> P. pulmonarius, P. eryngii fotoğrafları da gelir)
+        for ranks in (("species",), ("subspecies", "variety"), ("complex",)):
+            for t in res:
+                if t["name"].lower() == q.lower() and t["rank"] in ranks:
+                    return t["id"], t["name"], t["rank"]
         for t in res:
             if (t.get("matched_term") or "").lower() == q.lower():
                 if t["name"].lower() in RESERVED and t["name"].lower() != name.lower():
