@@ -134,6 +134,7 @@ def main():
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--shards", type=int, default=1)
     ap.add_argument("--only", default="")
+    ap.add_argument("--max-minutes", type=float, default=0, help="Süre dolunca kalan türleri atla")
     args = ap.parse_args()
 
     with open(args.species, encoding="utf-8") as f:
@@ -155,8 +156,12 @@ def main():
     todo = [sp for i, sp in enumerate(s for s in species if s["id"] in keys) if i % args.shards == args.shard]
     total = 0
     with ThreadPoolExecutor(args.workers) as ex:
+        t0 = time.time()
         for sp in todo:
             sid = sp["id"]
+            if args.max_minutes and time.time() - t0 > args.max_minutes * 60:
+                print(f"Süre doldu; {sid} ve sonrası atlandı", flush=True)
+                break
             key, name = keys[sid]
             if not key:
                 print(f"{sid}: GBIF'te bulunamadı", flush=True)
@@ -167,12 +172,8 @@ def main():
             items = candidates(key, int(args.per_species * 1.3))
             folder = os.path.join(args.out, sid)
             os.makedirs(folder, exist_ok=True)
-            ok_items = []
-            for item, ok in zip(items, ex.map(lambda it: download(it, folder), items)):
-                if ok:
-                    ok_items.append(item)
-                if len(ok_items) >= args.per_species:
-                    break
+            results = list(ex.map(lambda it: download(it, folder), items))
+            ok_items = [it for it, ok in zip(items, results) if ok][:args.per_species]
             keep = {f"gbif_{it['occ']}_{it['i']}.jpg" for it in ok_items}
             for f in os.listdir(folder):
                 if f.endswith(".jpg") and f not in keep:

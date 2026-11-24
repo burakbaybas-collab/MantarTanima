@@ -30,6 +30,7 @@ WORK = ROOT / "egitim"
 CODE = WORK / "kod"
 DATA = WORK / "data"
 DATA_FT = WORK / "data_ft"
+DATA_GBIF = WORK / "data_gbif"
 OUT = WORK / "out"
 FOTOLAR = ROOT / "fotograflar"   # kendi fotoğraflarınız: fotograflar\Amanita virosa\*.jpg
 
@@ -57,17 +58,20 @@ class ConcatReader(io.RawIOBase):
             self.f = None
 
 
+BASES = {"data": DATA, "data_ft": DATA_FT, "data_gbif": DATA_GBIF}
+
+
 def extract(fileobj, label):
-    """Paketi açar: data/... -> DATA, data_ft/... -> DATA_FT."""
+    """Paketi açar: data/... -> DATA, data_ft/... -> DATA_FT, data_gbif/... -> DATA_GBIF."""
     n, t0 = 0, time.time()
     with tarfile.open(fileobj=fileobj, mode="r|") as tf:
         for m in tf:
             if not m.isfile():
                 continue
             parts = m.name.replace("\\", "/").split("/")
-            if len(parts) < 3 or parts[0] not in ("data", "data_ft") or ".." in parts:
+            if len(parts) < 3 or parts[0] not in BASES or ".." in parts:
                 continue
-            base = DATA if parts[0] == "data" else DATA_FT
+            base = BASES[parts[0]]
             dst = base.joinpath(*parts[1:])
             dst.parent.mkdir(parents=True, exist_ok=True)
             with tf.extractfile(m) as src, open(dst, "wb") as out:
@@ -136,6 +140,25 @@ def step_data():
             extract(io.BytesIO(data), a["name"])
         yama_marker.write_text(stamp)
 
+    # GBIF fotoğrafları (gbif-data.yml ile hazırlanır); paket değişince yeniden indirilir
+    gbif = [a for a in r.json()["assets"] if a["name"].startswith("gbif-veri-")]
+    g_stamp = ",".join(f'{a["name"]}:{a["updated_at"]}' for a in gbif)
+    g_marker = WORK / ".gbif_acildi"
+    if gbif and (not g_marker.exists() or g_marker.read_text() != g_stamp):
+        print(f"  GBIF fotoğrafları indiriliyor ({len(gbif)} paket)", flush=True)
+        shutil.rmtree(DATA_GBIF, ignore_errors=True)
+        for a in gbif:
+            dst = VERI / a["name"]
+            if not dst.exists() or dst.stat().st_size != a["size"]:
+                with requests.get(a["browser_download_url"], stream=True, timeout=600) as resp:
+                    resp.raise_for_status()
+                    with open(dst, "wb") as f:
+                        for chunk in resp.iter_content(1 << 20):
+                            f.write(chunk)
+            with open(dst, "rb") as f:
+                extract(f, a["name"])
+        g_marker.write_text(g_stamp)
+
 
 def step_own():
     """C:\\FungiLens\\fotograflar altındaki tür klasörlerini eğitime ekler (en yüksek öncelikli kaynak)."""
@@ -174,7 +197,7 @@ def step_train():
     cmd = [
         sys.executable, "training/train_fungi.py",
         "--species", "app/src/main/assets/species.tsv",
-        "--data", str(DATA), "--df20", str(DATA_FT), "--own", "training/own",
+        "--data", str(DATA), "--df20", str(DATA_FT), "--own", "training/own", "--gbif", str(DATA_GBIF),
         "--exclude", "training/haric.csv",
         "--model", MODEL, "--img", str(IMG), "--batch", str(BATCH),
         "--limit-per-class", str(PER_SPECIES), "--head-epochs", "1",

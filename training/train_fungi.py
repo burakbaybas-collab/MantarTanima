@@ -65,7 +65,7 @@ def load_exclusions(path):
         with open(path, encoding="utf-8") as f:
             for r in _csv.reader(f):
                 if len(r) >= 3 and not r[0].startswith("#") and r[0] != "kaynak":
-                    out.add(({"inat": "inat", "ft": "df20", "own": "own"}.get(r[0], r[0]), r[1], r[2]))
+                    out.add(({"inat": "inat", "ft": "df20", "own": "own", "gbif": "gbif"}.get(r[0], r[0]), r[1], r[2]))
     return out
 
 
@@ -84,7 +84,8 @@ def cross_class_duplicates(data_dir, only=None):
     return dup
 
 
-def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None, df20_dir=None, exclude=None):
+def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None, df20_dir=None, exclude=None,
+                  gbif_dir=None):
     """Her türü ayrı ayrı eğitim/doğrulama olarak böler (train.py ile aynı bölme)."""
     rng = random.Random(SEED)
     classes, counts, skipped = [], {}, []
@@ -92,8 +93,8 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
     dup_inat = cross_class_duplicates(data_dir, set(species_ids))
     n_excl = n_dup = 0
     for c in sorted(species_ids):
-        by_src = {"inat": [], "df20": [], "own": []}
-        for src_root, prefix in ((data_dir, "inat"), (df20_dir, "df20"), (own_dir, "own")):
+        by_src = {"inat": [], "df20": [], "own": [], "gbif": []}
+        for src_root, prefix in ((data_dir, "inat"), (df20_dir, "df20"), (own_dir, "own"), (gbif_dir, "gbif")):
             src = os.path.join(src_root, c) if src_root else None
             if not src or not os.path.isdir(src):
                 continue
@@ -114,7 +115,10 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
         # Öncelik: kendi fotoğraflarınız > uzman doğrulamalı (FungiTastic/DF20) > iNaturalist
         for v in by_src.values():
             rng.shuffle(v)
-        own, ft, inat = by_src["own"], by_src["df20"], by_src["inat"]
+        # GBIF (Observation.org, Mushroom Observer...) iNaturalist ile aynı havuzda: gözlemci fotoğrafları
+        inat = by_src["inat"] + by_src["gbif"]
+        rng.shuffle(inat)
+        own, ft = by_src["own"], by_src["df20"]
         if limit:
             # Uzman fotoğrafları en fazla %70; kalanı iNaturalist'ten (çeşitlilik için),
             # iNaturalist yetmezse yine uzman fotoğraflarıyla tamamlanır.
@@ -174,6 +178,7 @@ def main():
     ap.add_argument("--data", default="training/data")
     ap.add_argument("--own", default="training/own")
     ap.add_argument("--df20", default="training/data_df20")
+    ap.add_argument("--gbif", default="training/data_gbif", help="GBIF fotoğrafları (fetch_gbif.py)")
     ap.add_argument("--exclude", default="training/haric.csv", help="Veri temizliğinde çıkarılacak fotoğraflar")
     ap.add_argument("--out", default="training/out")
     ap.add_argument("--report", default="training/rapor_fungi.md")
@@ -213,7 +218,8 @@ def main():
     classes, counts, skipped = merge_sources(
         species_ids, args.data, args.own if os.path.isdir(args.own) else None, tmp,
         limit=args.limit_per_class, df20_dir=args.df20 if use_df20 else None,
-        exclude=load_exclusions(args.exclude))
+        exclude=load_exclusions(args.exclude),
+        gbif_dir=args.gbif if os.path.isdir(args.gbif) else None)
     print(f"{len(classes)} tür, {sum(counts.values())} fotoğraf; atlanan: {skipped}", flush=True)
 
     IMG = args.img

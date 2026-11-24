@@ -42,7 +42,7 @@ jobs:
       - name: İndir
         run: |
           python training/fetch_gbif.py --per-species ${{ inputs.per_species }} --workers 24 \
-            --shard ${{ matrix.shard }} --shards $SHARDS --only "${{ inputs.only }}"
+            --shard ${{ matrix.shard }} --shards $SHARDS --max-minutes 290 --only "${{ inputs.only }}"
           mkdir -p training/data_gbif
           echo "Fotoğraf: $(find training/data_gbif -name '*.jpg' | wc -l)"; du -sh training/data_gbif
       - name: Paketle ve yükle
