@@ -11,6 +11,9 @@ on:
         default: ""
       per_species:
         default: "200"
+      shards:
+        description: "Çalışacak parçalar (JSON liste)"
+        default: "[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]"
       upload:
         description: "Sürüme yükle (deneme için kapatın)"
         type: boolean
@@ -21,7 +24,7 @@ permissions:
 
 env:
   DATA_TAG: egitim-verisi
-  SHARDS: 8
+  SHARDS: 16
 
 jobs:
   fetch:
@@ -30,7 +33,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+        shard: ${{ fromJSON(inputs.shards) }}
     env:
       GH_TOKEN: ${{ github.token }}
     steps:
@@ -41,12 +44,12 @@ jobs:
       - run: pip install requests pillow
       - name: İndir
         run: |
-          python training/fetch_gbif.py --per-species ${{ inputs.per_species }} --workers 24 \
+          python training/fetch_gbif.py --per-species ${{ inputs.per_species }} --workers 48 --species-workers 4 \
             --shard ${{ matrix.shard }} --shards $SHARDS --max-minutes 290 --only "${{ inputs.only }}"
           mkdir -p training/data_gbif
           echo "Fotoğraf: $(find training/data_gbif -name '*.jpg' | wc -l)"; du -sh training/data_gbif
       - name: Paketle ve yükle
-        if: ${{ inputs.upload }}
+        if: ${{ always() && inputs.upload }}
         run: |
           tar -cf gbif-veri-${{ matrix.shard }}.tar -C training data_gbif
           for i in 1 2 3 4 5; do gh release upload "$DATA_TAG" gbif-veri-${{ matrix.shard }}.tar --clobber && exit 0; sleep 20; done

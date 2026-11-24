@@ -33,6 +33,8 @@ OK_LICENSES = ("publicdomain/zero", "licenses/by/", "licenses/by-sa/", "licenses
 OVERRIDES = {"Amanita gemmata": ["Amanita gemmata", "Amanita junquillea"]}
 
 S = requests.Session()
+S.mount("https://", requests.adapters.HTTPAdapter(pool_connections=64, pool_maxsize=128))
+S.mount("http://", requests.adapters.HTTPAdapter(pool_connections=64, pool_maxsize=128))
 S.headers["User-Agent"] = "FungiLens-egitim/1.0 (github.com/burakbaybas-collab/MantarTanima)"
 
 
@@ -105,13 +107,19 @@ def candidates(taxon_key, want):
     return out
 
 
+HOST_FAIL = {}
+
+
 def download(item, folder):
     path = os.path.join(folder, f"gbif_{item['occ']}_{item['i']}.jpg")
     if os.path.exists(path):
         return True
-    for _ in range(3):
+    host = item["url"].split("/")[2]
+    if HOST_FAIL.get(host, 0) > 30:   # sürekli yanıt vermeyen sunucuyu atla
+        return False
+    for _ in range(2):
         try:
-            r = S.get(item["url"], timeout=40)
+            r = S.get(item["url"], timeout=(10, 25))
             if r.status_code != 200 or len(r.content) < 5000:
                 return False
             im = Image.open(io.BytesIO(r.content)).convert("RGB")
@@ -121,7 +129,8 @@ def download(item, folder):
             im.save(path, "JPEG", quality=85, optimize=True)
             return True
         except Exception:
-            time.sleep(2)
+            time.sleep(1)
+    HOST_FAIL[host] = HOST_FAIL.get(host, 0) + 1
     return False
 
 
@@ -130,7 +139,8 @@ def main():
     ap.add_argument("--species", default="app/src/main/assets/species.tsv")
     ap.add_argument("--out", default="training/data_gbif")
     ap.add_argument("--per-species", type=int, default=200)
-    ap.add_argument("--workers", type=int, default=24)
+    ap.add_argument("--workers", type=int, default=48)
+    ap.add_argument("--species-workers", type=int, default=4)
     ap.add_argument("--shard", type=int, default=0)
     ap.add_argument("--shards", type=int, default=1)
     ap.add_argument("--only", default="")
@@ -142,11 +152,9 @@ def main():
     only = {s.strip() for s in args.only.split(",") if s.strip()}
 
     # Önce tüm eşleşmeler: iki listedeki tür aynı GBIF taksonuna düşerse ikisi de atlanır
-    keys = {}
-    for sp in species:
-        if only and sp["id"] not in only:
-            continue
-        keys[sp["id"]] = resolve(sp["taxon"])
+    sel = [sp for sp in species if not only or sp["id"] in only]
+    with ThreadPoolExecutor(8) as ex:
+        keys = dict(zip([sp["id"] for sp in sel], ex.map(lambda sp: resolve(sp["taxon"]), sel)))
     by_key = {}
     for sid, (k, _) in keys.items():
         if k:
@@ -154,39 +162,46 @@ def main():
     clash = {sid for ids in by_key.values() if len(ids) > 1 for sid in ids}
 
     todo = [sp for i, sp in enumerate(s for s in species if s["id"] in keys) if i % args.shards == args.shard]
-    total = 0
-    with ThreadPoolExecutor(args.workers) as ex:
-        t0 = time.time()
-        for sp in todo:
-            sid = sp["id"]
-            if args.max_minutes and time.time() - t0 > args.max_minutes * 60:
-                print(f"Süre doldu; {sid} ve sonrası atlandı", flush=True)
-                break
-            key, name = keys[sid]
-            if not key:
-                print(f"{sid}: GBIF'te bulunamadı", flush=True)
-                continue
-            if sid in clash:
-                print(f"{sid}: başka bir türle aynı GBIF taksonu ({name}), atlandı", flush=True)
-                continue
+    t0 = time.time()
+    dl = ThreadPoolExecutor(args.workers)
+
+    def one(sp):
+        sid = sp["id"]
+        if args.max_minutes and time.time() - t0 > args.max_minutes * 60:
+            print(f"{sid}: süre doldu, atlandı", flush=True)
+            return 0
+        key, name = keys[sid]
+        if not key:
+            print(f"{sid}: GBIF'te bulunamadı", flush=True)
+            return 0
+        if sid in clash:
+            print(f"{sid}: başka bir türle aynı GBIF taksonu ({name}), atlandı", flush=True)
+            return 0
+        try:
             items = candidates(key, int(args.per_species * 1.3))
-            folder = os.path.join(args.out, sid)
-            os.makedirs(folder, exist_ok=True)
-            results = list(ex.map(lambda it: download(it, folder), items))
-            ok_items = [it for it, ok in zip(items, results) if ok][:args.per_species]
-            keep = {f"gbif_{it['occ']}_{it['i']}.jpg" for it in ok_items}
-            for f in os.listdir(folder):
-                if f.endswith(".jpg") and f not in keep:
-                    os.remove(os.path.join(folder, f))
-            with open(os.path.join(folder, "_kaynaklar.csv"), "w", newline="", encoding="utf-8") as f:
-                w = csv.writer(f)
-                w.writerow(["dosya", "gbif_kayit", "lisans", "hak_sahibi", "veri_seti", "ulke", "url"])
-                for it in ok_items:
-                    w.writerow([f"gbif_{it['occ']}_{it['i']}.jpg", it["occ"], it["license"], it["rights"],
-                                it["dataset"], it["country"], it["url"]])
-            tr = sum(1 for it in ok_items if it["country"] == "TR")
-            total += len(ok_items)
-            print(f"{sid} ({name}): {len(ok_items)} fotoğraf (Türkiye: {tr})", flush=True)
+        except Exception as e:
+            print(f"{sid}: GBIF hatası, atlandı ({e})", flush=True)
+            return 0
+        folder = os.path.join(args.out, sid)
+        os.makedirs(folder, exist_ok=True)
+        results = list(dl.map(lambda it: download(it, folder), items))
+        ok_items = [it for it, ok in zip(items, results) if ok][:args.per_species]
+        keep = {f"gbif_{it['occ']}_{it['i']}.jpg" for it in ok_items}
+        for f in os.listdir(folder):
+            if f.endswith(".jpg") and f not in keep:
+                os.remove(os.path.join(folder, f))
+        with open(os.path.join(folder, "_kaynaklar.csv"), "w", newline="", encoding="utf-8") as f:
+            w = csv.writer(f)
+            w.writerow(["dosya", "gbif_kayit", "lisans", "hak_sahibi", "veri_seti", "ulke", "url"])
+            for it in ok_items:
+                w.writerow([f"gbif_{it['occ']}_{it['i']}.jpg", it["occ"], it["license"], it["rights"],
+                            it["dataset"], it["country"], it["url"]])
+        tr = sum(1 for it in ok_items if it["country"] == "TR")
+        print(f"{sid} ({name}): {len(ok_items)} fotoğraf (Türkiye: {tr}) [{(time.time() - t0) / 60:.0f} dk]", flush=True)
+        return len(ok_items)
+
+    with ThreadPoolExecutor(args.species_workers) as ex:
+        total = sum(ex.map(one, todo))
     print(f"Toplam {total} fotoğraf", flush=True)
 
 
