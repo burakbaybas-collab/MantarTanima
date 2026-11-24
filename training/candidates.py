@@ -40,6 +40,13 @@ def main():
     print(len(eu_img), len(tr), len(keys), flush=True)
 
     def info(k):
+        try:
+            return _info(k)
+        except Exception as e:
+            print('hata', k, e, flush=True)
+            return None
+
+    def _info(k):
         s = get(f"species/{k}")
         if s.get("class") not in CLASSES or s.get("taxonomicStatus") not in ("ACCEPTED", None):
             return None
@@ -58,7 +65,7 @@ def main():
                 "dunya_fotolu": all_img.get(k, 0), "ilkbahar_orani": round(spring, 2),
                 "listedeki_es_anlamli": ";".join(syn_hit)}
 
-    with ThreadPoolExecutor(16) as ex:
+    with ThreadPoolExecutor(8) as ex:
         rows = [r for r in ex.map(info, sorted(keys)) if r]
     rows.sort(key=lambda r: (-r["tr_kayit"], -r["avrupa_fotolu"]))
     with open("adaylar.csv", "w", newline="", encoding="utf-8") as f:
