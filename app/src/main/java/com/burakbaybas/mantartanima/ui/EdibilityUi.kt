@@ -133,25 +133,13 @@ fun EdibilityBadge(edibility: Edibility) {
     if (showLegend) EdibilityLegendDialog(onDismiss = { showLegend = false })
 }
 
-/** Yenilebilirlik kutusu: simge, kategori adı (Yenir, Zehirli…) ve altında açıklaması. */
+/** Yenilebilirlik: kutucuk (simge + Yenir/Zehirli…, dokununca kategoriler penceresi) ve altında açıklaması. */
 @Composable
 fun EdibilityStatusBox(edibility: Edibility) {
-    val s = edibility.style
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .background(s.background, RoundedCornerShape(12.dp))
-            .border(1.dp, s.border, RoundedCornerShape(12.dp))
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        EdibilityIcon(edibility, 34.dp)
-        Spacer(Modifier.width(12.dp))
-        Column {
-            Text(s.label, fontWeight = FontWeight.Bold, color = s.color,
-                style = MaterialTheme.typography.titleMedium)
-            Text(s.description, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF33373D))
-        }
+    Column {
+        EdibilityBadge(edibility)
+        Spacer(Modifier.height(6.dp))
+        Text(edibility.style.description, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF33373D))
     }
 }
 
