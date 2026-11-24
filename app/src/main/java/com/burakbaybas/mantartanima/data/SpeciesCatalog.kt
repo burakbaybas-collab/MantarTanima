@@ -21,6 +21,8 @@ data class Species(
     val habitat: String = "",
     val sporePrint: String = "",
     val note: String = "",
+    /** Yöresel / diğer Türkçe adlar (virgülle). */
+    val otherNames: String = "",
 ) {
     /** Türkçe adı yoksa Latince adı gösterilir. */
     val displayName: String get() = turkishName.ifBlank { latinName }
@@ -32,7 +34,7 @@ data class Species(
  * tabloya satır eklemek yeterlidir.
  *
  * Sütunlar: id, taxon, turkish_name, edibility, description, lookalikes (; ile ayrılmış),
- *          season, habitat, spore_print, note
+ *          season, habitat, spore_print, note, other_names
  */
 object SpeciesCatalog {
     private var byId: Map<String, Species> = emptyMap()
@@ -64,6 +66,7 @@ object SpeciesCatalog {
             habitat = c.getOrElse(7) { "" }.trim(),
             sporePrint = c.getOrElse(8) { "" }.trim(),
             note = c.getOrElse(9) { "" }.trim(),
+            otherNames = c.getOrElse(10) { "" }.trim(),
         )
     }
 

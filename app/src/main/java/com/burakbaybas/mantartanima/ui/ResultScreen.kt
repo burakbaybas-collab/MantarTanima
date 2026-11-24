@@ -64,6 +64,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -233,6 +234,7 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
                         Text(
                             species.turkishName,
                             style = MaterialTheme.typography.bodyMedium,
+                            maxLines = 1, overflow = TextOverflow.Ellipsis,
                         )
                     }
                 }
@@ -382,6 +384,7 @@ private data class Verdict(
     val title: String, val sub: String, val icon: Edibility?,
     val color: Color, val bg: Color, val border: Color,
     val name: String, val latin: String?, val confidence: Float,
+    val otherNames: String? = null,
 )
 
 /**
@@ -403,7 +406,8 @@ private fun verdictOf(shown: List<Prediction>): Verdict {
     val grey = Triple(Color(0xFF4B5563), Color(0xFFF1F2F4), Color(0xFFD3D6DB))
     fun st(x: Edibility) = x.style
     val V = { t: String, sub: String, ic: Edibility?, c: Color, bg: Color, br: Color ->
-        Verdict(t, sub, ic, c, bg, br, sp?.latinName ?: name, sp?.turkishName?.takeIf { it.isNotBlank() }, top.confidence)
+        Verdict(t, sub, ic, c, bg, br, sp?.latinName ?: name, sp?.turkishName?.takeIf { it.isNotBlank() }, top.confidence,
+            sp?.otherNames?.takeIf { it.isNotBlank() })
     }
     return when {
         e == Edibility.DEADLY -> V(
@@ -462,7 +466,12 @@ private fun VerdictHeader(v: Verdict) {
                 Text(v.name, fontWeight = FontWeight.ExtraBold, fontStyle = FontStyle.Italic, fontSize = 26.sp, lineHeight = 30.sp,
                     color = Color(0xFF1F2A1F))
                 if (v.latin != null) {
-                    Text(v.latin, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, color = Color(0xFF374151))
+                    Text(v.latin, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, color = Color(0xFF374151),
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
+                if (v.otherNames != null) {
+                    Text("Diğer yöresel adları: ${v.otherNames}", fontSize = 13.sp, color = Color(0xFF6B7280),
+                        maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
             }
             Spacer(Modifier.width(8.dp))

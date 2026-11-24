@@ -303,7 +303,8 @@ private fun HistoryCard(
             Column(Modifier.weight(1f)) {
                 Text(sp?.latinName ?: top?.label ?: "—", fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic, fontSize = 16.sp, color = Color(0xFF1F2A1F))
                 if (sp != null && sp.turkishName.isNotBlank()) {
-                    Text(sp.turkishName, fontSize = 13.sp, color = Color(0xFF4B5563))
+                    Text(sp.turkishName, fontSize = 13.sp, color = Color(0xFF4B5563), maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
                 }
                 Spacer(Modifier.height(3.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
