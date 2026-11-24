@@ -69,13 +69,13 @@ def load_exclusions(path):
     return out
 
 
-def cross_class_duplicates(data_dir):
+def cross_class_duplicates(data_dir, only=None):
     """Aynı iNaturalist fotoğrafı birden çok tür klasöründe varsa (ör. 'complex' takson) adını döndürür."""
     seen, dup = {}, set()
     if data_dir and os.path.isdir(data_dir):
         for c in os.listdir(data_dir):
             d = os.path.join(data_dir, c)
-            if not os.path.isdir(d):
+            if not os.path.isdir(d) or (only is not None and c not in only):
                 continue
             for f in os.listdir(d):
                 if f in seen and seen[f] != c:
@@ -89,7 +89,7 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
     rng = random.Random(SEED)
     classes, counts, skipped = [], {}, []
     exclude = exclude or set()
-    dup_inat = cross_class_duplicates(data_dir)
+    dup_inat = cross_class_duplicates(data_dir, set(species_ids))
     n_excl = n_dup = 0
     for c in sorted(species_ids):
         by_src = {"inat": [], "df20": [], "own": []}
