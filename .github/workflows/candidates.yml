@@ -2,6 +2,10 @@ name: Yeni tür adayları (GBIF)
 
 on:
   workflow_dispatch:
+    inputs:
+      keys_only:
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -18,5 +22,6 @@ jobs:
         with:
           python-version: "3.11"
       - run: pip install requests
-      - run: python training/candidates.py
-      - run: gh release upload egitim-verisi adaylar.csv --clobber
+      - if: ${{ !inputs.keys_only }}
+        run: python training/candidates.py && gh release upload egitim-verisi adaylar.csv --clobber
+      - run: python training/own_gbif_keys.py && gh release upload egitim-verisi own_keys.csv --clobber
