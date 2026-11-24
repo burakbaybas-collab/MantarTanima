@@ -45,6 +45,18 @@ SEED = 42
 MIN_PHOTOS = 40
 
 
+def link(src, dst):
+    """Sembolik bağ; Windows'ta yetki yoksa sabit bağ, o da olmazsa kopya."""
+    try:
+        os.symlink(src, dst)
+    except OSError:
+        try:
+            os.link(src, dst)
+        except OSError:
+            import shutil
+            shutil.copyfile(src, dst)
+
+
 def load_exclusions(path):
     """Veri temizliğinde işaretlenen fotoğraflar: kaynak,tür,dosya satırları (training/haric.csv)."""
     out = set()
@@ -119,7 +131,7 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
             split = "val" if i < n_val else "train"
             dst = os.path.join(tmp, split, c)
             os.makedirs(dst, exist_ok=True)
-            os.symlink(path, os.path.join(dst, name))
+            link(path, os.path.join(dst, name))
         counts[c] = len(files)
     print(f"Veri temizliği: {n_excl} işaretli fotoğraf ve {n_dup} türler arası kopya çıkarıldı", flush=True)
     return classes, counts, skipped
