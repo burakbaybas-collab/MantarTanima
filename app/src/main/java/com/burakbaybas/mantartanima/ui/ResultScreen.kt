@@ -224,15 +224,15 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
                 Column(Modifier.weight(1f)) {
                     Text(
                         (if (rank == 0) "En olası: " else "${rank + 1}. olasılık: ") +
-                            (species?.displayName ?: prediction.label),
+                            (species?.latinName ?: prediction.label),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
+                        fontStyle = FontStyle.Italic,
                     )
                     if (species != null && species.turkishName.isNotBlank()) {
                         Text(
-                            species.latinName,
+                            species.turkishName,
                             style = MaterialTheme.typography.bodyMedium,
-                            fontStyle = FontStyle.Italic,
                         )
                     }
                 }
@@ -403,7 +403,7 @@ private fun verdictOf(shown: List<Prediction>): Verdict {
     val grey = Triple(Color(0xFF4B5563), Color(0xFFF1F2F4), Color(0xFFD3D6DB))
     fun st(x: Edibility) = x.style
     val V = { t: String, sub: String, ic: Edibility?, c: Color, bg: Color, br: Color ->
-        Verdict(t, sub, ic, c, bg, br, name, sp?.takeIf { it.turkishName.isNotBlank() }?.latinName, top.confidence)
+        Verdict(t, sub, ic, c, bg, br, sp?.latinName ?: name, sp?.turkishName?.takeIf { it.isNotBlank() }, top.confidence)
     }
     return when {
         e == Edibility.DEADLY -> V(
@@ -459,10 +459,10 @@ private fun VerdictHeader(v: Verdict) {
         // Tür adı ve oran
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
-                Text(v.name, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, lineHeight = 30.sp,
+                Text(v.name, fontWeight = FontWeight.ExtraBold, fontStyle = FontStyle.Italic, fontSize = 26.sp, lineHeight = 30.sp,
                     color = Color(0xFF1F2A1F))
                 if (v.latin != null) {
-                    Text(v.latin, fontStyle = FontStyle.Italic, fontSize = 16.sp, color = Color(0xFF4B5563))
+                    Text(v.latin, fontWeight = FontWeight.SemiBold, fontSize = 18.sp, color = Color(0xFF374151))
                 }
             }
             Spacer(Modifier.width(8.dp))
@@ -537,7 +537,7 @@ private fun MismatchCard(guesses: List<Prediction>) {
                 style = MaterialTheme.typography.bodyMedium,
             )
             PhotoAngle.entries.zip(guesses).forEach { (angle, g) ->
-                val name = SpeciesCatalog.find(g.label)?.displayName ?: g.label.replace('_', ' ')
+                val name = SpeciesCatalog.find(g.label)?.latinName ?: g.label.replace('_', ' ')
                 Text(
                     "• ${angle.title}: $name (%${(g.confidence * 100).roundToInt()})",
                     style = MaterialTheme.typography.bodyMedium,
