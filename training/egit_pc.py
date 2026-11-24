@@ -31,6 +31,7 @@ CODE = WORK / "kod"
 DATA = WORK / "data"
 DATA_FT = WORK / "data_ft"
 OUT = WORK / "out"
+FOTOLAR = ROOT / "fotograflar"   # kendi fotoğraflarınız: fotograflar\Amanita virosa\*.jpg
 
 MODEL = "hf-hub:BVRA/tf_efficientnet_b3.in1k_ft_df20_299"
 IMG, BATCH, PER_SPECIES, EPOCHS, HOURS = 299, 32, 1000, 12, 9.0
@@ -136,6 +137,35 @@ def step_data():
         yama_marker.write_text(stamp)
 
 
+def step_own():
+    """C:\\FungiLens\\fotograflar altındaki tür klasörlerini eğitime ekler (en yüksek öncelikli kaynak)."""
+    FOTOLAR.mkdir(parents=True, exist_ok=True)
+    import csv
+    with open(CODE / "app/src/main/assets/species.tsv", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f, delimiter="\t"))
+    by_name = {}
+    for r in rows:
+        by_name[r["id"].lower()] = r["id"]
+        by_name[r["taxon"].lower()] = r["id"]
+        by_name[r["taxon"].lower().replace(" ", "_")] = r["id"]
+    own = CODE / "training" / "own"
+    added, unknown = 0, []
+    for d in sorted(p for p in FOTOLAR.iterdir() if p.is_dir()):
+        sid = by_name.get(d.name.strip().lower())
+        if not sid:
+            unknown.append(d.name)
+            continue
+        dst = own / sid
+        dst.mkdir(parents=True, exist_ok=True)
+        for f in d.iterdir():
+            if f.suffix.lower() in (".jpg", ".jpeg", ".png"):
+                shutil.copyfile(f, dst / f"pc_{f.name}")
+                added += 1
+    print(f"== Kendi fotoğraflarınız: {added} fotoğraf eklendi ==", flush=True)
+    if unknown:
+        print(f"  Tanınmayan klasör adları (Latince adı kontrol edin): {unknown}", flush=True)
+
+
 def step_train():
     print("== 3) Eğitim başlıyor ==", flush=True)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -166,5 +196,6 @@ if __name__ == "__main__":
     t0 = time.time()
     step_code()
     step_data()
+    step_own()
     step_train()
     print(f"Toplam süre: {(time.time() - t0) / 3600:.1f} saat")
