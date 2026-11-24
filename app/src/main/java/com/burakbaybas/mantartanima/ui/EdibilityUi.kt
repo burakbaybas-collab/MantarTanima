@@ -138,8 +138,18 @@ fun EdibilityBadge(edibility: Edibility) {
 fun EdibilityStatusBox(edibility: Edibility) {
     Column {
         EdibilityBadge(edibility)
-        Spacer(Modifier.height(6.dp))
-        Text(edibility.style.description, style = MaterialTheme.typography.bodyMedium, color = Color(0xFF33373D))
+        Spacer(Modifier.height(8.dp))
+        val st = edibility.style
+        Text(
+            st.description,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color(0xFF33373D),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(st.background, RoundedCornerShape(12.dp))
+                .border(1.dp, st.border, RoundedCornerShape(12.dp))
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+        )
     }
 }
 
