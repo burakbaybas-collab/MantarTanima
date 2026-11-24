@@ -1,0 +1,17 @@
+name: Bilgisayar (self-hosted) bağlantı testi
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: [self-hosted, Windows]
+    timeout-minutes: 10
+    steps:
+      - name: Bilgi
+        shell: powershell
+        run: |
+          hostname
+          Get-Date
+          nvidia-smi
+          Get-PSDrive C | Select-Object Used,Free
+          if (Test-Path C:\FungiLens) { Get-ChildItem C:\FungiLens -Recurse -Depth 1 | Select-Object FullName }
+          Get-ChildItem C:\FungiLens -Recurse -Filter python.exe -ErrorAction SilentlyContinue | Select-Object -First 3 FullName
