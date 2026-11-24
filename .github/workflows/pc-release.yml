@@ -1,0 +1,15 @@
+name: Bilgisayar modeli için yükleme sürümünü hazırla
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - run: |
+          gh release view pc-egitim -R "${{ github.repository }}" >/dev/null 2>&1 || \
+          gh release create pc-egitim -R "${{ github.repository }}" --title "Bilgisayarda eğitilen model" --prerelease \
+            --notes "C:\\FungiLens\\egitim\\out klasöründeki best_model.pt, per_class.json ve rapor_fungi.md dosyalarını buraya yükleyin: sağ üstteki kalem (Edit) -> alttaki 'Attach binaries' alanına sürükleyin -> Update release."
