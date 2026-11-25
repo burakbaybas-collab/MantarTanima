@@ -76,40 +76,46 @@ def candidates(taxon_key, want):
     """Fotoğraflı kayıtları öncelik sırasıyla toplar: Türkiye > Avrupa > dünya."""
     seen, out = set(), []
     for scope in ({"country": "TR"}, {"continent": "EUROPE"}, {}):
-        offset = 0
-        while len(out) < want and offset < 5000:
-            page = get("occurrence/search", dict(scope, taxonKey=taxon_key, mediaType="StillImage",
-                                                  limit=300, offset=offset))
-            for occ in page.get("results", []):
-                k = occ["key"]
-                if k in seen or occ.get("datasetKey") in SKIP_DATASETS:
-                    continue
-                seen.add(k)
-                n = 0
-                for i, m in enumerate(occ.get("media", [])):
-                    url = m.get("identifier") or ""
-                    if m.get("type") != "StillImage" or not url.startswith("http"):
+        # iNaturalist kayıtlarını sayfa sayfa gezmemek için önce veri setlerini bul, sonra yalnız uygunları sorgula
+        f = get("occurrence/search", dict(scope, taxonKey=taxon_key, mediaType="StillImage", limit=0,
+                                          facet="datasetKey", **{"datasetKey.facetLimit": 40}))
+        dsets = [c["name"] for c in (f.get("facets") or [{}])[0].get("counts", []) if c["name"] not in SKIP_DATASETS]
+        for ds in dsets:
+            offset = 0
+            while len(out) < want and offset < 3000:
+                page = get("occurrence/search", dict(scope, taxonKey=taxon_key, mediaType="StillImage",
+                                                      datasetKey=ds, limit=300, offset=offset))
+                for occ in page.get("results", []):
+                    k = occ["key"]
+                    if k in seen:
                         continue
-                    if any(p in url.lower() for p in SKIP_URL_PARTS):
-                        break
-                    lic = m.get("license") or occ.get("license") or ""
-                    if not license_ok(lic):
-                        continue
-                    out.append({"occ": k, "i": i, "url": url, "license": lic,
-                                "rights": m.get("rightsHolder") or m.get("creator") or occ.get("recordedBy") or "",
-                                "dataset": occ.get("datasetName") or occ.get("datasetKey", ""),
-                                "country": occ.get("countryCode", "")})
-                    n += 1
-                    if n >= PER_OCC:
-                        break
-            if page.get("endOfRecords", True):
-                break
-            offset += 300
-        if len(out) >= want:
-            break
+                    seen.add(k)
+                    n = 0
+                    for i, m in enumerate(occ.get("media", [])):
+                        url = m.get("identifier") or ""
+                        if m.get("type") != "StillImage" or not url.startswith("http"):
+                            continue
+                        if any(p in url.lower() for p in SKIP_URL_PARTS):
+                            break
+                        lic = m.get("license") or occ.get("license") or ""
+                        if not license_ok(lic):
+                            continue
+                        out.append({"occ": k, "i": i, "url": url, "license": lic,
+                                    "rights": m.get("rightsHolder") or m.get("creator") or occ.get("recordedBy") or "",
+                                    "dataset": occ.get("datasetName") or occ.get("datasetKey", ""),
+                                    "country": occ.get("countryCode", "")})
+                        n += 1
+                        if n >= PER_OCC:
+                            break
+                if page.get("endOfRecords", True):
+                    break
+                offset += 300
+            if len(out) >= want:
+                return out
     return out
 
 
+T0 = 0
 HOST_FAIL = {}
 
 
@@ -148,9 +154,11 @@ def main():
     ap.add_argument("--only", default="")
     ap.add_argument("--plan", help="1. aşama: yalnızca GBIF sorguları; fotoğraf listesini bu dosyaya yaz")
     ap.add_argument("--from-plan", help="2. aşama: listedeki fotoğrafları indir")
-    ap.add_argument("--api-workers", type=int, default=3)
+    ap.add_argument("--api-workers", type=int, default=4)
     args = ap.parse_args()
 
+    global T0
+    T0 = time.time()
     if args.from_plan:
         return download_plan(args)
 
@@ -177,7 +185,7 @@ def main():
         except Exception as e:
             print(f"{sid}: GBIF hatası ({e})", flush=True)
             items = []
-        print(f"{sid}: {len(items)} aday fotoğraf", flush=True)
+        print(f"{sid}: {len(items)} aday fotoğraf [{(time.time() - T0) / 60:.0f} dk]", flush=True)
         return sid, name, items
 
     with ThreadPoolExecutor(args.api_workers) as ex:
