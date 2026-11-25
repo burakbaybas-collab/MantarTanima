@@ -35,8 +35,11 @@ jobs:
           python-version: "3.11"
       - run: pip install requests pillow
       - name: GBIF sorguları
+        timeout-minutes: 300
+        continue-on-error: true
         run: python training/fetch_gbif.py --plan plan.json.gz --per-species ${{ inputs.per_species }} --api-workers 4 --only "${{ inputs.only }}"
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: gbif-plan
           path: plan.json.gz

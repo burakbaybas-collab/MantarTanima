@@ -195,10 +195,21 @@ def main():
         print(f"{sid}: {len(items)} aday fotoğraf [{(time.time() - T0) / 60:.0f} dk]", flush=True)
         return sid, name, items
 
+    plan = {}
+
+    def save():
+        with gzip.open(args.plan + ".tmp", "wt", encoding="utf-8") as f:
+            json.dump(plan, f)
+        os.replace(args.plan + ".tmp", args.plan)
+
+    # Süre sınırına takılırsa o ana kadarki plan kaybolmasın diye düzenli kaydedilir
     with ThreadPoolExecutor(args.api_workers) as ex:
-        plan = {sid: {"name": name, "items": items} for sid, name, items in ex.map(plan_one, sel)}
-    with gzip.open(args.plan, "wt", encoding="utf-8") as f:
-        json.dump(plan, f)
+        for n, (sid, name, items) in enumerate(ex.map(plan_one, sel), 1):
+            plan[sid] = {"name": name, "items": items}
+            if n % 20 == 0:
+                save()
+                print(f"--- {n}/{len(sel)} tür planlandı", flush=True)
+    save()
     print(f"Plan: {len(plan)} tür, {sum(len(v['items']) for v in plan.values())} aday fotoğraf", flush=True)
 
 
