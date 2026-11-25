@@ -40,15 +40,18 @@ S.mount("http://", requests.adapters.HTTPAdapter(pool_connections=64, pool_maxsi
 S.headers["User-Agent"] = "FungiLens-egitim/1.0 (github.com/burakbaybas-collab/MantarTanima)"
 
 
-def get(path, params, retries=10):
+def get(path, params, retries=7):
     for i in range(retries):
         try:
             r = S.get(f"{API}/{path}", params=params, timeout=90)
             if r.status_code == 200:
                 return r.json()
+            if i == 0:
+                print(f"  GBIF {r.status_code} {r.headers.get('Retry-After')} {r.text[:120]!r}", flush=True)
             if r.status_code in (429, 500, 502, 503, 504):
                 wait = r.headers.get("Retry-After")
-                time.sleep(float(wait) if wait and wait.isdigit() else min(120, 5 * 2 ** i))
+                back = min(60, 3 * 2 ** i)
+                time.sleep(max(back, float(wait)) if wait and wait.isdigit() else back)
                 continue
             r.raise_for_status()
         except requests.RequestException:
@@ -83,8 +86,12 @@ def candidates(taxon_key, want):
         for ds in dsets:
             offset = 0
             while len(out) < want and offset < 3000:
-                page = get("occurrence/search", dict(scope, taxonKey=taxon_key, mediaType="StillImage",
-                                                      datasetKey=ds, limit=300, offset=offset))
+                try:
+                    page = get("occurrence/search", dict(scope, taxonKey=taxon_key, mediaType="StillImage",
+                                                          datasetKey=ds, limit=300, offset=offset))
+                except RuntimeError as e:
+                    print(f"  uyarı: {e}", flush=True)
+                    break
                 for occ in page.get("results", []):
                     k = occ["key"]
                     if k in seen:
