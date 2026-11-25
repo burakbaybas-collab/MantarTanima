@@ -162,6 +162,7 @@ def main():
     ap.add_argument("--plan", help="1. aşama: yalnızca GBIF sorguları; fotoğraf listesini bu dosyaya yaz")
     ap.add_argument("--from-plan", help="2. aşama: listedeki fotoğrafları indir")
     ap.add_argument("--api-workers", type=int, default=4)
+    ap.add_argument("--skip-file", help="Bu dosyadaki türler zaten indirilmiş; atla")
     args = ap.parse_args()
 
     global T0
@@ -172,7 +173,13 @@ def main():
     with open(args.species, encoding="utf-8") as f:
         species = list(csv.DictReader(f, delimiter="\t"))
     only = {s.strip() for s in args.only.split(",") if s.strip()}
-    sel = [sp for sp in species if not only or sp["id"] in only]
+    skip = set()
+    if args.skip_file and os.path.exists(args.skip_file):
+        skip = {l.strip() for l in open(args.skip_file, encoding="utf-8") if l.strip()}
+    sel = [sp for sp in species if (not only or sp["id"] in only) and sp["id"] not in skip]
+    # plan aşaması da parçalanabilir (farklı makineler = GBIF sınırına daha az takılma)
+    sel = [sp for i, sp in enumerate(sel) if i % args.shards == args.shard]
+    print(f"Planlanacak {len(sel)} tür (atlanan: {len(skip)})", flush=True)
     with ThreadPoolExecutor(args.api_workers) as ex:
         keys = dict(zip([sp["id"] for sp in sel], ex.map(lambda sp: resolve(sp["taxon"]), sel)))
     by_key = {}
@@ -214,8 +221,10 @@ def main():
 
 
 def download_plan(args):
-    with gzip.open(args.from_plan, "rt", encoding="utf-8") as f:
-        plan = json.load(f)
+    plan = {}
+    for path in args.from_plan.split(","):
+        with gzip.open(path, "rt", encoding="utf-8") as f:
+            plan.update(json.load(f))
     todo = [sid for i, sid in enumerate(sorted(plan)) if i % args.shards == args.shard]
     total = 0
     t0 = time.time()

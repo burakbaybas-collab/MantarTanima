@@ -1,8 +1,10 @@
 name: GBIF fotoğraflarını indir
 
-# 1) plan: GBIF'e az sayıda eşzamanlı sorgu ile her türün fotoğraf listesini çıkarır (GBIF sınırına takılmamak için)
-# 2) fetch: 16 parça halinde fotoğrafları indirir ve "egitim-verisi" sürümüne gbif-veri-<n>.tar olarak yükler.
-# egit_pc.py bu paketleri otomatik kullanır.
+# 1) plan (8 paralel makine): daha önce indirilmemiş türler için GBIF'ten fotoğraf listesi çıkarır.
+#    Her makine farklı IP'den sorguladığı için GBIF'in istek sınırına daha az takılır.
+# 2) fetch (16 parça): fotoğrafları indirir, "egitim-verisi" sürümüne gbif-veri-<çalıştırma>-<n>.tar olarak yükler.
+# Zaten sürümde bulunan türler atlanır; yarıda kalan iş yeniden çalıştırılarak tamamlanır.
+# egit_pc.py tüm gbif-veri-*.tar paketlerini otomatik kullanır.
 
 on:
   workflow_dispatch:
@@ -23,29 +25,46 @@ permissions:
 env:
   DATA_TAG: egitim-verisi
   SHARDS: 16
+  PLAN_SHARDS: 8
 
 jobs:
   plan:
     runs-on: ubuntu-latest
     timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
       - run: pip install requests pillow
+      - name: Zaten indirilmiş türler
+        run: |
+          : > mevcut.txt
+          for a in $(gh release view "$DATA_TAG" --json assets -q '.assets[].name' | grep '^gbif-veri-'); do
+            gh release download "$DATA_TAG" -p "$a" -O - | tar -t 2>/dev/null | grep '\.jpg$' | cut -d/ -f2 | sort -u >> mevcut.txt || true
+          done
+          sort -u -o mevcut.txt mevcut.txt; wc -l mevcut.txt
       - name: GBIF sorguları
         timeout-minutes: 300
         continue-on-error: true
-        run: python training/fetch_gbif.py --plan plan.json.gz --per-species ${{ inputs.per_species }} --api-workers 4 --only "${{ inputs.only }}"
+        run: |
+          python training/fetch_gbif.py --plan plan-${{ matrix.shard }}.json.gz --per-species ${{ inputs.per_species }} \
+            --api-workers 2 --shard ${{ matrix.shard }} --shards $PLAN_SHARDS --skip-file mevcut.txt --only "${{ inputs.only }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: gbif-plan
-          path: plan.json.gz
+          name: gbif-plan-${{ matrix.shard }}
+          path: plan-${{ matrix.shard }}.json.gz
 
   fetch:
     needs: plan
+    if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 340
     strategy:
@@ -62,18 +81,22 @@ jobs:
       - run: pip install requests pillow
       - uses: actions/download-artifact@v4
         with:
-          name: gbif-plan
+          pattern: gbif-plan-*
+          merge-multiple: true
       - name: İndir
+        timeout-minutes: 120
+        continue-on-error: true
         run: |
-          python training/fetch_gbif.py --from-plan plan.json.gz --per-species ${{ inputs.per_species }} --workers 48 \
-            --shard ${{ matrix.shard }} --shards $SHARDS
-          mkdir -p training/data_gbif
-          echo "Fotoğraf: $(find training/data_gbif -name '*.jpg' | wc -l)"; du -sh training/data_gbif
+          python training/fetch_gbif.py --from-plan "$(ls plan-*.json.gz | paste -sd,)" \
+            --per-species ${{ inputs.per_species }} --workers 48 --shard ${{ matrix.shard }} --shards $SHARDS
       - name: Paketle ve yükle
         if: ${{ always() && inputs.upload }}
         run: |
-          N=$(find training/data_gbif -name '*.jpg' 2>/dev/null | wc -l)
-          [ "$N" -lt 100 ] && { echo "Çok az fotoğraf ($N), yüklenmedi"; exit 1; }
-          tar -cf gbif-veri-${{ matrix.shard }}.tar -C training data_gbif
-          for i in 1 2 3 4 5; do gh release upload "$DATA_TAG" gbif-veri-${{ matrix.shard }}.tar --clobber && exit 0; sleep 20; done
+          N=$(find training/data_gbif -name '*.jpg' 2>/dev/null | wc -l); echo "Fotoğraf: $N"
+          [ "$N" -lt 100 ] && { echo "Çok az fotoğraf ($N), yüklenmedi"; exit 0; }
+          # yarım kalmış türü (kaynak listesi yazılmamış) pakete koyma
+          for d in training/data_gbif/*/; do [ -f "$d/_kaynaklar.csv" ] || rm -rf "$d"; done
+          F=gbif-veri-${{ github.run_number }}-${{ matrix.shard }}.tar
+          tar -cf $F -C training data_gbif
+          for i in 1 2 3 4 5; do gh release upload "$DATA_TAG" $F --clobber && exit 0; sleep 20; done
           exit 1
