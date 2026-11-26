@@ -4,8 +4,6 @@ import android.content.Intent
 import android.net.Uri
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.outlined.Checklist
-import androidx.compose.material3.Checkbox
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
@@ -431,34 +429,22 @@ private fun PoisonLine(k: String, v: String) {
     }, style = MaterialTheme.typography.bodySmall, color = Color(0xFF410E0B), modifier = Modifier.padding(vertical = 2.dp))
 }
 
-/** Elinizdeki mantarla karşılaştırılacak ayırt edici özellikler (işaretlenebilir). */
+/** Türün ayırt edici özellikleri (madde madde). */
 @Composable
 private fun FeatureChecklist(id: String, features: List<String>) {
-    val checked = remember(id) { mutableStateListOf<Boolean>().apply { repeat(features.size) { add(false) } } }
     Spacer(Modifier.height(12.dp))
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.Outlined.Checklist, null, tint = Color(0xFF1B5E2E), modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(8.dp))
         Text("Ayırt edici özellikler", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
     }
-    Text("Elinizdeki mantarda gördüklerinizi işaretleyin.", style = MaterialTheme.typography.bodySmall,
-        color = Color(0xFF6B7280))
     Spacer(Modifier.height(4.dp))
-    features.forEachIndexed { i, f ->
-        Row(
-            Modifier.fillMaxWidth().clickable { checked[i] = !checked[i] },
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Checkbox(checked = checked[i], onCheckedChange = { checked[i] = it })
+    features.forEach { f ->
+        Row(Modifier.fillMaxWidth().padding(vertical = 2.dp), verticalAlignment = Alignment.Top) {
+            Text("•", style = MaterialTheme.typography.bodyMedium, color = Color(0xFF1B5E2E),
+                fontWeight = FontWeight.Bold, modifier = Modifier.width(16.dp))
             Text(f, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
         }
-    }
-    val n = checked.count { it }
-    if (n > 0) {
-        Text(
-            "$n / ${features.size} özellik uyuşuyor. Tüm özellikler uyuşsa bile yemeden önce uzmana gösterin.",
-            style = MaterialTheme.typography.labelMedium, color = Color(0xFF1B5E2E), fontWeight = FontWeight.SemiBold,
-        )
     }
 }
 
