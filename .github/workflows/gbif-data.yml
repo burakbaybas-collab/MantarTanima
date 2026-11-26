@@ -55,7 +55,7 @@ jobs:
         continue-on-error: true
         run: |
           python training/fetch_gbif.py --plan plan-${{ matrix.shard }}.json.gz --per-species ${{ inputs.per_species }} \
-            --api-workers 2 --shard ${{ matrix.shard }} --shards $PLAN_SHARDS --skip-file mevcut.txt --only "${{ inputs.only }}"
+            --api-workers 3 --shard ${{ matrix.shard }} --shards $PLAN_SHARDS --skip-file mevcut.txt --only "${{ inputs.only }}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -88,7 +88,7 @@ jobs:
         continue-on-error: true
         run: |
           python training/fetch_gbif.py --from-plan "$(ls plan-*.json.gz | paste -sd,)" \
-            --per-species ${{ inputs.per_species }} --workers 48 --shard ${{ matrix.shard }} --shards $SHARDS
+            --per-species ${{ inputs.per_species }} --workers 16 --shard ${{ matrix.shard }} --shards $SHARDS
       - name: Paketle ve yükle
         if: ${{ always() && inputs.upload }}
         run: |

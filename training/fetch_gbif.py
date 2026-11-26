@@ -19,6 +19,8 @@ from concurrent.futures import ThreadPoolExecutor
 import requests
 from PIL import Image
 
+Image.MAX_IMAGE_PIXELS = 120_000_000
+
 API = "https://api.gbif.org/v1"
 MAX_PX = 448
 PER_OCC = 2
@@ -78,48 +80,49 @@ def license_ok(lic):
 def candidates(taxon_key, want):
     """Fotoğraflı kayıtları öncelik sırasıyla toplar: Türkiye > Avrupa > dünya."""
     seen, out = set(), []
-    for scope in ({"country": "TR"}, {"continent": "EUROPE"}, {}):
-        # iNaturalist kayıtlarını sayfa sayfa gezmemek için önce veri setlerini bul, sonra yalnız uygunları sorgula
-        f = get("occurrence/search", dict(scope, taxonKey=taxon_key, mediaType="StillImage", limit=0,
-                                          facet="datasetKey", **{"datasetKey.facetLimit": 40}))
-        dsets = [c["name"] for c in (f.get("facets") or [{}])[0].get("counts", []) if c["name"] not in SKIP_DATASETS]
-        for ds in dsets:
-            offset = 0
-            while len(out) < want and offset < 3000:
-                try:
-                    page = get("occurrence/search", dict(scope, taxonKey=taxon_key, mediaType="StillImage",
-                                                          datasetKey=ds, limit=300, offset=offset))
-                except RuntimeError as e:
-                    print(f"  uyarı: {e}", flush=True)
-                    break
-                for occ in page.get("results", []):
-                    k = occ["key"]
-                    if k in seen:
+    # Tek sorguda veri setlerini bul (iNat/Danimarka hariç), sonra yalnız onları sayfala.
+    f = get("occurrence/search", dict(taxonKey=taxon_key, mediaType="StillImage", limit=0,
+                                      facet="datasetKey", **{"datasetKey.facetLimit": 40}))
+    dsets = [c["name"] for c in (f.get("facets") or [{}])[0].get("counts", []) if c["name"] not in SKIP_DATASETS]
+    for ds in dsets:
+        offset = 0
+        while len(out) < want * 2 and offset < 3000:
+            try:
+                page = get("occurrence/search", dict(taxonKey=taxon_key, mediaType="StillImage",
+                                                      datasetKey=ds, limit=300, offset=offset))
+            except RuntimeError as e:
+                print(f"  uyarı: {e}", flush=True)
+                break
+            for occ in page.get("results", []):
+                k = occ["key"]
+                if k in seen:
+                    continue
+                seen.add(k)
+                n = 0
+                for i, m in enumerate(occ.get("media", [])):
+                    url = m.get("identifier") or ""
+                    if m.get("type") != "StillImage" or not url.startswith("http"):
                         continue
-                    seen.add(k)
-                    n = 0
-                    for i, m in enumerate(occ.get("media", [])):
-                        url = m.get("identifier") or ""
-                        if m.get("type") != "StillImage" or not url.startswith("http"):
-                            continue
-                        if any(p in url.lower() for p in SKIP_URL_PARTS):
-                            break
-                        lic = m.get("license") or occ.get("license") or ""
-                        if not license_ok(lic):
-                            continue
-                        out.append({"occ": k, "i": i, "url": url, "license": lic,
-                                    "rights": m.get("rightsHolder") or m.get("creator") or occ.get("recordedBy") or "",
-                                    "dataset": occ.get("datasetName") or occ.get("datasetKey", ""),
-                                    "country": occ.get("countryCode", "")})
-                        n += 1
-                        if n >= PER_OCC:
-                            break
-                if page.get("endOfRecords", True):
-                    break
-                offset += 300
-            if len(out) >= want:
-                return out
-    return out
+                    if any(p in url.lower() for p in SKIP_URL_PARTS):
+                        break
+                    lic = m.get("license") or occ.get("license") or ""
+                    if not license_ok(lic):
+                        continue
+                    out.append({"occ": k, "i": i, "url": url, "license": lic,
+                                "rights": m.get("rightsHolder") or m.get("creator") or occ.get("recordedBy") or "",
+                                "dataset": occ.get("datasetName") or occ.get("datasetKey", ""),
+                                "country": occ.get("countryCode", ""), "continent": occ.get("continent", "")})
+                    n += 1
+                    if n >= PER_OCC:
+                        break
+            if page.get("endOfRecords", True):
+                break
+            offset += 300
+        if len(out) >= want * 2:
+            break
+    # Öncelik: Türkiye > Avrupa > diğer
+    out.sort(key=lambda it: 0 if it["country"] == "TR" else (1 if it["continent"] == "EUROPE" else 2))
+    return out[:want]
 
 
 T0 = 0
@@ -138,7 +141,11 @@ def download(item, folder):
             r = S.get(item["url"], timeout=(10, 25))
             if r.status_code != 200 or len(r.content) < 5000:
                 return False
-            im = Image.open(io.BytesIO(r.content)).convert("RGB")
+            if len(r.content) > 25_000_000:
+                return False
+            im = Image.open(io.BytesIO(r.content))
+            im.draft("RGB", (MAX_PX * 2, MAX_PX * 2))   # JPEG'i küçük çözerek bellek tasarrufu
+            im = im.convert("RGB")
             if min(im.size) < 200:
                 return False
             im.thumbnail((MAX_PX, MAX_PX), Image.LANCZOS)
