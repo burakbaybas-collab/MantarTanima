@@ -194,6 +194,7 @@ def main():
     ap.add_argument("--img", type=int, default=224, help="Girdi çözünürlüğü (piksel)")
     ap.add_argument("--batch", type=int, default=48)
     ap.add_argument("--lr", type=float, default=1.5e-4, help="Tam ince ayar öğrenme hızı")
+    ap.add_argument("--init", default="", help="Eğitilmiş bir modelden (best_model.pt) başla, ör. çözünürlük artırırken")
     ap.add_argument("--no-export", action="store_true",
                     help="TFLite dışa aktarmayı atla (GPU sunucusunda; dışa aktarma export_model.py ile yapılır)")
     args = ap.parse_args()
@@ -229,6 +230,11 @@ def main():
     mean, std = list(cfg["mean"]), list(cfg["std"])
     print("Temel model normalizasyonu:", mean, std, flush=True)
     model.reset_classifier(len(classes))
+    if args.init and os.path.exists(args.init):
+        init = torch.load(args.init, map_location="cpu", weights_only=False)
+        assert init["classes"] == classes, "Başlangıç modelinin tür listesi farklı"
+        model.load_state_dict(init["state_dict"])
+        print(f"Başlangıç ağırlıkları: {args.init} (önceki doğruluk %{init.get('accuracy', 0) * 100:.1f})", flush=True)
     model.to(DEVICE)
 
     norm = transforms.Normalize(mean, std)

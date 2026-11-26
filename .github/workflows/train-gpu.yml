@@ -22,6 +22,14 @@ on:
       data_tag:
         description: "Önceden hazırlanmış iNaturalist paketleri (sürüm etiketi; boşsa sunucu kendisi indirir)"
         default: ""
+      init_from:
+        description: "Bu sürümdeki modelden başla (ör. son-egitim); boş = sıfırdan"
+        default: ""
+      lr:
+        description: "Öğrenme hızı (devam eğitiminde düşük)"
+        default: "5e-5"
+      batch:
+        default: "64"
       min_balance:
         description: "Bu bakiyenin (USD) altındaysa başlatma"
         default: "4"
@@ -93,7 +101,9 @@ jobs:
               "REPO": os.environ["GITHUB_REPOSITORY"], "RUN_TAG": os.environ["RUN_TAG"],
               "GH_TOKEN": os.environ["GH_TOKEN"], "RP_KEY": os.environ["RP_KEY"],
               "PER_SPECIES": os.environ["PER_SPECIES"], "MAX_EPOCHS": os.environ["MAX_EPOCHS"],
-              "MODEL": "${{ inputs.model }}", "IMG": "${{ inputs.img }}", "BATCH": "64",
+              "MODEL": "${{ inputs.model }}", "IMG": "${{ inputs.img }}", "BATCH": "${{ inputs.batch }}",
+              "INIT_FROM": "${{ inputs.init_from }}", "LR": "${{ inputs.lr }}",
+              "HEAD_EPOCHS": "${{ inputs.init_from != '' && '0' || '1' }}",
               "HOURS": os.environ["HOURS"], "LIMIT_SPECIES": os.environ["LIMIT_SPECIES"],
               "DATA_TAG": "${{ inputs.data_tag }}",
               "DEADLINE": os.environ["DEADLINE"],

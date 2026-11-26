@@ -171,8 +171,17 @@ for a in json.load(sys.stdin)['assets']:
   fi
   echo "=== Eğitim başlıyor ($(date -u)) ==="
   tail -n 120 "$LOG" > /work/ilerleme.log; upload /work/ilerleme.log ilerleme-baslangic.log
-  python training/train_fungi.py --species "$SPECIES" --df20 training/data_ft --model "$MODEL" --img "$IMG" --batch "$BATCH" \
-    --limit-per-class "$PER_SPECIES" --head-epochs 1 --max-epochs "$MAX_EPOCHS" --patience 4 \
+  EXTRA=""
+  if [ -n "$INIT_FROM" ]; then
+    # Önceki eğitilmiş modelden başla (ör. daha yüksek çözünürlükte ince ayar)
+    IID=$(curl -sS --http1.1 --retry 5 --retry-all-errors -H "$AUTH" "$API/releases/tags/$INIT_FROM" | python -c "
+import sys,json
+print(next(a['id'] for a in json.load(sys.stdin)['assets'] if a['name']=='best_model.pt'))")
+    dl "$API/releases/assets/$IID" /work/init.pt && EXTRA="--init /work/init.pt --lr $LR"
+    echo "Başlangıç modeli: $INIT_FROM ($EXTRA)"
+  fi
+  python training/train_fungi.py $EXTRA --species "$SPECIES" --df20 training/data_ft --model "$MODEL" --img "$IMG" --batch "$BATCH" \
+    --limit-per-class "$PER_SPECIES" --head-epochs "${HEAD_EPOCHS:-1}" --max-epochs "$MAX_EPOCHS" --patience 4 \
     --hours "$HOURS" --final --no-export
 )
 RC=$?
