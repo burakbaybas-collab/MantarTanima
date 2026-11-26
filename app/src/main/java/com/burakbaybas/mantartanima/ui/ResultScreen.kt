@@ -183,7 +183,16 @@ fun ResultScreen(
                     if (deadlyOther && topE != Edibility.DEADLY && topE != Edibility.POISONOUS) {
                         item { VerdictBox(verdictOf(shown)) }
                     }
-                    itemsIndexed(shown) { i, p -> PredictionCard(p, i) }
+                    val unknown = shown.first().confidence < VERY_LOW_CONFIDENCE
+                    if (unknown) {
+                        item {
+                            Text(
+                                "Düşük olasılıklı tahminler (yalnızca fikir için)",
+                                style = MaterialTheme.typography.titleSmall, color = Color(0xFF6B7280),
+                            )
+                        }
+                    }
+                    itemsIndexed(shown) { i, p -> PredictionCard(p, i, unknown) }
                 }
             }
             item { SafetyNotice() }
@@ -204,9 +213,10 @@ fun ResultScreen(
 }
 
 @Composable
-private fun PredictionCard(prediction: Prediction, rank: Int) {
+private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean = false) {
     val species = SpeciesCatalog.find(prediction.label)
-    var expanded by rememberSaveable(prediction.label) { mutableStateOf(rank == 0) }
+    // Tanınamayan fotoğrafta hiçbir kart açık gelmez ve yenilebilirlik etiketi gösterilmez (yanıltmasın)
+    var expanded by rememberSaveable(prediction.label) { mutableStateOf(rank == 0 && !unknown) }
     val uriHandler = LocalUriHandler.current
     val dangerous = species?.edibility == Edibility.POISONOUS || species?.edibility == Edibility.DEADLY
 
@@ -217,14 +227,14 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(Modifier.padding(16.dp)) {
-            if (rank > 0) {
+            if (rank > 0 || unknown) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.clickable(enabled = species != null) { expanded = !expanded },
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        (if (rank == 0) "En olası: " else "${rank + 1}. olasılık: ") +
+                        (if (unknown) "${rank + 1}. " else if (rank == 0) "En olası: " else "${rank + 1}. olasılık: ") +
                             (species?.latinName ?: prediction.label),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
@@ -257,7 +267,7 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
                 color = Color(0xFF4E9A2F),
                 trackColor = Color(0xFFE1EDD8),
             )
-            if (species != null) {
+            if (species != null && !unknown) {
                 Spacer(Modifier.height(12.dp))
                 EdibilityBadge(species.edibility)
             }
@@ -272,9 +282,9 @@ private fun PredictionCard(prediction: Prediction, rank: Int) {
             }
             }
             if (species != null && expanded) {
-            if (rank > 0) Spacer(Modifier.height(10.dp))
+            if (rank > 0 || unknown) Spacer(Modifier.height(10.dp))
             // Diğer olasılıklarda kutucuk başlıkta zaten var; açılınca yalnızca açıklama kutusu
-            EdibilityStatusBox(species.edibility, showBadge = rank == 0)
+            EdibilityStatusBox(species.edibility, showBadge = rank == 0 || unknown)
             Spacer(Modifier.height(10.dp))
             Text(species.description, style = MaterialTheme.typography.bodyMedium)
 
@@ -461,6 +471,21 @@ private fun VerdictHeader(v: Verdict) {
             .border(1.5.dp, v.border, RoundedCornerShape(18.dp))
             .padding(16.dp),
     ) {
+        if (v.confidence < VERY_LOW_CONFIDENCE) {
+            // Tanınamadı: tür adı büyük gösterilmez (mantar olmayan fotoğraflarda yanıltıcı olur)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.Info, null, tint = Color(0xFF4B5563), modifier = Modifier.size(30.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Tanınamadı", fontWeight = FontWeight.ExtraBold, fontSize = 26.sp, color = Color(0xFF1F2A1F))
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Fotoğraftaki mantar veri tabanında olmayabilir ya da bu bir mantar olmayabilir. " +
+                    "Mantarı yakından, iyi ışıkta ve kadrajı dolduracak şekilde yeniden çekin. Tanınmayan mantarı yemeyin.",
+                fontSize = 14.sp, lineHeight = 19.sp, color = Color(0xFF4B5563),
+            )
+            return@Column
+        }
         // Tür adı ve oran
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) {
@@ -488,9 +513,7 @@ private fun VerdictHeader(v: Verdict) {
         if (v.confidence < LOW_CONFIDENCE) {
             Spacer(Modifier.height(8.dp))
             Text(
-                if (v.confidence < VERY_LOW_CONFIDENCE)
-                    "Tanınamadı: bu mantar veri tabanında olmayabilir. Yakından ve iyi ışıkta yeniden çekin."
-                else "Model bu fotoğraflardan emin değil; sonuçları yalnızca fikir için kullanın.",
+                "Model bu fotoğraflardan emin değil; sonuçları yalnızca fikir için kullanın.",
                 fontSize = 14.sp, lineHeight = 18.sp, color = Color(0xFF4B5563),
             )
         }
