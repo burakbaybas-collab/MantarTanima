@@ -144,6 +144,18 @@ for a in json.load(sys.stdin)['assets']:
       tar -xf "/work/$NAME" -C training && rm -f "/work/$NAME"
     done < /work/yamalar.txt
     echo "iNaturalist türleri: $(ls training/data | wc -l)"
+    # GBIF fotoğrafları (Observation.org, Mushroom Observer...): gbif-veri-*.tar -> training/data_gbif
+    curl -sS --http1.1 --retry 5 --retry-all-errors -H "$AUTH" "$API/releases/tags/$DATA_TAG" | python -c "
+import sys,json
+for a in json.load(sys.stdin)['assets']:
+    if a['name'].startswith('gbif-veri-'): print(a['id'], a['name'])" > /work/gbif.txt
+    echo "GBIF paketi: $(wc -l < /work/gbif.txt)"
+    awk '{print $1" "$2}' /work/gbif.txt | xargs -P 6 -n 2 bash -c 'dl "'"$API"'/releases/assets/$0" "/work/$1"'
+    while read -r ID NAME; do
+      [ -f "/work/$NAME" ] || dl "$API/releases/assets/$ID" "/work/$NAME"
+      tar -xf "/work/$NAME" -C training && rm -f "/work/$NAME"
+    done < /work/gbif.txt
+    echo "GBIF türleri: $(ls training/data_gbif 2>/dev/null | wc -l), fotoğraf: $(find training/data_gbif -name '*.jpg' 2>/dev/null | wc -l)"
   else
     python training/fetch_inat.py --species "$SPECIES" --per-species "$PER_SPECIES" --workers 64 --species-workers 6
   fi

@@ -22,6 +22,9 @@ on:
       data_tag:
         description: "Önceden hazırlanmış iNaturalist paketleri (sürüm etiketi; boşsa sunucu kendisi indirir)"
         default: ""
+      min_balance:
+        description: "Bu bakiyenin (USD) altındaysa başlatma"
+        default: "4"
       smoke:
         description: "Hızlı deneme (5 tür, az fotoğraf; sonucu uygulamaya eklemez)"
         type: boolean
@@ -40,7 +43,7 @@ env:
   PER_SPECIES: ${{ inputs.smoke && '60' || inputs.per_species }}
   MAX_EPOCHS: ${{ inputs.smoke && '2' || inputs.max_epochs }}
   LIMIT_SPECIES: ${{ inputs.smoke && '5' || '' }}
-  HOURS: ${{ inputs.smoke && '0.3' || '3.3' }}
+  HOURS: ${{ inputs.smoke && '0.3' || '4.5' }}
 
 jobs:
   train:
@@ -48,6 +51,17 @@ jobs:
     timeout-minutes: 355
     steps:
       - uses: actions/checkout@v4
+
+      - name: RunPod bakiyesi
+        env:
+          RP_KEY: ${{ secrets.RUNPOD_API_KEY }}
+        run: |
+          B=$(curl -sS -H "Content-Type: application/json" -H "Authorization: Bearer $RP_KEY" \
+            -d '{"query":"query { myself { clientBalance currentSpendPerHr } }"}' https://api.runpod.io/graphql \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['data']['myself']['clientBalance'])" || echo "?")
+          echo "RunPod bakiyesi: $B USD"; echo "### RunPod bakiyesi: $B USD" >> $GITHUB_STEP_SUMMARY
+          python3 -c "import sys; b='$B'; sys.exit(0 if b=='?' or float(b) >= float('${{ inputs.min_balance }}') else 1)" \
+            || { echo "Bakiye yetersiz (en az ${{ inputs.min_balance }} USD gerekli); eğitim başlatılmadı."; exit 1; }
 
       - name: Sonuçlar için geçici sürüm oluştur
         env:
