@@ -1,0 +1,18 @@
+key	title	toxin	onset	symptoms
+AMATOKSIN	Amatoksin zehirlenmesi (ölümcül)	Amatoksinler (α-amanitin)	6–24 saat sonra (çoğunlukla 8–12 saat)	Şiddetli kusma, sulu ishal, karın ağrısı. 1–2 gün sonra yalancı bir düzelme olur; ardından karaciğer ve böbrek yetmezliği gelişir. Belirtiler geç başladığı için mide yıkama zamanı geçmiş olur; erken hastane tedavisi hayat kurtarır.
+AMATOKSIN_SUPHE	Amatoksin içerebilir	Bu cinste amatoksin içeren ölümcül türler var	6–24 saat sonra	Ölümcül amatoksin zehirlenmesi gibi değerlendirilmelidir: gecikmeli kusma ve ishal, ardından karaciğer hasarı.
+ORELLANIN	Orellanin zehirlenmesi (ölümcül, böbrek)	Orellanin	2–20 gün sonra (çoğunlukla 3–7 gün)	Yoğun susuzluk, bulantı, bel ağrısı, idrarın azalması. Böbrek yetmezliği kalıcı olabilir (diyaliz, nakil). Belirtiler çok geç başladığı için mantarla ilişkilendirilmeyebilir.
+CORTINARIUS_SUPHE	Böbrek zehiri içerebilir	Bu cinste orellanin içeren ölümcül türler var	Günler sonra olabilir	Bulantı, susuzluk, idrar azalması gibi böbrek belirtileri; orellanin zehirlenmesi gibi değerlendirilmelidir.
+GIROMITRIN	Giromitrin zehirlenmesi	Giromitrin (monometilhidrazin)	6–12 saat sonra	Kusma, ishal, baş ağrısı, halsizlik; ağır vakada karaciğer hasarı, kan yıkımı ve nöbet. Pişirme buharı da zehirlidir; kurutma veya haşlama güvenli hale getirmez.
+CIG_ZEHIRLI	Çiğ veya az pişmişken zehirli	Isıya duyarlı zehirli bileşikler (bazılarında giromitrin benzeri)	1–6 saat sonra	Bulantı, kusma, ishal, karın krampları. Toplanması ve yenmesi önerilmez.
+MUSKARIN	Muskarin zehirlenmesi	Muskarin	15 dakika – 2 saat sonra	Aşırı terleme, salya ve gözyaşı, göz bebeklerinde küçülme, nabız yavaşlaması, ishal, nefes darlığı. Hastanede panzehir (atropin) uygulanır.
+PANTERIN	Panterin zehirlenmesi (sinir sistemi)	İbotenik asit ve muskimol	30 dakika – 3 saat sonra	Sarhoşluk hali, şaşkınlık, baş dönmesi, halüsinasyon, ajitasyon ya da derin uyku, kas seğirmesi. Panter mantarında daha ağır seyreder.
+PAXILLUS	Paxillus sendromu (bağışıklık kaynaklı)	Bağışıklık tepkisi (tekrarlayan tüketimde)	1–3 saat sonra	Kusma, ishal, karın ağrısı; ardından kırmızı kan hücrelerinin yıkımı ve böbrek yetmezliği. Yıllarca sorunsuz yiyenlerde bile aniden ve ölümcül şekilde ortaya çıkabilir.
+KOPRIN	Koprin (alkolle) zehirlenmesi	Koprin	Alkol alındıktan 5 dakika – 2 saat sonra	Yüz ve boyunda kızarma, çarpıntı, baş ağrısı, bulantı, tansiyon düşmesi. Mantarı yemeden önceki ve sonraki 3 gün içinde alınan alkolle ortaya çıkar.
+RABDOMIYOLIZ	Kas yıkımı (rabdomiyoliz)	Tam bilinmiyor; tekrarlayan ve bol tüketimde	24–72 saat sonra	Kas ağrısı ve güçsüzlük, koyu renkli idrar; ağır vakada kalp ve böbrek etkilenir. Ölümcül olabilir.
+PSIKOAKTIF	Psikoaktif zehirlenme	Psilosibin / psilosin	20 dakika – 1 saat sonra	Algı bozukluğu, halüsinasyon, kaygı ve panik, çarpıntı. Kazalara ve kendine zarar vermeye yol açabilir.
+PROXIMA	Böbrek zehirlenmesi (Amanita proxima)	Alenik norlösin	8–14 saat sonra	Önce kusma ve ishal; 2–4 gün içinde akut böbrek yetmezliği. Yenen Amanita ovoidea ile karıştırılır.
+POLIPORIK	Poliporik asit zehirlenmesi	Poliporik asit	12 saat ve sonrası	Bulantı, görme bozukluğu, mor renkli idrar; böbrek ve karaciğer etkilenebilir.
+ENSEFALOPATI	Beyin etkilenmesi (ensefalopati)	Tam bilinmiyor	Günler sonra	Özellikle böbrek hastalarında bilinç bulanıklığı, nöbet; ölümcül vakalar bildirilmiştir.
+GI_AGIR	Ağır mide-bağırsak zehirlenmesi	Mide-bağırsak tahriş edici maddeler	30 dakika – 4 saat sonra	Şiddetli kusma, ishal ve karın krampları; ciddi sıvı kaybı. Hastane tedavisi gerekebilir.
+GI	Mide-bağırsak zehirlenmesi	Mide-bağırsak tahriş edici maddeler	15 dakika – 4 saat sonra	Bulantı, kusma, ishal, karın krampları. Genellikle 1–2 günde geçer; çocuk ve yaşlılarda sıvı kaybı tehlikelidir.

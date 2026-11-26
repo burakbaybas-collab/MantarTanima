@@ -1,6 +1,17 @@
 package com.burakbaybas.mantartanima.ui
 
+import android.content.Intent
 import android.net.Uri
+import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material3.Checkbox
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import com.burakbaybas.mantartanima.data.Syndrome
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.foundation.BorderStroke
@@ -317,6 +328,11 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
                 }
             }
 
+            species.details?.syndrome?.let { PoisoningBox(it) }
+            species.details?.let { d ->
+                if (d.features.isNotEmpty()) FeatureChecklist(species.id, d.features)
+                if (d.compare.isNotEmpty()) CompareSection(d.compare)
+            }
             Spacer(Modifier.height(12.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.Info, null, tint = Color(0xFF1B5E2E), modifier = Modifier.size(20.dp))
@@ -329,6 +345,11 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
                 add("Sezon" to species.season)
                 add("Habitat" to species.habitat)
                 add("Spor izi" to species.sporePrint)
+                species.details?.let { d ->
+                    add("Koku" to d.smell)
+                    add("Tat" to d.taste)
+                    add("Renk değişimi" to d.colorChange)
+                }
                 if (species.lookalikes.isNotEmpty()) add("Benzer türler" to species.lookalikes.joinToString(", "))
             }.filter { it.second.isNotBlank() }
             Column(
@@ -357,6 +378,108 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
                     leadingIcon = { Icon(Icons.Outlined.PhotoLibrary, null, Modifier.size(18.dp)) },
                 )
             }
+            }
+        }
+    }
+}
+
+/** Zehirli türlerde: toksin, belirtilerin başlama süresi, belirtiler ve ilk yardım. */
+@Composable
+private fun PoisoningBox(sy: Syndrome) {
+    val context = LocalContext.current
+    val red = Color(0xFF8C1D18)
+    Spacer(Modifier.height(10.dp))
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .background(Color(0xFFFDECEA), RoundedCornerShape(12.dp))
+            .border(1.dp, Color(0xFFF2B8B5), RoundedCornerShape(12.dp))
+            .padding(12.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(Icons.Filled.Warning, null, tint = red, modifier = Modifier.size(20.dp))
+            Spacer(Modifier.width(8.dp))
+            Text(sy.title, color = red, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
+        }
+        Spacer(Modifier.height(6.dp))
+        PoisonLine("Zehir", sy.toxin)
+        PoisonLine("Belirtiler başlar", sy.onset)
+        PoisonLine("Belirtiler", sy.symptoms)
+        PoisonLine("İlk yardım", "Belirtileri beklemeden 112'yi arayın; Ulusal Zehir Danışma Merkezi 114. " +
+            "Kalan mantarı ve yemek artığını saklayın, aynı yemeği yiyen herkes başvursun. Kendiliğinizden kusturmaya çalışmayın.")
+        Spacer(Modifier.height(6.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            listOf("112", "114").forEach { n ->
+                OutlinedButton(onClick = {
+                    runCatching { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:$n"))) }
+                }) {
+                    Icon(Icons.Filled.Call, null, Modifier.size(18.dp), tint = red)
+                    Spacer(Modifier.width(6.dp))
+                    Text(if (n == "112") "112'yi ara" else "114'ü ara", color = red)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PoisonLine(k: String, v: String) {
+    if (v.isBlank()) return
+    Text(buildAnnotatedString {
+        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) { append("$k: ") }
+        append(v)
+    }, style = MaterialTheme.typography.bodySmall, color = Color(0xFF410E0B), modifier = Modifier.padding(vertical = 2.dp))
+}
+
+/** Elinizdeki mantarla karşılaştırılacak ayırt edici özellikler (işaretlenebilir). */
+@Composable
+private fun FeatureChecklist(id: String, features: List<String>) {
+    val checked = remember(id) { mutableStateListOf<Boolean>().apply { repeat(features.size) { add(false) } } }
+    Spacer(Modifier.height(12.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Outlined.Checklist, null, tint = Color(0xFF1B5E2E), modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(8.dp))
+        Text("Ayırt edici özellikler", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+    }
+    Text("Elinizdeki mantarda gördüklerinizi işaretleyin.", style = MaterialTheme.typography.bodySmall,
+        color = Color(0xFF6B7280))
+    Spacer(Modifier.height(4.dp))
+    features.forEachIndexed { i, f ->
+        Row(
+            Modifier.fillMaxWidth().clickable { checked[i] = !checked[i] },
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Checkbox(checked = checked[i], onCheckedChange = { checked[i] = it })
+            Text(f, style = MaterialTheme.typography.bodySmall, modifier = Modifier.weight(1f))
+        }
+    }
+    val n = checked.count { it }
+    if (n > 0) {
+        Text(
+            "$n / ${features.size} özellik uyuşuyor. Tüm özellikler uyuşsa bile yemeden önce uzmana gösterin.",
+            style = MaterialTheme.typography.labelMedium, color = Color(0xFF1B5E2E), fontWeight = FontWeight.SemiBold,
+        )
+    }
+}
+
+/** Benzer türlerden nasıl ayrılır. */
+@Composable
+private fun CompareSection(items: List<Pair<String, String>>) {
+    Spacer(Modifier.height(12.dp))
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.AutoMirrored.Outlined.CompareArrows, null, tint = Color(0xFF1B5E2E), modifier = Modifier.size(20.dp))
+        Spacer(Modifier.width(8.dp))
+        Text("Benzer türlerden farkı", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+    }
+    Spacer(Modifier.height(6.dp))
+    Column(
+        Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).border(1.dp, Color(0xFFE3E7E1), RoundedCornerShape(10.dp)),
+    ) {
+        items.forEachIndexed { i, (name, diff) ->
+            Column(Modifier.fillMaxWidth().background(if (i % 2 == 0) Color(0xFFF4F7F2) else Color.White)
+                .padding(horizontal = 12.dp, vertical = 8.dp)) {
+                Text(name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+                Text(diff, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
