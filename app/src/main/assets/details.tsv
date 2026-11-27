@@ -159,7 +159,6 @@ panaeolus_antillarum						PSIKOAKTIF
 tricholoma_pessundatum						GI
 amanita_vittadinii						GI
 galerina_hypnorum						AMATOKSIN_SUPHE
-helvella_spadicea						CIG_ZEHIRLI
 amanita_regalis						PANTERIN
 amanita_porphyria						GI
 conocybe_tenera						GI
@@ -211,7 +210,6 @@ tricholoma_frondosae						RABDOMIYOLIZ
 inocybe_fraudans						MUSKARIN
 cortinarius_camphoratus						CORTINARIUS_SUPHE
 inocybe_grammata						MUSKARIN
-lactarius_necator						GI
 rubroboletus_lupinus						GI
 entoloma_serrulatum						GI
 russula_sardonia						GI
@@ -236,3 +234,4 @@ cortinarius_uliginosus						CORTINARIUS_SUPHE
 inocybe_sindonia						MUSKARIN
 entoloma_prunuloides						GI
 conocybe_rugosa						AMATOKSIN
+choiromyces_meandriformis						GI

@@ -8,6 +8,12 @@ on:
     inputs:
       per_species:
         default: "500"
+      ids_file:
+        description: "Tür listesi dosyası"
+        default: "training/yeni_ids.txt"
+      prefix:
+        description: "Paket adı eki (veri-yama-<ek>-n.tar)"
+        default: "ek"
 
 permissions:
   contents: write
@@ -33,7 +39,7 @@ jobs:
       - run: pip install requests pillow
       - name: İndir
         run: |
-          IDS=$(awk -v s=${{ matrix.shard }} 'NF && (NR-1)%8==s' training/yeni_ids.txt | paste -sd,)
+          IDS=$(awk -v s=${{ matrix.shard }} 'NF && (NR-1)%8==s' ${{ inputs.ids_file }} | paste -sd,)
           echo "Türler: $IDS"
           python training/fetch_inat.py --only "$IDS" --per-species ${{ inputs.per_species }} --workers 16
       - name: Küçült ve paketle
@@ -41,8 +47,8 @@ jobs:
           rm -f training/data/*/_kaynaklar.csv.bak
           python training/shrink_images.py training/data
           for d in training/data/*/; do echo "$d: $(ls $d | wc -l)"; done
-          tar -cf veri-yama-ek-${{ matrix.shard }}.tar -C training data
+          tar -cf veri-yama-${{ inputs.prefix }}-${{ matrix.shard }}.tar -C training data
       - name: Yükle
         run: |
-          for i in 1 2 3 4 5; do gh release upload "$DATA_TAG" veri-yama-ek-${{ matrix.shard }}.tar --clobber && exit 0; sleep 20; done
+          for i in 1 2 3 4 5; do gh release upload "$DATA_TAG" veri-yama-${{ inputs.prefix }}-${{ matrix.shard }}.tar --clobber && exit 0; sleep 20; done
           exit 1

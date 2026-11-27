@@ -103,7 +103,7 @@ put("CORTINARIUS_SUPHE", "cortinarius_bolaris cortinarius_obtusus cortinarius_su
                          "cortinarius_malicorius cortinarius_flexipes cortinarius_uliginosus")
 put("PSIKOAKTIF", "psilocybe_cyanescens panaeolus_antillarum panaeolus_cinctulus panaeolus_acuminatus")
 put("GIROMITRIN", "gyromitra_gigas discina_brunnea")
-put("CIG_ZEHIRLI", "helvella_monachella helvella_spadicea helvella_fibrosa helvella_corium helvella_solitaria helvella_fusca")
+put("CIG_ZEHIRLI", "helvella_monachella helvella_fibrosa helvella_corium helvella_solitaria helvella_fusca")
 put("RABDOMIYOLIZ", "tricholoma_frondosae")
 put("PANTERIN", "amanita_regalis")
 put("ERGOT", "claviceps_purpurea")

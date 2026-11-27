@@ -1,0 +1,16 @@
+terfezia_boudieri|Keme|E|Toprak altında, patates gibi yumru; kahve dış kabuk, krem-pembemsi damarlı iç. Çöl trüfü.|İlkbahar|Kurak bozkır, Helianthemum bitkileri yanında|—
+terfezia_claveryi|Keme|E|Yuvarlak yer altı yumrusu; açık kahve kabuk, mermer desenli iç.|İlkbahar|Kurak bozkır ve çöl kenarları|—
+tirmania_nivea|Beyaz Keme|E|Beyaz-krem dış yüzlü yer altı yumrusu; iç beyaz.|İlkbahar|Çöl ve yarı kurak alanlar|—
+tirmania_pinoyi|Keme|E|Krem-sarımsı dış yüzlü yer altı yumrusu.|İlkbahar|Kurak bozkır|—
+tuber_melanosporum|Siyah Trüf|E|Siyah, çokgen siğilli kabuk; iç koyu mor-siyah, beyaz damarlı. Çok güçlü koku.|Kış|Meşe ve fındık kökleri, kireçli toprak|—
+tuber_borchii|Beyaz Bahar Trüfü|E|Krem-kahve düz kabuk; iç kahve, beyaz damarlı; sarımsaklı koku.|Kış sonu–ilkbahar|Çam ve meşe altında kireçli toprak|—
+tuber_magnatum|Beyaz Trüf|E|Düzgün, sarımsı-krem kabuk; iç kahve-pembe, ince beyaz damarlı; çok güçlü koku.|Sonbahar–kış|Kavak, söğüt, meşe kökleri|—
+lactarius_volemus|Tatlı Süt Mantarı|E|Turuncu-kahve kadifemsi şapka; bol beyaz süt kahverengileşir; balık kokusu.|Yaz–sonbahar|Yaprak döken ve karışık orman|Beyaz
+lactarius_vinosus|Şarap Süt Mantarı|E|Şarap kırmızısı-mor süt; turuncu-pembe zonlu şapka.|Sonbahar|Akdeniz çam ormanları|Krem
+ramaria_flava|Sarı Mercan Mantarı|C|Sarı, çok dallı mercan; tabanı beyaz. İshal yapabilir; zehirli benzerleri var.|Yaz–sonbahar|Kayın ve iğne yapraklı orman|Sarımsı
+amanita_ponderosa|Ağır Amanita|C|İri, beyaz-pembemsi şapka; toprağa gömülü büyür, sapta volva. Ölümcül beyaz Amanita'larla karıştırılabilir.|İlkbahar|Akdeniz meşe ve laden çalılıkları|Beyaz
+amanita_mairei|Gri Volvalı Amanita|I|Gri, kenarı çizgili şapka; halkasız, beyaz volvalı sap.|Sonbahar|Akdeniz meşe ve çam ormanları|Beyaz
+hygrophorus_latitabundus|Yapışkan Çam Balmumu Mantarı|C|Kahve-zeytin, çok yapışkan iri şapka; sap yapışkan kuşaklı.|Sonbahar–kış|Akdeniz çam ormanları|Beyaz
+leccinum_lepidum|Akdeniz Boleti|C|Sarı-kahve şapka, sarı gözenekler; kesince pembe-gri olur. İyi pişirilmeli.|Sonbahar|Kermes meşesi ve pırnal altında|Zeytin-kahve
+choiromyces_meandriformis|Beyaz Yer Trüfü|P|Toprak altında, kirli beyaz-krem büyük yumru; iç kıvrımlı damarlı. Çiğ yenmez, mide rahatsızlığı yapabilir.|Yaz–sonbahar|Nemli yaprak döken orman|—
+phellorinia_herculeana|Bozkır Tozlu Mantarı|I|Uzun pullu saplı, üstte tozlu baş; çöl puf mantarı.|İlkbahar–sonbahar|Kurak kumlu bozkır|Kahverengi

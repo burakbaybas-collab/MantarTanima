@@ -27,11 +27,9 @@ guepiniopsis_alpina
 tricholoma_fulvum
 tricholoma_albobrunneum
 galerina_hypnorum
-helvella_spadicea
 cyclocybe_cylindracea
 hygrocybe_chlorophana
 tricholoma_caligatum
-polyporus_squamosus
 amanita_regalis
 amanita_porphyria
 marasmius_siccus
@@ -48,7 +46,6 @@ pholiota_squarrosoides
 cortinarius_obtusus
 panus_neostrigosus
 dumontinia_tuberosa
-agrocybe_cylindracea
 byssonectria_fusispora
 sarcosoma_globosum
 podofomes_mollis
@@ -79,7 +76,6 @@ inocybe_flocculosa
 entoloma_aprile
 phyllotopsis_nidulans
 helvella_fibrosa
-polyporus_lepideus
 phellopilus_nigrolimitatus
 helvella_corium
 tricholoma_triste
@@ -125,7 +121,6 @@ ganoderma_australe
 leccinum_versipelle
 microstoma_protractum
 entoloma_mougeotii
-mycena_acicula
 conocybe_deliquescens
 agaricus_impudicus
 picipes_badius
@@ -155,10 +150,8 @@ entoloma_rhodocylix
 plectania_melastoma
 cortinarius_sanguineus
 inocybe_insinuata
-polyporus_lipsiensis
 inosperma_lanatodiscum
 cortinarius_lividoochraceus
-agrocybe_dura
 lactarius_pubescens
 coprinellus_flocculosus
 mycena_metata
@@ -169,7 +162,6 @@ mycena_plumipes
 pseudoinonotus_dryadeus
 mutinus_elegans
 entoloma_byssisedum
-boletus_erythropus
 pholiota_limonella
 galerina_paludosa
 tricholoma_frondosae
@@ -182,14 +174,11 @@ ganoderma_pfeifferi
 cortinarius_camphoratus
 inocybe_grammata
 agrocybe_acericola
-polyporus_brumalis
-lactarius_necator
 rhizocybe_pruinosa
 crepidotus_cesatii
 rubroboletus_lupinus
 suillus_cavipes
 calvatia_booniana
-armillaria_lutea
 cerioporus_leptocephalus
 pluteus_hongoi
 cortinarius_mucosus
@@ -197,12 +186,10 @@ entoloma_serrulatum
 russula_sardonia
 fomitopsis_officinalis
 parasola_auricoma
-agaricus_urinascens
 inocybe_calospora
 russula_maculata
 hebeloma_hiemale
 russula_acrifolia
-thaxterogaster_leucoluteolus
 amanita_echinocephala
 inocutis_rheades
 hypholoma_dispersum
@@ -221,7 +208,6 @@ tricholoma_matsutake
 cortinarius_malicorius
 entoloma_cetratum
 climacodon_septentrionalis
-hygrophorus_persoonii
 agaricus_crocodilinus
 leccinum_leucopodium
 agaricus_langei
@@ -247,7 +233,6 @@ infundibulicybe_squamulosa
 hygrocybe_reidii
 pithya_cupressina
 vitreoporus_dichrous
-cortinarius_elatior
 contumyces_rosellus
 cortinarius_largus
 tricholoma_stans
@@ -282,7 +267,6 @@ tricholoma_apium
 collybiopsis_confluens
 mycenastrum_corium
 pseudombrophila_guldeniae
-agaricus_semotus
 guepinia_helvelloides
 suillus_pseudobrevipes
 lactarius_lignyotus

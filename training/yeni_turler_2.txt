@@ -2,7 +2,6 @@ ganoderma_australe|Güney Ganoderma|I|Büyük, sert, kahve raf; üstü kakao toz
 leccinum_versipelle|Turuncu Huş Boleti|C|Turuncu şapka, sapta siyah pullar; kesince morarıp kararır. İyi pişirilmeli.|Yaz–sonbahar|Huş altında|Kahverengi
 microstoma_protractum|Kırmızı Kadeh Mantarı|I|Kırmızı, ağzı yıldız gibi açılan kadeh; beyaz tüylü sap.|İlkbahar|Gömülü dallar|Beyaz
 entoloma_mougeotii|Kurşuni Pembe Mantar|P|Gri-mavi, ince pullu şapka.|Yaz–sonbahar|Çayır|Pembe
-mycena_acicula|Turuncu İğne Mantarı|I|Çok küçük, parlak turuncu şapka, sarı sap.|Yaz–sonbahar|Nemli orman, dal parçaları|Beyaz
 conocybe_deliquescens|Eriyen Koni Mantarı|P|Kahve, ince, çabuk eriyen şapka.|Yaz|Çimenlik|Pas kahvesi
 agaricus_impudicus|Pullu Orman Agaricus|P|Kahve pullu şapka; hoş olmayan kokulu.|Sonbahar|İğne yapraklı orman|Kahverengi
 picipes_badius|Kara Ayaklı Gözenek Mantarı|I|Parlak kestane şapka, sap tabanı siyah.|Yaz–sonbahar|Yaprak döken odun|Beyaz
@@ -32,10 +31,8 @@ entoloma_rhodocylix|Küçük Huni Pembe Mantar|I|Küçük, kahve, huni şapka.|S
 plectania_melastoma|Kara Kadeh Mantarı|I|Siyah kadeh, kenarında turuncu granüller.|İlkbahar|Çürük dallar|Beyaz
 cortinarius_sanguineus|Kan Kırmızısı Örümcek Mantarı|P|Tamamen koyu kan kırmızısı küçük mantar.|Sonbahar|İğne yapraklı orman|Pas kahvesi
 inocybe_insinuata|Sızan Lif Mantarı|P|Kahve, lifli şapka.|Sonbahar|Yaprak döken orman|Kahverengi
-polyporus_lipsiensis|Leipzig Gözenek Mantarı|I|Kahve, ince yelpaze; beyaz gözenekler.|Yaz–sonbahar|Ölü dallar|Beyaz
 inosperma_lanatodiscum|Yünlü Lif Mantarı|P|Krem-kahve, ortası yünlü şapka.|Yaz–sonbahar|Orman kenarı|Kahverengi
 cortinarius_lividoochraceus|Mor Saplı Örümcek Mantarı|P|Sarı-kahve yapışkan şapka, mor-beyaz sap.|Sonbahar|Kayın ve meşe|Pas kahvesi
-agrocybe_dura|Sert Agrocybe|I|Beyaz-krem, çatlaklı şapka.|İlkbahar–yaz|Çayır ve bahçe|Kahverengi
 lactarius_pubescens|Tüylü Süt Mantarı|P|Soluk pembe, kenarı tüylü şapka; beyaz acı süt.|Yaz–sonbahar|Huş altında|Krem
 coprinellus_flocculosus|Pullu Mürekkep Mantarı|I|Gri-kahve, beyaz pamuksu pullu küçük şapka.|Yaz–sonbahar|Kompost|Siyah
 mycena_metata|Pembe Çan Mycena|I|Küçük, pembemsi kahve çan şapka.|Sonbahar|İğne yapraklı orman|Beyaz
@@ -46,7 +43,6 @@ mycena_plumipes|Kozalak Mycena|I|Gri-kahve küçük çan; çam kozalağında.|İ
 pseudoinonotus_dryadeus|Ağlayan Meşe Mantarı|I|Krem-kahve, kalın; üzerinde damlacıklar.|Yaz–sonbahar|Yaşlı meşe dipleri|Kahverengi
 mutinus_elegans|Zarif Köpek Mantarı|I|Turuncu-pembe, uç kısmı koyu yeşil-kahve lekeli; kötü kokulu.|Yaz–sonbahar|Orman zemini|Zeytin
 entoloma_byssisedum|Yünlü Pembe Mantar|I|Gri-beyaz küçük kulak şekli.|Sonbahar|Çürük odun|Pembe
-boletus_erythropus|Kırmızı Ayaklı Bolet|C|Kahve kadifemsi şapka, kırmızı gözenekler ve noktalı sap; kesince hemen maviye döner. Çiğ zehirli.|Yaz–sonbahar|İğne yapraklı ve yaprak döken orman|Zeytin-kahve
 pholiota_limonella|Limon Pul Mantarı|I|Limon sarısı, yapışkan, pullu şapka.|Sonbahar|Yaprak döken ağaç|Kahverengi
 galerina_paludosa|Bataklık Galerina|P|Küçük kahve şapka, sapta beyaz kuşaklar.|Yaz–sonbahar|Sfagnum bataklığı|Pas kahvesi
 tricholoma_frondosae|Kavak Sarı Kurt Mantarı|P|Sarı şapka, sarı lameller. Kükürt sarısı kurt mantarı grubundan; kas yıkımı yapabilir.|Sonbahar|Kavak ve huş|Beyaz
@@ -59,14 +55,11 @@ ganoderma_pfeifferi|Bakır Ganoderma|I|Bakır-kahve, mumsu kaplamalı raf.|Tüm 
 cortinarius_camphoratus|Kokulu Örümcek Mantarı|P|Leylak-kahve şapka; keskin kötü koku.|Sonbahar|Ladin ormanı|Pas kahvesi
 inocybe_grammata|Çizgili Lif Mantarı|P|Krem, lifli şapka, pembe tonlu sap.|Yaz–sonbahar|Orman|Kahverengi
 agrocybe_acericola|Akçaağaç Agrocybe|I|Kahve şapka, sapta halka; odun parçalarında.|Yaz|Yaprak döken odun|Kahverengi
-polyporus_brumalis|Kış Gözenek Mantarı|I|Kahve şapka, beyaz gözenekler, ince sap.|Kış–ilkbahar|Ölü dallar|Beyaz
-lactarius_necator|Zeytin Süt Mantarı|P|Koyu zeytin-yeşil şapka; acı beyaz süt.|Yaz–sonbahar|Huş altında|Krem
 rhizocybe_pruinosa|Unsu Huni Mantarı|I|Gri-kahve, unsu huni şapka.|İlkbahar|İğne yapraklı orman|Beyaz
 crepidotus_cesatii|Küçük Beyaz Kulak|I|Beyaz, keçemsi küçük kulak.|Sonbahar|Ölü dallar|Kahverengi
 rubroboletus_lupinus|Kurt Boleti|P|Krem-pembe şapka, kırmızı gözenekler; maviye döner.|Yaz–sonbahar|Sıcak meşe ormanları|Zeytin-kahve
 suillus_cavipes|Boş Saplı Çam Boleti|C|Kahve keçemsi şapka; sap içi boş.|Yaz–sonbahar|Melez altında|Zeytin
 calvatia_booniana|Batı Dev Puf Mantarı|C|İri, çokgen desenli beyaz top. Yalnız içi beyazken yenir.|Yaz|Kurak çayır|Kahverengi
-armillaria_lutea|Kalın Saplı Bal Mantarı|C|Kahve pullu şapka, sapta sarı halka; iyi pişirilmeli.|Sonbahar|Ağaç kökleri ve kütükleri|Beyaz
 cerioporus_leptocephalus|Siyah Ayak Gözenek Mantarı|I|Krem-kahve şapka, sap tabanı siyah.|Yaz–sonbahar|Ölü dallar|Beyaz
 pluteus_hongoi|Hongo Geyik Mantarı|I|Gri-kahve lifli şapka, pembe lameller.|Yaz–sonbahar|Çürük odun|Pembe
 cortinarius_mucosus|Yapışkan Örümcek Mantarı|I|Turuncu-kahve, çok yapışkan şapka ve beyaz yapışkan sap.|Sonbahar|Çam ormanı|Pas kahvesi
@@ -74,12 +67,10 @@ entoloma_serrulatum|Mavi Kenarlı Pembe Mantar|P|Mavi-siyah küçük şapka, lam
 russula_sardonia|Limon Lamelli Kırmızı Kabı|P|Mor-kırmızı şapka, limon sarısı lameller; çok acı.|Sonbahar|Çam altında|Krem
 fomitopsis_officinalis|Kınakına Mantarı|I|Beyaz, at nalı şeklinde uzun yaşlı odunsu mantar; acı.|Tüm yıl|Yaşlı melez gövdeleri|Beyaz
 parasola_auricoma|Altın Tüylü Şemsiye|I|Kahve, çizgili, ince şemsiye şapka.|Yaz–sonbahar|Çimenlik, bahçe|Siyah
-agaricus_urinascens|Dev Çayır Mantarı|E|Çok iri, beyaz-krem, ince pullu şapka; badem kokusu.|Yaz–sonbahar|Çayır ve otlak|Kahverengi
 inocybe_calospora|Dikenli Sporlu Lif Mantarı|P|Küçük kahve pullu şapka.|Yaz–sonbahar|Yaprak döken orman|Kahverengi
 russula_maculata|Benekli Kırmızı Kabı|I|Turuncu-kırmızı şapka, pas lekeli; acı.|Yaz–sonbahar|Kireçli yaprak döken orman|Sarı
 hebeloma_hiemale|Kış Hebeloma|P|Krem-kahve şapka; turp kokusu.|Sonbahar–kış|Orman ve park|Kahverengi
 russula_acrifolia|Acı Lamelli Kara Kırmızı Kabı|I|Kahve-siyah şapka; et kızarıp kararır; acı lameller.|Yaz–sonbahar|Orman|Beyaz
-thaxterogaster_leucoluteolus|Ak Sarı Örümcek Mantarı|I|Beyaz-sarı şapka ve sap.|Sonbahar|Orman|Pas kahvesi
 amanita_echinocephala|Dikenli Başlı Amanita|P|Beyaz şapkada sivri pullar; yeşilimsi lameller.|Yaz–sonbahar|Kireçli toprakta yaprak döken orman|Beyaz
 inocutis_rheades|Kavak Kav Mantarı|I|Turuncu-kahve, tüylü raf.|Tüm yıl|Kavak gövdeleri|Kahverengi
 hypholoma_dispersum|Dağınık Kükürt Mantarı|P|Turuncu-kahve, ince küçük şapka; acı.|Sonbahar|İğne yapraklı odun|Mor-kahve
