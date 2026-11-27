@@ -54,6 +54,8 @@ SYNDROMES = {
                   "Bulantı, görme bozukluğu, mor renkli idrar; böbrek ve karaciğer etkilenebilir."),
     "ENSEFALOPATI": ("Beyin etkilenmesi (ensefalopati)", "Tam bilinmiyor", "Günler sonra",
                      "Özellikle böbrek hastalarında bilinç bulanıklığı, nöbet; ölümcül vakalar bildirilmiştir."),
+    "ERGOT": ("Ergotizm (çavdar mahmuzu zehirlenmesi)", "Ergot alkaloitleri", "Saatler – günler (birikerek)",
+              "Damar daralması ile el-ayak uyuşması, yanma, kangren; kasılmalar, halüsinasyon. Mahmuzlu tahıldan yapılan un ile olur."),
     "GI_AGIR": ("Ağır mide-bağırsak zehirlenmesi", "Mide-bağırsak tahriş edici maddeler", "30 dakika – 4 saat sonra",
                 "Şiddetli kusma, ishal ve karın krampları; ciddi sıvı kaybı. Hastane tedavisi gerekebilir."),
     "GI": ("Mide-bağırsak zehirlenmesi", "Mide-bağırsak tahriş edici maddeler", "15 dakika – 4 saat sonra",
@@ -87,6 +89,24 @@ put("PSIKOAKTIF", "psilocybe_semilanceata panaeolus_papilionaceus pluteus_salici
 put("PROXIMA", "amanita_proxima")
 put("POLIPORIK", "hapalopilus_rutilans")
 put("ENSEFALOPATI", "pleurocybella_porrigens")
+# 1000 türe çıkarken eklenenler
+put("AMATOKSIN", "conocybe_rugosa")
+put("AMATOKSIN_SUPHE", "galerina_hypnorum galerina_vittiformis galerina_graminea galerina_paludosa lepiota_lilacea "
+                       "lepiota_ignivolvata conocybe_arrhenii")
+put("MUSKARIN", "pseudosperma_sororium inocybe_flocculosa inosperma_adaequatum inosperma_maculatum inocybe_insinuata "
+                "inosperma_lanatodiscum inocybe_fuscidula inocybe_lacera inocybe_fraudans inocybe_grammata inocybe_calospora "
+                "inocybe_griseolilacina inocybe_hirtella inocybe_nemorosa inosperma_calamistratum inocybe_sindonia "
+                "clitocybe_mediterranea")
+put("CORTINARIUS_SUPHE", "cortinarius_bolaris cortinarius_obtusus cortinarius_subtortus cortinarius_armillatus "
+                         "cortinarius_decipiens cortinarius_saniosus cortinarius_vernus cortinarius_casimirii "
+                         "cortinarius_sanguineus cortinarius_lividoochraceus cortinarius_camphoratus cortinarius_hemitrichus "
+                         "cortinarius_malicorius cortinarius_flexipes cortinarius_uliginosus")
+put("PSIKOAKTIF", "psilocybe_cyanescens panaeolus_antillarum panaeolus_cinctulus panaeolus_acuminatus")
+put("GIROMITRIN", "gyromitra_gigas discina_brunnea")
+put("CIG_ZEHIRLI", "helvella_monachella helvella_spadicea helvella_fibrosa helvella_corium helvella_solitaria helvella_fusca")
+put("RABDOMIYOLIZ", "tricholoma_frondosae")
+put("PANTERIN", "amanita_regalis")
+put("ERGOT", "claviceps_purpurea")
 put("GI_AGIR", "entoloma_sinuatum tricholoma_pardinum omphalotus_olearius chlorophyllum_molybdites rubroboletus_satanas")
 
 # --- Kontrol listesi, fark tablosu, koku/tat/renk değişimi ---

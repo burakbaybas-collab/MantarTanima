@@ -697,3 +697,305 @@ xerula_pudens	Xerula pudens		EDIBLE_WITH_CAUTION	Kahve, kadifemsi şapka; uzun, 
 lentinellus_cochleatus	Lentinellus cochleatus		INEDIBLE	Kahve-pembe, huni-kulak biçimli şapka; testere dişli lameller; anason kokusu.	Lentinellus türleri	Sonbahar	Yapraklı ağaç kütükleri	Beyaz		
 armillaria_cepistipes	Armillaria cepistipes		EDIBLE_WITH_CAUTION	Sarı-kahve, ince kahve pullu şapka; ince, kolay yırtılan halka.	Armillaria mellea; Galerina marginata	Sonbahar	Yapraklı ve iğne yapraklı ağaçlar, kümeler halinde	Beyaz	Çiğ veya az pişmiş zehirlidir; iyi pişirilmelidir.	
 clavariadelphus_truncatus	Clavariadelphus truncatus	Şekerlice Mantarı	EDIBLE	Sarı-turuncu, tepesi düz kesik lobut biçimli.	Clavariadelphus pistillaris	Sonbahar	İğne yapraklı ormanlar	Okra	Tatlımsı tadı vardır.	
+morchella_tridentina	Morchella tridentina		EDIBLE_WITH_CAUTION	Krem-sarımsı, sivri koni şapka; çukurların kenarları açık renkli. Çiğ yenmez.		İlkbahar	Dağlık yerlerde iğne yapraklı ormanlar	Krem		
+morchella_semilibera	Morchella semilibera		EDIBLE_WITH_CAUTION	Küçük şapka sapın ortasına kadar etek gibi serbest; uzun, kepekli sap. Çiğ yenmez.		İlkbahar	Dişbudak, kavak ve dere kenarları	Krem		
+morchella_vulgaris	Morchella vulgaris		EDIBLE_WITH_CAUTION	Gri-kahve, düzensiz çukurlu yuvarlak şapka; içi tek boşluk. Çiğ yenmez.		İlkbahar	Yaprak döken ağaçlar, bahçe ve park	Krem		
+morchella_rufobrunnea	Morchella rufobrunnea		EDIBLE_WITH_CAUTION	Gençken gri-beyaz, yaşlanınca turuncu-kahve lekelenen şapka. Çiğ yenmez.		Kış sonu–ilkbahar	Bahçe, malç ve odun talaşı	Krem		
+morchella_steppicola	Morchella steppicola		EDIBLE_WITH_CAUTION	Kısa sap, sık ve düzensiz çukurlu, açık renkli yuvarlak şapka. Çiğ yenmez.		İlkbahar	Bozkır, açık otlak	Krem		
+morchella_deliciosa	Morchella deliciosa		EDIBLE_WITH_CAUTION	Sarımsı-gri, uzunca şapka; çukurlar dikey sıralı. Çiğ yenmez.		İlkbahar	Yaprak döken ve karışık ormanlar	Krem		
+gyromitra_gigas	Gyromitra gigas		POISONOUS	İri, sarı-kahve, beyin gibi kıvrımlı şapka; kalın beyaz sap.		İlkbahar	Dağlık iğne yapraklı ormanlarda kar erimesi sonrası	Krem		
+montagnea_arenaria	Montagnea arenaria		INEDIBLE	Kumulda biten, uzun odunsu sap, kara lamelli disk şeklinde şapka.		İlkbahar–sonbahar	Kumul ve kurak kumlu alanlar	Siyah		
+phylloscypha_phyllogena	Phylloscypha phyllogena		INEDIBLE	Kahverengi-mor tonlu, kenarı dalgalı çanak.		İlkbahar	Yaprak döken ağaçların altında toprakta	Beyaz		
+cortinarius_bolaris	Cortinarius bolaris		POISONOUS	Beyaz zemin üzerinde bakır-kırmızı pullu şapka ve sap.		Sonbahar	Kayın ve meşe altında asitli toprak	Pas kahvesi		
+pseudoplectania_nigrella	Pseudoplectania nigrella		INEDIBLE	Parlak siyah iç yüzlü küçük çanak; dışı kadifemsi.		İlkbahar	İğne yapraklı ormanda yosun arasında	Beyaz		
+sarcoscypha_austriaca	Sarcoscypha austriaca		INEDIBLE	Parlak kırmızı iç yüz, beyaz tüylü dış yüz; kısa saplı çanak.		Kış sonu–ilkbahar	Nemli ormanda çürüyen dallar	Beyaz		
+phlebia_radiata	Phlebia radiata		INEDIBLE	Turuncu-pembe, ışınsal kırışık yüzeyli kabuk şeklinde.		Sonbahar–kış	Ölü odun üzerinde	Beyaz		
+leucocoprinus_cepistipes	Leucocoprinus cepistipes		POISONOUS	Beyaz-krem, unsu pullu ince şapka; sap tabanı şişkin.		Yaz–sonbahar	Kompost, talaş, sera	Beyaz		
+helvella_monachella	Helvella monachella		POISONOUS	Siyah-kahve eyer şeklinde şapka, beyaz pürüzsüz sap. Çiğ zehirli.		İlkbahar	Kavak ve söğüt altında kumlu toprak	Beyaz		
+discina_brunnea	Discina brunnea		POISONOUS	Kahverengi, kenarı kıvrık disk; kısa kalın sap.		İlkbahar	Çürük odun, iğne yapraklı orman	Beyaz		
+sarcomyxa_serotina	Sarcomyxa serotina		EDIBLE_WITH_CAUTION	Yeşil-zeytin, yapışkan yüzeyli istiridye şekli; turuncu lameller.		Sonbahar–kış	Yaprak döken ağaç gövdeleri	Soluk sarı		
+urnula_craterium	Urnula craterium		INEDIBLE	Derin, koyu kahve-siyah kupa; kenarı yırtık.		İlkbahar	Gömülü dallar, meşe ormanı	Beyaz		
+entoloma_vernum	Entoloma vernum		POISONOUS	Gri-kahve konik şapka, pembemsi lameller.		İlkbahar	Çayır ve orman kenarı	Pembe		
+pholiota_populnea	Pholiota populnea		INEDIBLE	İri, beyaz pamuksu pullu şapka; kavak kesiklerinde.		Sonbahar	Kavak kütük ve gövdeleri	Kahverengi		
+panaeolus_antillarum	Panaeolus antillarum		POISONOUS	Beyaz-krem, düzgün yüzeyli şapka; benekli siyah lameller.		Yaz–sonbahar	Gübre	Siyah		
+nectria_cinnabarina	Nectria cinnabarina		INEDIBLE	Ölü dallarda pembe-kırmızı küçük pustüller.		Tüm yıl	Ölü ince dallar	Beyaz		
+tricholoma_pessundatum	Tricholoma pessundatum		POISONOUS	Kızıl kahve, yağlı görünümlü, damla lekeli şapka; un kokulu.		Sonbahar	Çam altında	Beyaz		
+amanita_vittadinii	Amanita vittadinii		POISONOUS	Beyaz şapkada dik, sivri pullar; sapta halka; açık alanlarda.		İlkbahar–sonbahar	Çayır ve tarla kenarları	Beyaz		
+russula_brevipes	Russula brevipes		INEDIBLE	İri, beyaz, huni şeklinde şapka; kısa sap.		Yaz–sonbahar	İğne yapraklı ormanlar	Beyaz–krem		
+guepiniopsis_alpina	Guepiniopsis alpina		INEDIBLE	Parlak sarı-turuncu, kadeh şeklinde küçük jöle mantar.		İlkbahar	Dağlık bölgelerde iğne yapraklı odun	Beyaz		
+tricholoma_fulvum	Tricholoma fulvum		INEDIBLE	Kahverengi yapışkan şapka, sarımsı lameller; un kokusu.		Sonbahar	Huş altında	Beyaz		
+tricholoma_albobrunneum	Tricholoma albobrunneum		INEDIBLE	Kahve, lifli şapka, beyaz lameller.		Sonbahar	Çam ormanı	Beyaz		
+galerina_hypnorum	Galerina hypnorum		POISONOUS	Çok küçük, bal sarısı çan şapka; yosun arasında.		Sonbahar	Yosun	Pas kahvesi		
+helvella_spadicea	Helvella spadicea		POISONOUS	Kahve-siyah eyer şapka, beyaz düz sap. Çiğ zehirli.		İlkbahar	Kumlu topraklar	Beyaz		
+cyclocybe_cylindracea	Cyclocybe cylindracea		EDIBLE	Krem-kahve şapka, sapta halka; kavak ve söğüt üzerinde demet.		İlkbahar–sonbahar	Kavak ve söğüt kütükleri	Kahverengi		
+hygrocybe_chlorophana	Hygrocybe chlorophana		INEDIBLE	Limon sarısı, yapışkan, mum gibi parlak şapka.		Sonbahar	Gübrelenmemiş çayırlar	Beyaz		
+tricholoma_caligatum	Tricholoma caligatum		EDIBLE_WITH_CAUTION	Kahve pullu şapka, sapta çizme gibi pullu kılıf.		Sonbahar	Akdeniz çam ormanları	Beyaz		
+polyporus_squamosus	Polyporus squamosus		EDIBLE_WITH_CAUTION	Büyük yelpaze, kahve pullu şapka; altta gözenekler. Gençken yenir.		İlkbahar–yaz	Yaprak döken ağaç gövdeleri	Beyaz		
+amanita_regalis	Amanita regalis		POISONOUS	Kahverengi şapka üzerinde sarımsı-beyaz pullar.		Yaz–sonbahar	Ladin ve huş ormanı	Beyaz		
+amanita_porphyria	Amanita porphyria		POISONOUS	Gri-kahve-mor şapka, sapta gri halka, kenarlı soğanlı taban.		Yaz–sonbahar	İğne yapraklı orman	Beyaz		
+marasmius_siccus	Marasmius siccus		INEDIBLE	Küçük turuncu-pembe, çizgili şemsiye şapka, kıl gibi sap.		Yaz–sonbahar	Yaprak çöpü	Beyaz		
+psathyrella_uliginicola	Psathyrella uliginicola		INEDIBLE	Kahve, kırılgan şapka; dere kenarında demet.		İlkbahar	Islak orman zemini	Mor-kahve		
+jackrogersella_multiformis	Jackrogersella multiformis		INEDIBLE	Odun üzerinde kızıl-kahve, sonra siyah yumrular.		Tüm yıl	Ölü huş ve kızılağaç	Kahverengi		
+conocybe_tenera	Conocybe tenera		POISONOUS	Pas kahvesi, ince koni şapka, uzun kırılgan sap.		Yaz–sonbahar	Çimenlik	Pas kahvesi		
+claviceps_purpurea	Claviceps purpurea	Çavdar Mahmuzu	POISONOUS	Tahıl başaklarında siyah boynuz şeklinde sklerot. Çok zehirli (ergotizm).		Yaz	Çavdar ve buğday başakları	—		
+galerina_vittiformis	Galerina vittiformis		POISONOUS	Küçük turuncu-kahve şapka, ince sap; yosun arasında.		Sonbahar	Yosun	Pas kahvesi		
+pholiota_flammans	Pholiota flammans		INEDIBLE	Parlak sarı, kıvrık pullu şapka ve sap.		Sonbahar	İğne yapraklı ağaç kütükleri	Kahverengi		
+arrhenia_chlorocyanea	Arrhenia chlorocyanea		INEDIBLE	Çok küçük, mavi-yeşil huni şapka.		İlkbahar	Yosunlu açık alanlar	Beyaz		
+suillus_grevillei	Suillus grevillei		EDIBLE_WITH_CAUTION	Parlak sarı-turuncu, yapışkan şapka; sapta halka.		Yaz–sonbahar	Melez (Larix) altında	Kahverengi		
+pseudosperma_sororium	Pseudosperma sororium		POISONOUS	Sarı-kahve, ışınsal lifli konik şapka.		Yaz–sonbahar	Yaprak döken orman	Kahverengi		
+pholiota_squarrosoides	Pholiota squarrosoides		EDIBLE_WITH_CAUTION	Krem şapka üzerinde dik kahve pullar; yapışkan zemin.		Sonbahar	Yaprak döken ağaç gövdeleri	Kahverengi		
+cortinarius_obtusus	Cortinarius obtusus		POISONOUS	Küçük, higrofan, kahve şapka; iyot kokusu.		Sonbahar	İğne yapraklı orman	Pas kahvesi		
+panus_neostrigosus	Panus neostrigosus		INEDIBLE	Mor-kahve, kıllı, deri gibi huni şapka.		Yaz–sonbahar	Yaprak döken ağaç odunu	Beyaz		
+dumontinia_tuberosa	Dumontinia tuberosa		INEDIBLE	Kahve saplı küçük çanak; anemon yumrusundan çıkar.		İlkbahar	Orman anemonu bulunan yerler	Beyaz		
+agrocybe_cylindracea	Agrocybe cylindracea		EDIBLE	Krem-kahve şapka, sapta halka; kavak ve söğütte demet.		İlkbahar–sonbahar	Kavak ve söğüt	Kahverengi		
+byssonectria_fusispora	Byssonectria fusispora		INEDIBLE	Küçük turuncu diskler; hayvan idrarı izi olan yerlerde.		İlkbahar	Kar erimesi sonrası orman zemini	Beyaz		
+sarcosoma_globosum	Sarcosoma globosum		INEDIBLE	Siyah, içi jöle dolu, fıçı şeklinde.		İlkbahar	Yaşlı ladin ormanı yosunları	Beyaz		
+podofomes_mollis	Podofomes mollis		INEDIBLE	Krem-kahve, yumuşak raf; kesince kırmızılaşır.		Sonbahar	İğne yapraklı odun	Beyaz		
+cortinarius_subtortus	Cortinarius subtortus		POISONOUS	Zeytin-sarı yapışkan şapka; tütsü kokusu.		Sonbahar	Ladin ormanı	Pas kahvesi		
+pycnoporellus_fulgens	Pycnoporellus fulgens		INEDIBLE	Parlak turuncu, yumuşak raf.		Sonbahar	Ladin kütükleri	Beyaz		
+entoloma_undatum	Entoloma undatum		POISONOUS	Küçük, gri-kahve, ortası çukur halkalı şapka.		Yaz–sonbahar	Çayır ve orman kenarı	Pembe		
+neoantrodia_serialis	Neoantrodia serialis		INEDIBLE	Beyaz-krem, sıralı küçük raflar.		Tüm yıl	İğne yapraklı odun	Beyaz		
+calvatia_cyathiformis	Calvatia cyathiformis		EDIBLE_WITH_CAUTION	İri top; olgunlukta içi mor-kahve. Yalnız içi bembeyazken yenir.		Yaz–sonbahar	Çayır ve otlak	Mor-kahve		
+byssonectria_terrestris	Byssonectria terrestris		INEDIBLE	Küçük turuncu-sarı diskler.		İlkbahar	İğne yapraklı orman zemini	Beyaz		
+chlorophyllum_olivieri	Chlorophyllum olivieri		EDIBLE_WITH_CAUTION	Zeytin-kahve pullu iri şapka; kesince turuncu-kırmızılaşır. Bazı kişilerde rahatsızlık yapar.		Sonbahar	Orman ve park	Beyaz		
+trametes_cinnabarina	Trametes cinnabarina		INEDIBLE	Parlak turuncu-kırmızı, sert raf.		Tüm yıl	Ölü yaprak döken odun	Beyaz		
+psilocybe_cyanescens	Psilocybe cyanescens		POISONOUS	Karamel rengi, kenarı dalgalı şapka; ezilince maviye döner. Psikoaktif.		Sonbahar	Talaş, malç	Mor-kahve		
+caloboletus_radicans	Caloboletus radicans		INEDIBLE	Açık gri şapka, sarı gözenekler; maviye döner, çok acı.		Yaz–sonbahar	Meşe ve kayın	Zeytin-kahve		
+tricholoma_argyraceum	Tricholoma argyraceum		EDIBLE_WITH_CAUTION	Gri, ince pullu şapka; un kokusu.		Sonbahar	Yaprak döken ve karışık orman	Beyaz		
+hypoxylon_fuscum	Hypoxylon fuscum		INEDIBLE	Ölü dallarda mor-kahve küçük yumrular.		Tüm yıl	Fındık ve kızılağaç dalları	Kahverengi		
+thaxterogaster_purpurascens	Thaxterogaster purpurascens		INEDIBLE	Kahve şapka, mor lameller ve sap; dokununca morarır.		Sonbahar	Karışık orman	Pas kahvesi		
+craterellus_calicornucopioides	Craterellus calicornucopioides		EDIBLE	Gri-siyah, boru şeklinde huni; altı düz gri.		Yaz–sonbahar	Kayın ve meşe ormanı	Beyaz		
+tricholoma_focale	Tricholoma focale		INEDIBLE	Turuncu-kahve şapka, sapta kırmızımsı kuşaklı halka.		Sonbahar	Çam ormanı	Beyaz		
+panus_conchatus	Panus conchatus		INEDIBLE	Mor tonlu, deri gibi kabuk şekilli şapka.		Yaz–sonbahar	Yaprak döken odun	Beyaz		
+entoloma_clandestinum	Entoloma clandestinum		POISONOUS	Küçük, gri-kahve, ince şapka.		Sonbahar	Yosunlu orman	Pembe		
+cortinarius_armillatus	Cortinarius armillatus		POISONOUS	İri, kahve-turuncu şapka; sapta kırmızı kuşaklar.		Sonbahar	Huş altında	Pas kahvesi		
+tricholoma_squarrulosum	Tricholoma squarrulosum		EDIBLE_WITH_CAUTION	Gri-kahve pullu şapka ve sap; un kokusu.		Sonbahar	Kireçli yaprak döken orman	Beyaz		
+rhodocollybia_maculata	Rhodocollybia maculata		INEDIBLE	Beyaz şapkada pas kırmızısı lekeler; acı.		Yaz–sonbahar	İğne yapraklı orman	Krem-pembe		
+russula_violeipes	Russula violeipes		EDIBLE_WITH_CAUTION	Sarı-yeşil şapka, sapta mor ton.		Yaz–sonbahar	Yaprak döken orman	Krem		
+cortinarius_decipiens	Cortinarius decipiens		POISONOUS	Küçük, kahve-siyah tepeli higrofan şapka.		Sonbahar	Islak orman	Pas kahvesi		
+pluteus_umbrosus	Pluteus umbrosus		INEDIBLE	Kahve, kadifemsi şapka; lamel kenarları kahve.		Yaz–sonbahar	Yaprak döken odun	Pembe		
+inocybe_flocculosa	Inocybe flocculosa		POISONOUS	Kahve, yünlü-lifli küçük şapka.		Yaz–sonbahar	Karışık orman	Kahverengi		
+entoloma_aprile	Entoloma aprile		POISONOUS	Gri-kahve konik şapka, pembemsi lameller.		İlkbahar	Yaprak döken orman	Pembe		
+phyllotopsis_nidulans	Phyllotopsis nidulans		INEDIBLE	Turuncu, tüylü yelpaze şapka; kötü kokulu.		Sonbahar	Ölü odun	Pembe		
+helvella_fibrosa	Helvella fibrosa		POISONOUS	Gri-kahve kadeh, kaburgasız sap. Çiğ zehirli.		Yaz–sonbahar	Nemli orman	Beyaz		
+polyporus_lepideus	Polyporus lepideus		INEDIBLE	Kahve pullu şapka, beyaz gözenekler.		İlkbahar	Ölü dallar	Beyaz		
+phellopilus_nigrolimitatus	Phellopilus nigrolimitatus		INEDIBLE	Kahve, odunsu kabuk; kesitte siyah çizgiler.		Tüm yıl	Ladin kütükleri	Kahverengi		
+helvella_corium	Helvella corium		POISONOUS	Siyah, küçük kadeh; kumlu yerlerde.		Yaz	Kum ve kumul	Beyaz		
+tricholoma_triste	Tricholoma triste		INEDIBLE	Gri, keçemsi küçük şapka.		Sonbahar	İğne yapraklı orman	Beyaz		
+crepidotus_applanatus	Crepidotus applanatus		INEDIBLE	Beyaz-krem, yassı, saplı olmayan küçük kulak.		Yaz–sonbahar	Ölü odun	Kahverengi		
+hypoxylon_rubiginosum	Hypoxylon rubiginosum		INEDIBLE	Pas-kahve kabuk şeklinde odun mantarı.		Tüm yıl	Ölü dişbudak odunu	Kahverengi		
+tricholoma_imbricatum	Tricholoma imbricatum		EDIBLE_WITH_CAUTION	Kahve, keçemsi-pullu iri şapka.		Sonbahar	Çam ormanı	Beyaz		
+thaxterogaster_scaurus	Thaxterogaster scaurus		INEDIBLE	Zeytin-kahve şapka, yeşilimsi lameller.		Sonbahar	İğne yapraklı orman	Pas kahvesi		
+helvella_solitaria	Helvella solitaria		POISONOUS	Gri-kahve kadeh, uzun sap. Çiğ zehirli.		İlkbahar–yaz	Orman kenarı	Beyaz		
+trametes_pubescens	Trametes pubescens		INEDIBLE	Krem-sarı, kadifemsi ince raf.		Tüm yıl	Ölü yaprak döken odun	Beyaz		
+chlorophyllum_agaricoides	Chlorophyllum agaricoides		INEDIBLE	Hiç açılmayan, yumurta şeklinde beyaz şapka.		Yaz–sonbahar	Çayır ve otlak	Kahverengi		
+strobilurus_stephanocystis	Strobilurus stephanocystis		EDIBLE_WITH_CAUTION	Küçük krem şapka; gömülü çam kozalağında.		İlkbahar	Çam kozalakları	Beyaz		
+galerina_graminea	Galerina graminea		POISONOUS	Çok küçük turuncu-kahve şapka; çimenlikte.		Yaz–sonbahar	Çimenlik	Pas kahvesi		
+helvella_fusca	Helvella fusca		POISONOUS	Koyu kahve eyer şapka, beyaz sap. Çiğ zehirli.		İlkbahar	Kavak altında	Beyaz		
+ischnoderma_resinosum	Ischnoderma resinosum		INEDIBLE	Kahve, kadifemsi raf; kenarından damla çıkarır.		Sonbahar	Yaprak döken odun	Beyaz		
+agaricus_bernardii	Agaricus bernardii		EDIBLE_WITH_CAUTION	Beyaz, çatlaklı şapka; kesince kırmızılaşır; tuzlu topraklarda.		Yaz–sonbahar	Yol kenarı, tuzlu toprak	Kahverengi		
+cortinarius_saniosus	Cortinarius saniosus		POISONOUS	Küçük sarı-kahve şapka, sapta sarı kuşak.		Sonbahar	Söğüt ve kavak altında	Pas kahvesi		
+agaricus_iodosmus	Agaricus iodosmus		POISONOUS	Beyaz, dokununca sararır; iyot kokusu.		Yaz–sonbahar	Orman ve park	Kahverengi		
+cortinarius_caerulescens	Cortinarius caerulescens		INEDIBLE	Mavi-mor şapka ve lameller, kenarlı soğanlı taban.		Sonbahar	Kayın altında kireçli toprak	Pas kahvesi		
+clitocybe_mediterranea	Clitocybe mediterranea		POISONOUS	Beyaz-gri, unsu huni şapka.		Sonbahar	Akdeniz çalılıkları	Beyaz		
+gymnopilus_luteofolius	Gymnopilus luteofolius		INEDIBLE	Kırmızımsı pullu şapka, sarı lameller; acı.		Yaz–sonbahar	İğne yapraklı odun	Pas turuncu		
+irpiciporus_pachyodon	Irpiciporus pachyodon		INEDIBLE	Beyaz-krem raf, altında yassı dişler.		Yaz–sonbahar	Yaprak döken ağaç	Beyaz		
+bjerkandera_fumosa	Bjerkandera fumosa		INEDIBLE	Krem-gri, kalın yumuşak raf.		Tüm yıl	Söğüt ve kavak odunu	Beyaz		
+entoloma_hebes	Entoloma hebes		POISONOUS	Gri-kahve küçük şapka.		İlkbahar	Çayır	Pembe		
+hydnum_umbilicatum	Hydnum umbilicatum		EDIBLE	Turuncu-kahve, ortası göbekli şapka; altta dikenler.		Yaz–sonbahar	Nemli iğne yapraklı orman	Beyaz		
+favolaschia_claudopus	Favolaschia claudopus		INEDIBLE	Parlak turuncu, petek gözenekli küçük yelpaze.		Tüm yıl	Ölü odun	Beyaz		
+hygrocybe_miniata	Hygrocybe miniata		INEDIBLE	Küçük, parlak kırmızı, kuru şapka.		Yaz–sonbahar	Çayır ve yosun	Beyaz		
+hygrophorus_erubescens	Hygrophorus erubescens		EDIBLE_WITH_CAUTION	Beyaz-pembe, kırmızı benekli şapka.		Sonbahar	İğne yapraklı orman	Beyaz		
+tricholoma_cingulatum	Tricholoma cingulatum		EDIBLE_WITH_CAUTION	Gri, ince pullu şapka; sapta yünlü halka.		Sonbahar	Söğüt altında	Beyaz		
+lepiota_lilacea	Lepiota lilacea		POISONOUS	Küçük, mor-kahve pullu şapka.		Yaz–sonbahar	Kompost, orman kenarı	Beyaz		
+xylaria_polymorpha	Xylaria polymorpha		INEDIBLE	Siyah, parmak şeklinde sert yapılar.		Tüm yıl	Gömülü odun, kütük	Siyah		
+leucopaxillus_gentianeus	Leucopaxillus gentianeus		INEDIBLE	Kahve şapka, krem lameller; çok acı.		Sonbahar	İğne yapraklı orman	Beyaz		
+cortinarius_alboviolaceus	Cortinarius alboviolaceus		INEDIBLE	Gümüşi-leylak ipeksi şapka ve sap.		Sonbahar	Kayın ve huş	Pas kahvesi		
+tricholoma_aurantium	Tricholoma aurantium		INEDIBLE	Turuncu, yapışkan şapka; sapta turuncu kuşaklar.		Sonbahar	İğne yapraklı orman	Beyaz		
+russula_torulosa	Russula torulosa		INEDIBLE	Mor-bordo şapka, sapta mor ton; acı.		Sonbahar	Çam ormanı	Krem		
+inosperma_adaequatum	Inosperma adaequatum		POISONOUS	Kırmızımsı kahve, lifli şapka.		Yaz–sonbahar	Yaprak döken orman	Kahverengi		
+fuscoporia_ferrea	Fuscoporia ferrea		INEDIBLE	Pas kahvesi, ince kabuk şeklinde.		Tüm yıl	Yaprak döken odun	Kahverengi		
+armillaria_sinapina	Armillaria sinapina		EDIBLE_WITH_CAUTION	Sarı-kahve, pullu şapka; demet halinde.		Sonbahar	Karışık orman	Beyaz		
+marasmius_epiphyllus	Marasmius epiphyllus		INEDIBLE	Çok küçük beyaz şapka; çürüyen yapraklarda.		Sonbahar	Yaprak çöpü	Beyaz		
+panellus_mitis	Panellus mitis		INEDIBLE	Küçük beyaz, jelatinimsi yelpaze.		Sonbahar	İğne yapraklı dallar	Beyaz		
+russula_cerolens	Russula cerolens		INEDIBLE	Kahve-sarı, kenarı çizgili şapka; kötü kokulu.		Yaz–sonbahar	Yaprak döken orman	Krem		
+lepiota_ignivolvata	Lepiota ignivolvata		POISONOUS	Krem şapka, sap tabanında turuncu halka çizgisi.		Sonbahar	Orman	Beyaz		
+ganoderma_australe	Ganoderma australe		INEDIBLE	Büyük, sert, kahve raf; üstü kakao tozu gibi spor kaplı.		Tüm yıl	Yaprak döken ağaç gövdeleri	Kahverengi		
+leccinum_versipelle	Leccinum versipelle		EDIBLE_WITH_CAUTION	Turuncu şapka, sapta siyah pullar; kesince morarıp kararır. İyi pişirilmeli.		Yaz–sonbahar	Huş altında	Kahverengi		
+microstoma_protractum	Microstoma protractum		INEDIBLE	Kırmızı, ağzı yıldız gibi açılan kadeh; beyaz tüylü sap.		İlkbahar	Gömülü dallar	Beyaz		
+entoloma_mougeotii	Entoloma mougeotii		POISONOUS	Gri-mavi, ince pullu şapka.		Yaz–sonbahar	Çayır	Pembe		
+mycena_acicula	Mycena acicula		INEDIBLE	Çok küçük, parlak turuncu şapka, sarı sap.		Yaz–sonbahar	Nemli orman, dal parçaları	Beyaz		
+conocybe_deliquescens	Conocybe deliquescens		POISONOUS	Kahve, ince, çabuk eriyen şapka.		Yaz	Çimenlik	Pas kahvesi		
+agaricus_impudicus	Agaricus impudicus		POISONOUS	Kahve pullu şapka; hoş olmayan kokulu.		Sonbahar	İğne yapraklı orman	Kahverengi		
+picipes_badius	Picipes badius		INEDIBLE	Parlak kestane şapka, sap tabanı siyah.		Yaz–sonbahar	Yaprak döken odun	Beyaz		
+hydnellum_aurantiacum	Hydnellum aurantiacum		INEDIBLE	Turuncu-kahve, mantar gibi sert, altta dikenler.		Sonbahar	İğne yapraklı orman	Kahverengi		
+cortinarius_vernus	Cortinarius vernus		POISONOUS	Kahve, higrofan küçük şapka; ilkbaharda.		İlkbahar	Yaprak döken orman	Pas kahvesi		
+inosperma_maculatum	Inosperma maculatum		POISONOUS	Kahve lifli konik şapka, ortası beyaz örtülü.		Yaz–sonbahar	Yaprak döken orman	Kahverengi		
+clitopilus_hobsonii	Clitopilus hobsonii		INEDIBLE	Çok küçük beyaz yelpaze; çürük odunda.		Yaz–sonbahar	Çürük odun	Pembe		
+panaeolus_cinctulus	Panaeolus cinctulus		POISONOUS	Kahve, kuruyunca kenarında koyu kuşak. Psikoaktif.		Yaz–sonbahar	Gübre, kompost	Siyah		
+phlegmacium_triumphans	Phlegmacium triumphans		INEDIBLE	İri, sarı-turuncu yapışkan şapka; sapta kuşaklar.		Sonbahar	Huş altında	Pas kahvesi		
+deconica_coprophila	Deconica coprophila		INEDIBLE	Küçük, yapışkan, kahve şapka.		Yaz–sonbahar	Gübre	Mor-kahve		
+hohenbuehelia_petaloides	Hohenbuehelia petaloides		EDIBLE_WITH_CAUTION	Kahve-gri, kaşık şeklinde, saplı.		Sonbahar	Gömülü odun, talaş	Beyaz		
+trametopsis_cervina	Trametopsis cervina		INEDIBLE	Kahve-krem, yırtık gözenekli raf.		Yaz–sonbahar	Kayın odunu	Beyaz		
+pleurotus_calyptratus	Pleurotus calyptratus		EDIBLE	Gri-kahve, gençken zarla örtülü istiridye.		İlkbahar	Kavak gövdeleri	Beyaz		
+russula_grisea	Russula grisea		EDIBLE	Gri-mor-yeşil karışık şapka, krem lameller.		Yaz–sonbahar	Kayın ve meşe	Krem		
+scleroderma_cepa	Scleroderma cepa		POISONOUS	Kahve, düz kabuklu top; içi siyah-mor.		Yaz–sonbahar	Orman kenarı, kumlu toprak	Kahverengi		
+tricholoma_inamoenum	Tricholoma inamoenum		INEDIBLE	Beyaz-krem şapka; havagazı kokusu.		Sonbahar	Ladin ormanı	Beyaz		
+russula_claroflava	Russula claroflava		EDIBLE	Parlak sarı şapka; et kesilince grileşir.		Yaz–sonbahar	Huş altında nemli yerler	Krem		
+entoloma_incanum	Entoloma incanum		POISONOUS	Küçük, zeytin-yeşil şapka, yeşil sap; fare kokusu.		Yaz–sonbahar	Kireçli çayırlar	Pembe		
+trametes_trogii	Trametes trogii		INEDIBLE	Krem, kaba tüylü raf, iri gözenekler.		Tüm yıl	Kavak ve söğüt	Beyaz		
+conocybe_arrhenii	Conocybe arrhenii		POISONOUS	Kahve şapka, sapta halka. Amatoksin içerebilir.		Yaz–sonbahar	Orman kenarı, bahçe	Pas kahvesi		
+tricholoma_stiparophyllum	Tricholoma stiparophyllum		INEDIBLE	Beyaz-krem şapka; keskin kötü koku.		Sonbahar	Huş altında	Beyaz		
+tricholoma_sciodes	Tricholoma sciodes		POISONOUS	Gri, lifli konik şapka; acı tat.		Sonbahar	Kayın altında	Beyaz		
+leucocoprinus_brebissonii	Leucocoprinus brebissonii		POISONOUS	Beyaz şapka, ortası koyu kahve, siyah pullu.		Yaz–sonbahar	Orman çöpü	Beyaz		
+cortinarius_casimirii	Cortinarius casimirii		POISONOUS	Küçük kahve şapka, mor tonlu sap.		Sonbahar	Orman	Pas kahvesi		
+russula_albonigra	Russula albonigra		INEDIBLE	Beyaz şapka, dokununca doğrudan kararır.		Yaz–sonbahar	Orman	Beyaz		
+entoloma_rhodocylix	Entoloma rhodocylix		INEDIBLE	Küçük, kahve, huni şapka.		Sonbahar	Çürük odun	Pembe		
+plectania_melastoma	Plectania melastoma		INEDIBLE	Siyah kadeh, kenarında turuncu granüller.		İlkbahar	Çürük dallar	Beyaz		
+cortinarius_sanguineus	Cortinarius sanguineus		POISONOUS	Tamamen koyu kan kırmızısı küçük mantar.		Sonbahar	İğne yapraklı orman	Pas kahvesi		
+inocybe_insinuata	Inocybe insinuata		POISONOUS	Kahve, lifli şapka.		Sonbahar	Yaprak döken orman	Kahverengi		
+polyporus_lipsiensis	Polyporus lipsiensis		INEDIBLE	Kahve, ince yelpaze; beyaz gözenekler.		Yaz–sonbahar	Ölü dallar	Beyaz		
+inosperma_lanatodiscum	Inosperma lanatodiscum		POISONOUS	Krem-kahve, ortası yünlü şapka.		Yaz–sonbahar	Orman kenarı	Kahverengi		
+cortinarius_lividoochraceus	Cortinarius livido-ochraceus		POISONOUS	Sarı-kahve yapışkan şapka, mor-beyaz sap.		Sonbahar	Kayın ve meşe	Pas kahvesi		
+agrocybe_dura	Agrocybe dura		INEDIBLE	Beyaz-krem, çatlaklı şapka.		İlkbahar–yaz	Çayır ve bahçe	Kahverengi		
+lactarius_pubescens	Lactarius pubescens		POISONOUS	Soluk pembe, kenarı tüylü şapka; beyaz acı süt.		Yaz–sonbahar	Huş altında	Krem		
+coprinellus_flocculosus	Coprinellus flocculosus		INEDIBLE	Gri-kahve, beyaz pamuksu pullu küçük şapka.		Yaz–sonbahar	Kompost	Siyah		
+mycena_metata	Mycena metata		INEDIBLE	Küçük, pembemsi kahve çan şapka.		Sonbahar	İğne yapraklı orman	Beyaz		
+inocybe_fuscidula	Inocybe fuscidula		POISONOUS	Gri-kahve, lifli şapka.		Yaz–sonbahar	Orman	Kahverengi		
+hygrocybe_cantharellus	Hygrocybe cantharellus		INEDIBLE	Küçük turuncu-kırmızı huni, aralıklı inen lameller.		Yaz–sonbahar	Yosunlu çayır	Beyaz		
+inocybe_lacera	Inocybe lacera		POISONOUS	Kahve, pullu-lifli küçük şapka.		Yaz–sonbahar	Kumlu topraklar	Kahverengi		
+mycena_plumipes	Mycena plumipes		INEDIBLE	Gri-kahve küçük çan; çam kozalağında.		İlkbahar	Kozalaklar	Beyaz		
+pseudoinonotus_dryadeus	Pseudoinonotus dryadeus		INEDIBLE	Krem-kahve, kalın; üzerinde damlacıklar.		Yaz–sonbahar	Yaşlı meşe dipleri	Kahverengi		
+mutinus_elegans	Mutinus elegans		INEDIBLE	Turuncu-pembe, uç kısmı koyu yeşil-kahve lekeli; kötü kokulu.		Yaz–sonbahar	Orman zemini	Zeytin		
+entoloma_byssisedum	Entoloma byssisedum		INEDIBLE	Gri-beyaz küçük kulak şekli.		Sonbahar	Çürük odun	Pembe		
+boletus_erythropus	Boletus erythropus		EDIBLE_WITH_CAUTION	Kahve kadifemsi şapka, kırmızı gözenekler ve noktalı sap; kesince hemen maviye döner. Çiğ zehirli.		Yaz–sonbahar	İğne yapraklı ve yaprak döken orman	Zeytin-kahve		
+pholiota_limonella	Pholiota limonella		INEDIBLE	Limon sarısı, yapışkan, pullu şapka.		Sonbahar	Yaprak döken ağaç	Kahverengi		
+galerina_paludosa	Galerina paludosa		POISONOUS	Küçük kahve şapka, sapta beyaz kuşaklar.		Yaz–sonbahar	Sfagnum bataklığı	Pas kahvesi		
+tricholoma_frondosae	Tricholoma frondosae		POISONOUS	Sarı şapka, sarı lameller. Kükürt sarısı kurt mantarı grubundan; kas yıkımı yapabilir.		Sonbahar	Kavak ve huş	Beyaz		
+geastrum_minimum	Geastrum minimum		INEDIBLE	Çok küçük, yıldız gibi açılan dış kabuk.		Sonbahar	Kumlu-kireçli topraklar	Kahverengi		
+rhizopogon_roseolus	Rhizopogon roseolus		INEDIBLE	Yumru şeklinde; dokununca pembeleşir.		Sonbahar	Çam altında kumlu toprak	Zeytin		
+tricholoma_arvernense	Tricholoma arvernense		INEDIBLE	Yeşil-sarı lifli şapka.		Sonbahar	Çam ormanı	Beyaz		
+inocybe_fraudans	Inocybe fraudans		POISONOUS	Leylak tonlu, lifli şapka; armut kokusu.		Sonbahar	Orman	Kahverengi		
+geopyxis_carbonaria	Geopyxis carbonaria		INEDIBLE	Küçük turuncu kadeh; yanık alanlarda.		İlkbahar–yaz	Yanmış orman zemini	Beyaz		
+ganoderma_pfeifferi	Ganoderma pfeifferi		INEDIBLE	Bakır-kahve, mumsu kaplamalı raf.		Tüm yıl	Kayın gövdeleri	Kahverengi		
+cortinarius_camphoratus	Cortinarius camphoratus		POISONOUS	Leylak-kahve şapka; keskin kötü koku.		Sonbahar	Ladin ormanı	Pas kahvesi		
+inocybe_grammata	Inocybe grammata		POISONOUS	Krem, lifli şapka, pembe tonlu sap.		Yaz–sonbahar	Orman	Kahverengi		
+agrocybe_acericola	Agrocybe acericola		INEDIBLE	Kahve şapka, sapta halka; odun parçalarında.		Yaz	Yaprak döken odun	Kahverengi		
+polyporus_brumalis	Polyporus brumalis		INEDIBLE	Kahve şapka, beyaz gözenekler, ince sap.		Kış–ilkbahar	Ölü dallar	Beyaz		
+lactarius_necator	Lactarius necator		POISONOUS	Koyu zeytin-yeşil şapka; acı beyaz süt.		Yaz–sonbahar	Huş altında	Krem		
+rhizocybe_pruinosa	Rhizocybe pruinosa		INEDIBLE	Gri-kahve, unsu huni şapka.		İlkbahar	İğne yapraklı orman	Beyaz		
+crepidotus_cesatii	Crepidotus cesatii		INEDIBLE	Beyaz, keçemsi küçük kulak.		Sonbahar	Ölü dallar	Kahverengi		
+rubroboletus_lupinus	Rubroboletus lupinus		POISONOUS	Krem-pembe şapka, kırmızı gözenekler; maviye döner.		Yaz–sonbahar	Sıcak meşe ormanları	Zeytin-kahve		
+suillus_cavipes	Suillus cavipes		EDIBLE_WITH_CAUTION	Kahve keçemsi şapka; sap içi boş.		Yaz–sonbahar	Melez altında	Zeytin		
+calvatia_booniana	Calvatia booniana		EDIBLE_WITH_CAUTION	İri, çokgen desenli beyaz top. Yalnız içi beyazken yenir.		Yaz	Kurak çayır	Kahverengi		
+armillaria_lutea	Armillaria lutea		EDIBLE_WITH_CAUTION	Kahve pullu şapka, sapta sarı halka; iyi pişirilmeli.		Sonbahar	Ağaç kökleri ve kütükleri	Beyaz		
+cerioporus_leptocephalus	Cerioporus leptocephalus		INEDIBLE	Krem-kahve şapka, sap tabanı siyah.		Yaz–sonbahar	Ölü dallar	Beyaz		
+pluteus_hongoi	Pluteus hongoi		INEDIBLE	Gri-kahve lifli şapka, pembe lameller.		Yaz–sonbahar	Çürük odun	Pembe		
+cortinarius_mucosus	Cortinarius mucosus		INEDIBLE	Turuncu-kahve, çok yapışkan şapka ve beyaz yapışkan sap.		Sonbahar	Çam ormanı	Pas kahvesi		
+entoloma_serrulatum	Entoloma serrulatum		POISONOUS	Mavi-siyah küçük şapka, lamel kenarları koyu.		Yaz–sonbahar	Çayır	Pembe		
+russula_sardonia	Russula sardonia		POISONOUS	Mor-kırmızı şapka, limon sarısı lameller; çok acı.		Sonbahar	Çam altında	Krem		
+fomitopsis_officinalis	Fomitopsis officinalis		INEDIBLE	Beyaz, at nalı şeklinde uzun yaşlı odunsu mantar; acı.		Tüm yıl	Yaşlı melez gövdeleri	Beyaz		
+parasola_auricoma	Parasola auricoma		INEDIBLE	Kahve, çizgili, ince şemsiye şapka.		Yaz–sonbahar	Çimenlik, bahçe	Siyah		
+agaricus_urinascens	Agaricus urinascens		EDIBLE	Çok iri, beyaz-krem, ince pullu şapka; badem kokusu.		Yaz–sonbahar	Çayır ve otlak	Kahverengi		
+inocybe_calospora	Inocybe calospora		POISONOUS	Küçük kahve pullu şapka.		Yaz–sonbahar	Yaprak döken orman	Kahverengi		
+russula_maculata	Russula maculata		INEDIBLE	Turuncu-kırmızı şapka, pas lekeli; acı.		Yaz–sonbahar	Kireçli yaprak döken orman	Sarı		
+hebeloma_hiemale	Hebeloma hiemale		POISONOUS	Krem-kahve şapka; turp kokusu.		Sonbahar–kış	Orman ve park	Kahverengi		
+russula_acrifolia	Russula acrifolia		INEDIBLE	Kahve-siyah şapka; et kızarıp kararır; acı lameller.		Yaz–sonbahar	Orman	Beyaz		
+thaxterogaster_leucoluteolus	Thaxterogaster leucoluteolus		INEDIBLE	Beyaz-sarı şapka ve sap.		Sonbahar	Orman	Pas kahvesi		
+amanita_echinocephala	Amanita echinocephala		POISONOUS	Beyaz şapkada sivri pullar; yeşilimsi lameller.		Yaz–sonbahar	Kireçli toprakta yaprak döken orman	Beyaz		
+inocutis_rheades	Inocutis rheades		INEDIBLE	Turuncu-kahve, tüylü raf.		Tüm yıl	Kavak gövdeleri	Kahverengi		
+hypholoma_dispersum	Hypholoma dispersum		POISONOUS	Turuncu-kahve, ince küçük şapka; acı.		Sonbahar	İğne yapraklı odun	Mor-kahve		
+inocybe_griseolilacina	Inocybe griseolilacina		POISONOUS	Gri-kahve şapka, leylak tonlu sap.		Sonbahar	Yaprak döken orman	Kahverengi		
+coprinopsis_cinerea	Coprinopsis cinerea		INEDIBLE	Gri, tüylü şapka; çabuk erir.		Yaz–sonbahar	Gübre, kompost	Siyah		
+panaeolus_acuminatus	Panaeolus acuminatus		POISONOUS	Koyu kahve konik şapka. Zehirli olabilir.		Yaz–sonbahar	Çayır	Siyah		
+psathyrella_corrugis	Psathyrella corrugis		INEDIBLE	Pembe-kahve, kenarı çizgili ince şapka.		Yaz–sonbahar	Orman zemini	Mor-kahve		
+inocybe_hirtella	Inocybe hirtella		POISONOUS	Sarı-kahve küçük şapka; acı badem kokusu.		Yaz–sonbahar	Orman	Kahverengi		
+hypholoma_radicosum	Hypholoma radicosum		POISONOUS	Sarı-kahve şapka, kök gibi uzanan sap.		Sonbahar	Gömülü iğne yapraklı odun	Mor-kahve		
+cortinarius_hemitrichus	Cortinarius hemitrichus		POISONOUS	Gri-kahve şapka, beyaz tüylerle kaplı.		Sonbahar	Huş altında	Pas kahvesi		
+inocybe_nemorosa	Inocybe nemorosa		POISONOUS	Kahve, lifli konik şapka.		Sonbahar	İğne yapraklı orman	Kahverengi		
+leucoagaricus_badhamii	Leucoagaricus badhamii		POISONOUS	Krem pullu şapka; dokununca kırmızı sonra siyah olur.		Yaz–sonbahar	Kompostlu orman zemini	Beyaz		
+coltricia_perennis	Coltricia perennis		INEDIBLE	Halka halka kahve-pas renkli, huni şeklinde ince.		Yaz–sonbahar	Kumlu topraklar, yanık alan	Kahverengi		
+russula_romellii	Russula romellii		EDIBLE	Mor-yeşil şapka, sarı lameller; tatlı.		Yaz–sonbahar	Kayın altında	Sarı		
+tricholoma_matsutake	Tricholoma matsutake	Matsutake	EDIBLE	Kahve lifli şapka, kalın sap; çok güçlü, baharatlı koku.		Sonbahar	Çam ormanı, kumlu toprak	Beyaz		
+cortinarius_malicorius	Cortinarius malicorius		POISONOUS	Zeytin-kahve şapka, turuncu sap; yeşilimsi et.		Sonbahar	İğne yapraklı orman	Pas kahvesi		
+entoloma_cetratum	Entoloma cetratum		POISONOUS	Bal-kahve, çizgili küçük şapka.		Yaz–sonbahar	İğne yapraklı orman	Pembe		
+climacodon_septentrionalis	Climacodon septentrionalis		INEDIBLE	İri, beyaz-krem kat kat raf; altta dişler.		Yaz–sonbahar	Yaşlı akçaağaç ve kayın	Beyaz		
+hygrophorus_persoonii	Hygrophorus persoonii		EDIBLE_WITH_CAUTION	Kahve-zeytin yapışkan şapka, sapta zeytin kuşaklar.		Sonbahar	Meşe altında	Beyaz		
+agaricus_crocodilinus	Agaricus crocodilinus		EDIBLE	Çok iri beyaz şapka, timsah derisi gibi çatlayan yüzey.		Yaz–sonbahar	Kıyı çayırları ve otlak	Kahverengi		
+leccinum_leucopodium	Leccinum leucopodium		EDIBLE_WITH_CAUTION	Turuncu şapka, beyaz pullu sap; kesince kararır. İyi pişirilmeli.		Yaz–sonbahar	Kavak altında	Kahverengi		
+agaricus_langei	Agaricus langei		EDIBLE	Kahve pullu şapka; et kesince kırmızılaşır.		Yaz–sonbahar	İğne yapraklı orman	Kahverengi		
+lactarius_helvus	Lactarius helvus		POISONOUS	Kahve-pembe keçemsi şapka; sulu süt, kuru çemen kokusu.		Yaz–sonbahar	Nemli iğne yapraklı orman	Krem		
+clavulinopsis_fusiformis	Clavulinopsis fusiformis		INEDIBLE	Parlak sarı, iğ şeklinde demet halinde parmaklar.		Yaz–sonbahar	Çayır	Beyaz		
+anthracobia_melaloma	Anthracobia melaloma		INEDIBLE	Küçük turuncu disk, kenarı kahve tüylü.		İlkbahar–sonbahar	Yanık alanlar	Beyaz		
+cortinarius_delibutus	Cortinarius delibutus		INEDIBLE	Sarı yapışkan şapka, mavi tonlu lameller.		Sonbahar	Huş ve kayın	Pas kahvesi		
+entoloma_bloxamii	Entoloma bloxamii		POISONOUS	Mavi-mor, etli şapka.		Sonbahar	Gübrelenmemiş çayırlar	Pembe		
+coprinopsis_strossmayeri	Coprinopsis strossmayeri		INEDIBLE	Gri, beyaz pullu şapka; çabuk erir.		Yaz–sonbahar	Kompost	Siyah		
+cortinarius_flexipes	Cortinarius flexipes		POISONOUS	Küçük, kahve şapka, sardunya kokusu.		Sonbahar	Nemli orman	Pas kahvesi		
+cystodermella_granulosa	Cystodermella granulosa		INEDIBLE	Pas-kırmızı taneli şapka ve sap.		Sonbahar	İğne yapraklı orman	Beyaz		
+entoloma_neglectum	Entoloma neglectum		INEDIBLE	Küçük, gri-kahve şapka.		Sonbahar	Çayır	Pembe		
+russula_paludosa	Russula paludosa		EDIBLE	Parlak kırmızı şapka, pembe tonlu sap.		Yaz–sonbahar	Çam ve ladin, nemli yerler	Krem		
+entoloma_sericellum	Entoloma sericellum		INEDIBLE	Beyaz, ipeksi küçük şapka.		Yaz–sonbahar	Çayır	Pembe		
+russula_odorata	Russula odorata		INEDIBLE	Mor-kahve şapka; meyvemsi koku.		Yaz–sonbahar	Yaprak döken orman	Sarı		
+leratiomyces_percevalii	Leratiomyces percevalii		INEDIBLE	Sarı-kahve şapka, sapta halka.		Sonbahar	Talaş ve malç	Mor-kahve		
+hypomyces_microspermus	Hypomyces microspermus		INEDIBLE	Boletlerin üzerini beyaz-sarı kaplayan parazit küf.		Yaz–sonbahar	Bolet mantarları üzerinde	—		
+clavaria_argillacea	Clavaria argillacea		INEDIBLE	Soluk sarı, ince parmak şeklinde.		Sonbahar	Fundalık, yosun	Beyaz		
+tricholoma_acerbum	Tricholoma acerbum		INEDIBLE	Krem-sarı, kenarı kıvrık şapka; acı.		Sonbahar	Kireçli yaprak döken orman	Beyaz		
+ramariopsis_crocea	Ramariopsis crocea		INEDIBLE	Küçük, turuncu, dallanan mercan.		Sonbahar	Orman zemini	Beyaz		
+lactarius_acerrimus	Lactarius acerrimus		INEDIBLE	Krem-sarı, zonlu iri şapka; çok acı süt.		Yaz–sonbahar	Meşe altında	Krem		
+infundibulicybe_squamulosa	Infundibulicybe squamulosa		INEDIBLE	Kahve, ince pullu huni şapka.		Sonbahar	İğne yapraklı orman	Beyaz		
+hygrocybe_reidii	Hygrocybe reidii		INEDIBLE	Turuncu-kırmızı küçük şapka; bal kokusu.		Yaz–sonbahar	Çayır	Beyaz		
+pithya_cupressina	Pithya cupressina		INEDIBLE	Küçük turuncu diskler; ardıç dallarında.		Kış–ilkbahar	Ardıç ve servi dalları	Beyaz		
+vitreoporus_dichrous	Vitreoporus dichrous		INEDIBLE	Beyaz raf, altında mor-kırmızı gözenekler.		Tüm yıl	Yaprak döken odun	Beyaz		
+cortinarius_elatior	Cortinarius elatior		EDIBLE_WITH_CAUTION	Bal-kahve çok yapışkan şapka; mor tonlu yapışkan sap.		Sonbahar	Kayın ormanı	Pas kahvesi		
+contumyces_rosellus	Contumyces rosellus		INEDIBLE	Küçük pembe huni; inen lameller.		Sonbahar	Yosunlu çayır	Beyaz		
+cortinarius_largus	Cortinarius largus		INEDIBLE	Leylak-kahve iri şapka, leylak lameller.		Sonbahar	Yaprak döken orman	Pas kahvesi		
+tricholoma_stans	Tricholoma stans		INEDIBLE	Kahve-sarı, yapışkan şapka; acı.		Sonbahar	Çam ormanı	Beyaz		
+oxyporus_corticola	Oxyporus corticola		INEDIBLE	Beyaz-krem, kabuk şeklinde gözenekli.		Tüm yıl	Ölü odun	Beyaz		
+tarzetta_catinus	Tarzetta catinus		INEDIBLE	Krem, derin çanak; kenarı tırtıklı.		Yaz–sonbahar	Kireçli orman zemini	Beyaz		
+xanthoporia_radiata	Xanthoporia radiata		INEDIBLE	Pas-sarı, ışınsal çizgili raf.		Tüm yıl	Kızılağaç	Sarı-kahve		
+inosperma_calamistratum	Inosperma calamistratum		POISONOUS	Kahve, kıvırcık pullu şapka; sap tabanı mavi-yeşil.		Sonbahar	İğne yapraklı orman	Kahverengi		
+sarcodon_squamosus	Sarcodon squamosus		INEDIBLE	İri, kahve, kiremit gibi pullu şapka; altta dikenler; acı.		Sonbahar	Çam ormanı	Kahverengi		
+lactarius_camphoratus	Lactarius camphoratus		EDIBLE_WITH_CAUTION	Kızıl kahve küçük şapka; kurutulunca çemen kokusu.		Yaz–sonbahar	İğne yapraklı orman	Krem		
+entoloma_formosum	Entoloma formosum		INEDIBLE	Sarı-kahve küçük şapka.		Yaz–sonbahar	Çayır	Pembe		
+callistosporium_luteoolivaceum	Callistosporium luteo-olivaceum		INEDIBLE	Sarı-zeytin küçük şapka.		Sonbahar	İğne yapraklı odun	Beyaz		
+pseudoboletus_parasiticus	Pseudoboletus parasiticus		INEDIBLE	Toprak topu mantarı üzerinde yaşayan küçük sarı-kahve bolet.		Yaz–sonbahar	Scleroderma üzerinde	Zeytin		
+tricholoma_aestuans	Tricholoma aestuans		INEDIBLE	Sarı-kahve şapka, sarı lameller; çok acı.		Sonbahar	İğne yapraklı orman	Beyaz		
+cortinarius_uliginosus	Cortinarius uliginosus		POISONOUS	Bakır-kırmızı küçük şapka, sarı lameller.		Yaz–sonbahar	Söğüt altında bataklık	Pas kahvesi		
+simocybe_centunculus	Simocybe centunculus		INEDIBLE	Küçük, zeytin-kahve kadifemsi şapka.		Yaz–sonbahar	Çürük odun	Kahverengi		
+gymnopilus_picreus	Gymnopilus picreus		INEDIBLE	Turuncu-kahve, koyu saplı küçük şapka; acı.		Sonbahar	İğne yapraklı odun	Pas turuncu		
+cortinarius_pholideus	Cortinarius pholideus		INEDIBLE	Kahve pullu şapka, mor lameller.		Sonbahar	Huş altında	Pas kahvesi		
+cortinarius_stillatitius	Cortinarius stillatitius		INEDIBLE	Bal-kahve yapışkan şapka, mor yapışkan sap.		Sonbahar	İğne yapraklı orman	Pas kahvesi		
+geopora_arenicola	Geopora arenicola		INEDIBLE	Kuma gömülü, krem iç yüzlü küçük çanak.		İlkbahar–sonbahar	Kumlu toprak	Beyaz		
+pyronema_omphalodes	Pyronema omphalodes		INEDIBLE	Toprağı kaplayan küçük pembe-turuncu diskler.		Yaz	Yanık toprak	Beyaz		
+geastrum_elegans	Geastrum elegans		INEDIBLE	Yıldız gibi açılan kabuk, çizgili ağız.		Sonbahar	Kumlu toprak	Kahverengi		
+phlebia_rufa	Phlebia rufa		INEDIBLE	Pembe-turuncu, kırışık kabuk.		Sonbahar–kış	Meşe odunu	Beyaz		
+mycena_capillaripes	Mycena capillaripes		INEDIBLE	Gri-pembe çan şapka, pembe lamel kenarları.		Sonbahar	Ladin ormanı	Beyaz		
+agaricus_litoralis	Agaricus litoralis		EDIBLE	Krem-kahve, etli şapka; kısa kalın sap.		Sonbahar	Kıyı ve kumlu çayır	Kahverengi		
+bolbitius_reticulatus	Bolbitius reticulatus		INEDIBLE	Mor-gri, ağsı damarlı yapışkan şapka.		Yaz–sonbahar	Çürük odun	Pas kahvesi		
+pluteus_nanus	Pluteus nanus		INEDIBLE	Küçük, kahve kadifemsi şapka.		Yaz–sonbahar	Çürük odun	Pembe		
+inocybe_sindonia	Inocybe sindonia		POISONOUS	Krem-beyaz, ipeksi lifli şapka.		Sonbahar	İğne yapraklı orman	Kahverengi		
+tricholoma_viridilutescens	Tricholoma viridilutescens		INEDIBLE	Kahve-yeşil lifli şapka, sarımsı sap.		Sonbahar	Çam ormanı	Beyaz		
+mycena_silvaenigrae	Mycena silvae-nigrae		INEDIBLE	Gri-kahve çan şapka; çam kozalaklarında.		İlkbahar	Kozalaklar	Beyaz		
+lactarius_atlanticus	Lactarius atlanticus		INEDIBLE	Turuncu-kahve küçük şapka; beyaz süt.		Sonbahar	Meşe altında	Krem		
+tricholoma_apium	Tricholoma apium		INEDIBLE	Kahve, lifli şapka; kereviz kokusu.		Sonbahar	Çam ormanı	Beyaz		
+collybiopsis_confluens	Collybiopsis confluens		INEDIBLE	Pembemsi kahve, tüylü sap; demet halinde.		Yaz–sonbahar	Yaprak çöpü	Beyaz		
+mycenastrum_corium	Mycenastrum corium		INEDIBLE	Kalın deri gibi kabuklu, yıldız gibi açılan top.		Yaz–sonbahar	Gübreli otlak	Mor-kahve		
+pseudombrophila_guldeniae	Pseudombrophila guldeniae		INEDIBLE	Küçük kahve çanak; gübrede.		İlkbahar–sonbahar	Gübre	Beyaz		
+agaricus_semotus	Agaricus semotus		EDIBLE_WITH_CAUTION	Küçük, beyaz, ortası mor-pembe şapka; anason kokusu.		Yaz–sonbahar	Orman kenarı ve park	Kahverengi		
+guepinia_helvelloides	Guepinia helvelloides		EDIBLE	Turuncu-pembe, dil ya da huni şeklinde jöle mantar.		Yaz–sonbahar	İğne yapraklı orman, kireçli toprak	Beyaz		
+suillus_pseudobrevipes	Suillus pseudobrevipes		EDIBLE_WITH_CAUTION	Kahve, yapışkan şapka; kısa sap.		Yaz–sonbahar	Çam altında	Kahverengi		
+lactarius_lignyotus	Lactarius lignyotus		INEDIBLE	Koyu kahve kadifemsi şapka; kesince pembeleşen beyaz süt.		Yaz–sonbahar	Ladin ormanı	Krem-sarı		
+russula_veternosa	Russula veternosa		INEDIBLE	Pembe-kırmızı şapka, sarı lameller; acı.		Yaz–sonbahar	Kayın altında	Sarı		
+russula_alutacea	Russula alutacea		EDIBLE	Kırmızı şapka, sarı lameller, pembe tonlu sap; tatlı.		Yaz–sonbahar	Yaprak döken orman	Sarı		
+oxyporus_populinus	Oxyporus populinus		INEDIBLE	Krem-beyaz, yosunlu, kat kat raf.		Tüm yıl	Akçaağaç ve kavak	Beyaz		
+leccinum_holopus	Leccinum holopus		EDIBLE_WITH_CAUTION	Beyaz-krem şapka, beyaz pullu sap; bataklıkta.		Yaz–sonbahar	Sfagnum bataklığında huş	Kahverengi		
+entoloma_prunuloides	Entoloma prunuloides		POISONOUS	Krem-gri şapka; un kokusu.		Yaz–sonbahar	Çayır	Pembe		
+polyporus_umbellatus	Polyporus umbellatus		EDIBLE	Çok dallı, küçük yuvarlak şapkalardan oluşan demet.		Yaz	Meşe ve kayın dipleri	Beyaz		
+pluteus_plautus	Pluteus plautus		INEDIBLE	Kahve, kadifemsi küçük şapka.		Yaz–sonbahar	Çürük odun	Pembe		
+agaricus_devoniensis	Agaricus devoniensis		EDIBLE_WITH_CAUTION	Beyaz, küçük şapka; kuma gömülü.		Yaz–sonbahar	Kumul	Kahverengi		
+xerocomus_ferrugineus	Xerocomus ferrugineus		EDIBLE_WITH_CAUTION	Kahve kadifemsi şapka, sarı gözenekler.		Yaz–sonbahar	İğne yapraklı orman	Zeytin-kahve		
+macrolepiota_excoriata	Macrolepiota excoriata		EDIBLE_WITH_CAUTION	Krem şapka, kabuğu kenarda soyulmuş gibi; sap desensiz.		Yaz–sonbahar	Çayır ve tarla	Beyaz		
+tricholoma_psammopus	Tricholoma psammopus		INEDIBLE	Kahve şapka, sapta kahve noktalar; acı.		Sonbahar	Melez altında	Beyaz		
+hygrophorus_cossus	Hygrophorus cossus		INEDIBLE	Beyaz yapışkan şapka; ağaç kurdu kokusu.		Sonbahar	Kayın altında	Beyaz		
+gloeophyllum_trabeum	Gloeophyllum trabeum		INEDIBLE	Kahve, ince, labirent gözenekli raf.		Tüm yıl	İşlenmiş odun, kiriş	Beyaz		
+conocybe_rugosa	Conocybe rugosa		DEADLY	Küçük pas-kahve şapka, sapta halka. Amatoksin içerir.		Yaz–sonbahar	Talaş, bahçe, orman kenarı	Pas kahvesi		
