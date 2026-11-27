@@ -1,0 +1,9 @@
+russula_mairei|Kayın Kusturan Mantarı|P|Parlak kırmızı şapka, beyaz lameller ve sap; çok acı. Kayın altında.|Yaz–sonbahar|Kayın ormanı|Beyaz
+butyriboletus_appendiculatus|Tereyağı Boleti|E|Kahve şapka, sarı gözenekler, sarı ağlı sap; kesince hafif maviye döner.|Yaz–sonbahar|Meşe ve kayın, kireçli toprak|Zeytin-kahve
+rubroboletus_legaliae|Pembe Şeytan Boleti|P|Pembe-kırmızımsı şapka, kırmızı gözenekler; kesince maviye döner.|Yaz–sonbahar|Sıcak meşe ve kayın ormanları|Zeytin-kahve
+imperator_rhodopurpureus|Mor Bolet|P|Mor-pembe benekli şapka, kırmızı gözenekler; kesince koyu maviye döner.|Yaz–sonbahar|Meşe ve kayın|Zeytin-kahve
+porphyrellus_porphyrosporus|Mor Sporlu Bolet|I|Koyu kahve kadifemsi şapka, kahve gözenekler; kesince kızarıp maviye döner.|Yaz–sonbahar|İğne yapraklı ve karışık orman|Mor-kahve
+aureoboletus_gentilis|Altın Gözenekli Bolet|C|Pembemsi kahve, yapışkan küçük şapka; parlak sarı gözenekler.|Yaz–sonbahar|Meşe ve kestane altında|Zeytin-kahve
+peziza_badia|Kahve Çanak Mantarı|C|Koyu kahve, dışı kırmızımsı kahve çanak. Çiğ yenmez.|Yaz–sonbahar|Kumlu-killi topraklı orman yolları|Beyaz
+podaxis_pistillaris|Çöl Mürekkep Mantarı|I|Beyaz pullu, iğ şeklinde baş, sert uzun sap; içi siyah tozlu.|Yaz|Kurak ve çöl alanları|Siyah
+flammulina_elastica|Söğüt Kış Mantarı|C|Bal-turuncu yapışkan şapka, kadifemsi koyu sap; kış mantarına çok benzer.|Sonbahar–ilkbahar|Söğüt ve kavak|Beyaz

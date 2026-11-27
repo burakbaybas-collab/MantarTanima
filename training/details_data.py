@@ -105,6 +105,7 @@ put("PSIKOAKTIF", "psilocybe_cyanescens panaeolus_antillarum panaeolus_cinctulus
 put("GIROMITRIN", "gyromitra_gigas discina_brunnea")
 put("CIG_ZEHIRLI", "helvella_monachella helvella_fibrosa helvella_corium helvella_solitaria helvella_fusca")
 put("RABDOMIYOLIZ", "tricholoma_frondosae")
+put("GI_AGIR", "rubroboletus_legaliae imperator_rhodopurpureus")
 put("PANTERIN", "amanita_regalis")
 put("ERGOT", "claviceps_purpurea")
 put("GI_AGIR", "entoloma_sinuatum tricholoma_pardinum omphalotus_olearius chlorophyllum_molybdites rubroboletus_satanas")
