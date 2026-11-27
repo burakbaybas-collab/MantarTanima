@@ -1,6 +1,12 @@
 package com.burakbaybas.mantartanima.ui
 
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.draw.alpha
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -87,7 +93,12 @@ val Edibility.style: EdibilityStyle
 
 /** Kategori simgesi: çatal-bıçak, uyarılı çatal-bıçak, çarpı çatal-bıçak, üçgen uyarı, kurukafa. */
 @Composable
-fun EdibilityIcon(edibility: Edibility, size: Dp = 24.dp, tint: Color = edibility.style.color) {
+fun EdibilityIcon(edibility: Edibility, size: Dp = 24.dp, tint: Color = edibility.style.color, blink: Boolean = false) {
+    val dangerous = edibility == Edibility.POISONOUS || edibility == Edibility.DEADLY
+    if (blink && dangerous) {
+        Box(Modifier.alpha(rememberBlinkAlpha())) { EdibilityIcon(edibility, size, tint, blink = false) }
+        return
+    }
     when (edibility) {
         Edibility.EDIBLE -> Icon(Icons.Filled.Restaurant, null, tint = tint, modifier = Modifier.size(size))
         Edibility.EDIBLE_WITH_CAUTION -> Box(Modifier.size(size)) {
@@ -111,6 +122,17 @@ fun EdibilityIcon(edibility: Edibility, size: Dp = 24.dp, tint: Color = edibilit
     }
 }
 
+/** Zehirli/ölümcül uyarı simgesinin yanıp sönmesi için saydamlık (1 → 0.2 → 1). */
+@Composable
+fun rememberBlinkAlpha(): Float {
+    val t = rememberInfiniteTransition(label = "uyari")
+    val a by t.animateFloat(
+        initialValue = 1f, targetValue = 0.2f,
+        animationSpec = infiniteRepeatable(tween(650), RepeatMode.Reverse), label = "uyari_alfa",
+    )
+    return a
+}
+
 /** Sonuç kartındaki renkli etiket. Dokunulunca tüm kategorilerin açıklaması açılır. */
 @Composable
 fun EdibilityBadge(edibility: Edibility) {
@@ -124,7 +146,7 @@ fun EdibilityBadge(edibility: Edibility) {
             .clickable { showLegend = true }
             .padding(start = 10.dp, end = 12.dp, top = 6.dp, bottom = 6.dp),
     ) {
-        EdibilityIcon(edibility, 22.dp)
+        EdibilityIcon(edibility, 22.dp, blink = true)
         Spacer(Modifier.width(8.dp))
         Text(s.label, color = s.color, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
         Spacer(Modifier.width(6.dp))

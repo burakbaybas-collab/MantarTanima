@@ -69,6 +69,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -395,7 +396,7 @@ private fun PoisoningBox(sy: Syndrome) {
             .padding(12.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Filled.Warning, null, tint = red, modifier = Modifier.size(20.dp))
+            Icon(Icons.Filled.Warning, null, tint = red, modifier = Modifier.size(20.dp).alpha(rememberBlinkAlpha()))
             Spacer(Modifier.width(8.dp))
             Text(sy.title, color = red, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleSmall)
         }
@@ -642,7 +643,7 @@ private fun VerdictBox(v: Verdict) {
     ) {
             val ic = v.icon
             if (ic != null) {
-                EdibilityIcon(ic, 34.dp, tint = v.color)
+                EdibilityIcon(ic, 34.dp, tint = v.color, blink = true)
             } else {
                 Icon(Icons.Outlined.Info, null, tint = v.color, modifier = Modifier.size(34.dp))
             }
