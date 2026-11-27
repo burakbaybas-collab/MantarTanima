@@ -30,6 +30,9 @@ on:
         default: "5e-5"
       batch:
         default: "64"
+      head_epochs:
+        description: "Yalnız son katman epoch sayısı (boş = devam eğitiminde 0, sıfırdan 1)"
+        default: ""
       min_balance:
         description: "Bu bakiyenin (USD) altındaysa başlatma"
         default: "4"
@@ -103,7 +106,7 @@ jobs:
               "PER_SPECIES": os.environ["PER_SPECIES"], "MAX_EPOCHS": os.environ["MAX_EPOCHS"],
               "MODEL": "${{ inputs.model }}", "IMG": "${{ inputs.img }}", "BATCH": "${{ inputs.batch }}",
               "INIT_FROM": "${{ inputs.init_from }}", "LR": "${{ inputs.lr }}",
-              "HEAD_EPOCHS": "${{ inputs.init_from != '' && '0' || '1' }}",
+              "HEAD_EPOCHS": "${{ inputs.head_epochs != '' && inputs.head_epochs || (inputs.init_from != '' && '0' || '1') }}",
               "HOURS": os.environ["HOURS"], "LIMIT_SPECIES": os.environ["LIMIT_SPECIES"],
               "DATA_TAG": "${{ inputs.data_tag }}",
               "DEADLINE": os.environ["DEADLINE"],

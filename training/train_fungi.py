@@ -232,8 +232,28 @@ def main():
     model.reset_classifier(len(classes))
     if args.init and os.path.exists(args.init):
         init = torch.load(args.init, map_location="cpu", weights_only=False)
-        assert init["classes"] == classes, "Başlangıç modelinin tür listesi farklı"
-        model.load_state_dict(init["state_dict"])
+        sd, old_classes = init["state_dict"], init["classes"]
+        if old_classes == classes:
+            model.load_state_dict(sd)
+        else:
+            # Tür listesi değişti (ör. yeni türler eklendi): gövde aynen, son katmanda eski türlerin
+            # satırları yeni yerlerine taşınır; yeni türler rastgele başlar.
+            head = model.get_classifier()
+            hk = [k for k in sd if sd[k].ndim >= 1 and sd[k].shape[0] == len(old_classes)]
+            body = {k: v for k, v in sd.items() if k not in hk}
+            missing, unexpected = model.load_state_dict(body, strict=False)
+            idx_old = {c: i for i, c in enumerate(old_classes)}
+            with torch.no_grad():
+                for name, prm in head.named_parameters():
+                    full = [k for k in hk if k.endswith(name)]
+                    if not full:
+                        continue
+                    src = sd[full[0]]
+                    for j, c in enumerate(classes):
+                        if c in idx_old:
+                            prm[j].copy_(src[idx_old[c]])
+            kept = sum(c in idx_old for c in classes)
+            print(f"Tür listesi farklı: {kept}/{len(classes)} türün son katmanı eski modelden aktarıldı", flush=True)
         print(f"Başlangıç ağırlıkları: {args.init} (önceki doğruluk %{init.get('accuracy', 0) * 100:.1f})", flush=True)
     model.to(DEVICE)
 
