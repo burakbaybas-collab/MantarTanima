@@ -17,7 +17,7 @@ SYNDROMES = {
                   "Şiddetli kusma, sulu ishal, karın ağrısı. 1–2 gün sonra yalancı bir düzelme olur; ardından karaciğer ve "
                   "böbrek yetmezliği gelişir. Belirtiler geç başladığı için mide yıkama zamanı geçmiş olur; erken hastane "
                   "tedavisi hayat kurtarır."),
-    "AMATOKSIN_SUPHE": ("Amatoksin içerebilir", "Bu cinste amatoksin içeren ölümcül türler var",
+    "AMATOKSIN_SUPHE": ("Karaciğere zarar veren ölümcül zehir (amatoksin) içerebilir", "Bu cinste amatoksin içeren ölümcül türler var",
                         "6–24 saat sonra", "Ölümcül amatoksin zehirlenmesi gibi değerlendirilmelidir: gecikmeli kusma ve ishal, "
                         "ardından karaciğer hasarı."),
     "ORELLANIN": ("Orellanin zehirlenmesi (ölümcül, böbrek)", "Orellanin", "2–20 gün sonra (çoğunlukla 3–7 gün)",
