@@ -23,7 +23,7 @@ SYNDROMES = {
     "ORELLANIN": ("Orellanin zehirlenmesi (ölümcül, böbrek)", "Orellanin", "2–20 gün sonra (çoğunlukla 3–7 gün)",
                   "Yoğun susuzluk, bulantı, bel ağrısı, idrarın azalması. Böbrek yetmezliği kalıcı olabilir (diyaliz, nakil). "
                   "Belirtiler çok geç başladığı için mantarla ilişkilendirilmeyebilir."),
-    "CORTINARIUS_SUPHE": ("Böbrek zehiri içerebilir", "Bu cinste orellanin içeren ölümcül türler var",
+    "CORTINARIUS_SUPHE": ("Böbreğe zarar veren zehir içerebilir", "Bu cinste orellanin içeren ölümcül türler var",
                           "Günler sonra olabilir", "Bulantı, susuzluk, idrar azalması gibi böbrek belirtileri; "
                           "orellanin zehirlenmesi gibi değerlendirilmelidir."),
     "GIROMITRIN": ("Giromitrin zehirlenmesi", "Giromitrin (monometilhidrazin)", "6–12 saat sonra",
