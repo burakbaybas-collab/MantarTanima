@@ -22,6 +22,7 @@ import time
 import numpy as np
 import timm
 import torch
+import torch.nn.functional as F
 import torch.nn as nn
 from timm.data import resolve_data_config
 from torch.utils.data import DataLoader
@@ -159,17 +160,39 @@ class ExportWrapper(nn.Module):
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-def evaluate(model, loader, n_classes):
+def evaluate(model, loader, n_classes, keep_logits=False):
     model.eval()
-    ys, ps = [], []
+    ys, ps, ls = [], [], []
     with torch.no_grad():
         for x, y in loader:
             with torch.autocast(DEVICE.type, enabled=DEVICE.type == "cuda"):
                 out = model(x.to(DEVICE, non_blocking=True))
             ps.append(out.argmax(1).cpu().numpy())
             ys.append(y.numpy())
+            if keep_logits:
+                ls.append(out.float().cpu().half())
     y, p = np.concatenate(ys), np.concatenate(ps)
+    if keep_logits:
+        return float((y == p).mean()), y, p, torch.cat(ls)
     return float((y == p).mean()), y, p
+
+
+def fit_temperature(logits, y):
+    """Sıcaklık kalibrasyonu: doğrulama setinde negatif log-olabilirliği en aza indiren T.
+    Gösterilen olasılık (softmax(logit / T)) gerçek isabetle örtüşsün diye. Sıralama değişmez."""
+    yt = torch.as_tensor(y, dtype=torch.long)
+    best_t, best_nll = 1.0, float("inf")
+    for t in [x / 100 for x in range(30, 301, 2)]:
+        nll = 0.0
+        for i in range(0, len(yt), 4096):
+            lg = logits[i:i + 4096].float().to(DEVICE) / t
+            nll += float(F.cross_entropy(lg, yt[i:i + 4096].to(DEVICE), reduction="sum"))
+        if nll < best_nll:
+            best_t, best_nll = t, nll
+    # Güvenilirlik özeti: gösterilen ortalama güven ile gerçek isabet
+    conf_before = float(torch.softmax(logits.float(), 1).max(1).values.mean())
+    conf_after = float(torch.softmax(logits.float() / best_t, 1).max(1).values.mean())
+    return best_t, conf_before, conf_after
 
 
 def main():
@@ -194,6 +217,7 @@ def main():
     ap.add_argument("--img", type=int, default=224, help="Girdi çözünürlüğü (piksel)")
     ap.add_argument("--batch", type=int, default=48)
     ap.add_argument("--lr", type=float, default=1.5e-4, help="Tam ince ayar öğrenme hızı")
+    ap.add_argument("--calibrate-only", action="store_true", help="Eğitme; --init modelinin sıcaklığını ölç")
     ap.add_argument("--init", default="", help="Eğitilmiş bir modelden (best_model.pt) başla, ör. çözünürlük artırırken")
     ap.add_argument("--no-export", action="store_true",
                     help="TFLite dışa aktarmayı atla (GPU sunucusunda; dışa aktarma export_model.py ile yapılır)")
@@ -277,6 +301,14 @@ def main():
                           persistent_workers=True, pin_memory=pin, drop_last=True)
     val_dl = DataLoader(val_ds, batch_size=args.batch * 2, shuffle=False, num_workers=workers,
                         persistent_workers=True, pin_memory=pin)
+    if args.calibrate_only:
+        acc, y_true, _, logits = evaluate(model, val_dl, len(classes), keep_logits=True)
+        t, cb, ca = fit_temperature(logits, y_true)
+        os.makedirs(args.out, exist_ok=True)
+        with open(os.path.join(args.out, "temperature.txt"), "w") as f:
+            f.write(f"{t:.2f}\n")
+        print(f"Kalibrasyon: doğruluk %{acc * 100:.1f}, ortalama güven %{cb * 100:.1f} -> T={t:.2f} ile %{ca * 100:.1f}", flush=True)
+        return
     scaler = torch.amp.GradScaler(DEVICE.type, enabled=DEVICE.type == "cuda")
 
     total = sum(counts.values())
@@ -360,7 +392,9 @@ def main():
         return
 
     model.load_state_dict(best_state)
-    acc, y_true, y_pred = evaluate(model, val_dl, len(classes))
+    acc, y_true, y_pred, val_logits = evaluate(model, val_dl, len(classes), keep_logits=True)
+    temp, conf_b, conf_a = fit_temperature(val_logits, y_true)
+    del val_logits
 
     lines = [
         "# Model doğrulama raporu (mantar modeli temelli)", "",
@@ -395,6 +429,9 @@ def main():
         f.write("\n".join(classes) + "\n")
     with open(os.path.join(args.out, "accuracy.txt"), "w") as f:
         f.write(f"{acc:.4f}\n")
+    with open(os.path.join(args.out, "temperature.txt"), "w") as f:
+        f.write(f"{temp:.2f}\n")
+    print(f"Sıcaklık kalibrasyonu: T={temp:.2f} (ortalama güven %{conf_b * 100:.1f} -> %{conf_a * 100:.1f}, doğruluk %{acc * 100:.1f})", flush=True)
     if args.no_export:
         print("Dışa aktarma atlandı (best_model.pt kaydedildi).", flush=True)
         return
@@ -435,6 +472,9 @@ def main():
         f.write("\n".join(classes) + "\n")
     with open(os.path.join(args.out, "accuracy.txt"), "w") as f:
         f.write(f"{acc:.4f}\n")
+    with open(os.path.join(args.out, "temperature.txt"), "w") as f:
+        f.write(f"{temp:.2f}\n")
+    print(f"Sıcaklık kalibrasyonu: T={temp:.2f} (ortalama güven %{conf_b * 100:.1f} -> %{conf_a * 100:.1f}, doğruluk %{acc * 100:.1f})", flush=True)
     print(f"Model: {os.path.getsize(path) / 1e6:.1f} MB, toplam süre {(time.time() - start) / 60:.0f} dk", flush=True)
 
 

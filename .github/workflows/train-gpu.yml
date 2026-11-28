@@ -33,6 +33,10 @@ on:
       head_epochs:
         description: "Yalnız son katman epoch sayısı (boş = devam eğitiminde 0, sıfırdan 1)"
         default: ""
+      calibrate_only:
+        description: "Eğitme; init_from modelinin sıcaklık kalibrasyonunu yap ve uygulamaya ekle"
+        type: boolean
+        default: false
       min_balance:
         description: "Bu bakiyenin (USD) altındaysa başlatma"
         default: "4"
@@ -106,6 +110,7 @@ jobs:
               "PER_SPECIES": os.environ["PER_SPECIES"], "MAX_EPOCHS": os.environ["MAX_EPOCHS"],
               "MODEL": "${{ inputs.model }}", "IMG": "${{ inputs.img }}", "BATCH": "${{ inputs.batch }}",
               "INIT_FROM": "${{ inputs.init_from }}", "LR": "${{ inputs.lr }}",
+              "CALIBRATE": "${{ inputs.calibrate_only && '1' || '' }}",
               "HEAD_EPOCHS": "${{ inputs.head_epochs != '' && inputs.head_epochs || (inputs.init_from != '' && '0' || '1') }}",
               "HOURS": os.environ["HOURS"], "LIMIT_SPECIES": os.environ["LIMIT_SPECIES"],
               "DATA_TAG": "${{ inputs.data_tag }}",
@@ -177,37 +182,54 @@ jobs:
           echo "----- Eğitim günlüğünün sonu -----"
           tail -n 60 sonuc/egitim.log || true
           [ -f sonuc/basarili.txt ] || { echo "Eğitim başarısız oldu."; exit 1; }
+          if [ "${{ inputs.calibrate_only }}" = "true" ]; then
+            cp sonuc/temperature.txt app/src/main/assets/temperature.txt
+            echo "Sıcaklık: $(cat app/src/main/assets/temperature.txt)" | tee -a "$GITHUB_STEP_SUMMARY"
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add app/src/main/assets/temperature.txt
+            git commit -m "Sıcaklık kalibrasyonu: T=$(cat app/src/main/assets/temperature.txt)" && git pull --rebase && git push
+            gh workflow run build-apk.yml --ref main
+            echo "SKIP_REST=1" >> "$GITHUB_ENV"
+            exit 0
+          fi
           cp sonuc/best_model.pt sonuc/per_class.json training/out/
+          [ -f sonuc/temperature.txt ] && cp sonuc/temperature.txt training/out/
           cp sonuc/rapor_fungi.md training/rapor_fungi.md
 
       - uses: actions/setup-python@v5
+        if: env.SKIP_REST != '1'
         with:
           python-version: "3.11"
           cache: pip
           cache-dependency-path: training/requirements-fungi.txt
 
       - name: Telefona uygun hale getir (TFLite)
+        if: env.SKIP_REST != '1'
         run: |
           pip install -r training/requirements-fungi.txt
           python training/export_model.py --ckpt training/out/best_model.pt --out training/out
 
       - name: Eski modelle karşılaştır
         id: compare
+        if: env.SKIP_REST != '1'
         run: |
           if python training/compare_models.py; then echo "better=true" >> "$GITHUB_OUTPUT"; else echo "better=false" >> "$GITHUB_OUTPUT"; fi
           cat training/out/karsilastirma.md >> training/rapor_fungi.md
           cat training/rapor_fungi.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Daha iyiyse uygulamaya ekle ve kaydet
-        if: ${{ !inputs.smoke }}
+        if: ${{ !inputs.smoke && env.SKIP_REST != '1' }}
         run: |
           if [ "${{ steps.compare.outputs.better }}" = "true" ]; then
+            [ -f training/out/temperature.txt ] && cp training/out/temperature.txt app/src/main/assets/
             cp training/out/model.tflite training/out/labels.txt app/src/main/assets/
             cp training/rapor_fungi.md training/rapor.md
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add training/rapor_fungi.md training/rapor.md app/src/main/assets/model.tflite app/src/main/assets/labels.txt
+          git add app/src/main/assets/temperature.txt 2>/dev/null || true
           git commit -m "GPU eğitimi sonucu (${{ steps.compare.outputs.better == 'true' && 'uygulamaya alındı' || 'alınmadı' }})" || exit 0
           git pull --rebase
           git push
@@ -219,13 +241,14 @@ jobs:
         run: gh workflow run build-apk.yml --ref main
 
       - name: Modeli her durumda yedekle (son-egitim sürümü)
-        if: ${{ !inputs.smoke && always() }}
+        if: ${{ !inputs.smoke && always() && env.SKIP_REST != '1' }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           [ -f training/out/best_model.pt ] || exit 0
           gh release view son-egitim >/dev/null 2>&1 || gh release create son-egitim --title "Son GPU eğitimi (yedek)" --notes "Uygulamaya alınsın ya da alınmasın, son eğitimin modeli." --prerelease
           F="training/out/best_model.pt training/rapor_fungi.md"
+          [ -f training/out/temperature.txt ] && F="$F training/out/temperature.txt"
           [ -f training/out/model.tflite ] && F="$F training/out/model.tflite training/out/labels.txt"
           for i in 1 2 3; do gh release upload son-egitim $F --clobber && break; sleep 15; done
 

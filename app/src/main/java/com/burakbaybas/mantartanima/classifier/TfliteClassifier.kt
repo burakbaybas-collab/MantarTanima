@@ -9,6 +9,7 @@ import java.nio.ByteOrder
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 import kotlin.math.exp
+import kotlin.math.ln
 
 /**
  * TensorFlow Lite görüntü sınıflandırıcı.
@@ -27,6 +28,11 @@ class TfliteClassifier(
     private val labels: List<String>
     private val inputWidth: Int
     private val inputHeight: Int
+
+    /** Sıcaklık kalibrasyonu (assets/temperature.txt; yoksa 1 = değişiklik yok). Sıralamayı değiştirmez. */
+    private val temperature: Float = runCatching {
+        context.assets.open("temperature.txt").bufferedReader().readText().trim().toFloat()
+    }.getOrDefault(1f).takeIf { it in 0.2f..5f } ?: 1f
 
     init {
         interpreter = Interpreter(loadModel(context, modelFile), Interpreter.Options().setNumThreads(4))
@@ -96,7 +102,10 @@ class TfliteClassifier(
     private fun runOnce(bitmap: Bitmap): FloatArray {
         val output = Array(1) { FloatArray(labels.size) }
         interpreter.run(toInputBuffer(bitmap), output)
-        return output[0].let { if (looksLikeProbabilities(it)) it else softmax(it) }
+        val raw = output[0]
+        // Kalibrasyon: logit/T ile softmax. Model olasılık veriyorsa log(p) logit yerine kullanılır.
+        val logits = if (looksLikeProbabilities(raw)) FloatArray(raw.size) { ln(raw[it].coerceAtLeast(1e-12f)) } else raw
+        return softmax(FloatArray(logits.size) { logits[it] / temperature })
     }
 
     private fun mirrored(b: Bitmap): Bitmap {

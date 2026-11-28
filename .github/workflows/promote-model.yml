@@ -41,6 +41,7 @@ jobs:
         run: |
           mkdir -p model
           gh release download "${{ inputs.source }}" -p best_model.pt -p rapor_fungi.md -D model
+          gh release download "${{ inputs.source }}" -p temperature.txt -D model || true
           ls -la model
       - uses: actions/setup-python@v5
         with:
@@ -55,11 +56,12 @@ jobs:
         run: |
           git pull --rebase
           cp model/model.tflite model/labels.txt app/src/main/assets/
+          [ -f model/temperature.txt ] && cp model/temperature.txt app/src/main/assets/ || true
           cp model/rapor_fungi.md training/rapor.md
           cp model/rapor_fungi.md training/rapor_fungi.md
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add app/src/main/assets/model.tflite app/src/main/assets/labels.txt training/rapor.md training/rapor_fungi.md
+          git add app/src/main/assets/model.tflite app/src/main/assets/labels.txt app/src/main/assets/temperature.txt 2>/dev/null; git add app/src/main/assets/model.tflite app/src/main/assets/labels.txt training/rapor.md training/rapor_fungi.md
           git commit -m "Yeni model uygulamaya alındı ($(wc -l < app/src/main/assets/labels.txt) tür)"
           git push
       - name: Yeni APK derlemesini başlat

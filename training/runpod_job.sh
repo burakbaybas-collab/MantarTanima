@@ -28,6 +28,7 @@ finish() {
   upload /work/repo/training/out/best_model.pt best_model.pt
   upload /work/repo/training/rapor_fungi.md rapor_fungi.md
   upload /work/repo/training/out/per_class.json per_class.json
+  upload /work/repo/training/out/temperature.txt temperature.txt
   echo "$status" > /work/durum.txt
   upload "$LOG" egitim.log
   upload /work/durum.txt "$status.txt"
@@ -180,6 +181,7 @@ print(next(a['id'] for a in json.load(sys.stdin)['assets'] if a['name']=='best_m
     dl "$API/releases/assets/$IID" /work/init.pt && EXTRA="--init /work/init.pt --lr $LR"
     echo "Başlangıç modeli: $INIT_FROM ($EXTRA)"
   fi
+  [ "$CALIBRATE" = "1" ] && EXTRA="$EXTRA --calibrate-only" && echo "Yalnızca sıcaklık kalibrasyonu"
   python training/train_fungi.py $EXTRA --species "$SPECIES" --df20 training/data_ft --model "$MODEL" --img "$IMG" --batch "$BATCH" \
     --limit-per-class "$PER_SPECIES" --head-epochs "${HEAD_EPOCHS:-1}" --max-epochs "$MAX_EPOCHS" --patience 4 \
     --hours "$HOURS" --final --no-export
