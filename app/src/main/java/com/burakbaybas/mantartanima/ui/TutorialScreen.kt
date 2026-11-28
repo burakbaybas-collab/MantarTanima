@@ -64,6 +64,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.burakbaybas.mantartanima.data.Edibility
 import kotlinx.coroutines.launch
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.layout.onSizeChanged
+import kotlinx.coroutines.delay
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -79,150 +87,155 @@ object Tutorial {
 }
 
 private val TGreen = Color(0xFF17502A)
-private val TText = Color(0xFF33373D)
 private val Accent = Color(0xFFFF8F00)
 
-/**
- * Bir eğitim adımı. Koordinatlar 1080x2400 ekran görüntüsü piksel cinsindendir.
- * [crop]: gösterilecek bölge, [marks]: vurgulanan öğe ve okun başladığı nokta.
- */
-private class TStep(
-    val title: String,
-    val text: String,
-    val image: String? = null,
-    val crop: Rect? = null,
-    val marks: List<Pair<Rect, Offset>> = emptyList(),
-    val extra: (@Composable () -> Unit)? = null,
-)
+/** Ekran görüntüsündeki bir öğe (1080x2400 piksel koordinatı) ve açıklaması. */
+private class Mark(val r: Rect, val text: String)
 
-private const val HOME = "home.jpg"
-private const val RESULT = "result.jpg"
+private class TPage(val title: String, val image: String, val marks: List<Mark>)
 
-private fun mark(r: Rect, from: Offset) = listOf(r to from)
+private val CROP = Rect(0f, 130f, 1080f, 2268f)  // durum çubuğu ve alt gezinme çubuğu hariç
 
-private val steps = listOf(
-    TStep("1. Fotoğraf yükleyin",
-        "Mantarın üç yüzü için üç kutu vardır: Üstten (şapka), Yandan (şapka ve sap), Alttan (lameller ya da gözenekler). \"Örnek\" resimler nasıl çekeceğinizi gösterir. \"Fotoğraf Yükle\"ye dokunup kamerayla çekin ya da galeriden seçin.",
-        HOME, Rect(0f, 700f, 1080f, 1730f), mark(Rect(40f, 990f, 1040f, 1695f), Offset(880f, 770f))),
-    TStep("2. İpuçları",
-        "Sağdaki (i) düğmesi iyi fotoğraf çekme önerilerini açar.",
-        HOME, Rect(0f, 760f, 1080f, 1400f), mark(Rect(40f, 805f, 1038f, 955f), Offset(900f, 1250f))),
-    TStep("3. Tanımla",
-        "Parantezdeki sayı kaç fotoğraf eklediğinizi gösterir (ör. 2/3). Üç fotoğraf da eklenince düğme etkinleşir ve yalnızca \"Tanımla\" yazar; basınca tanımlama başlar.",
-        HOME, Rect(0f, 1400f, 1080f, 2270f), mark(Rect(118f, 1752f, 962f, 1925f), Offset(540f, 1480f))),
-    TStep("4. Geçmiş ve yardım",
-        "Geçmiş Tanımlamalar önceki sonuçlarınızı saklar; dışa aktarabilir ya da silebilirsiniz. \"Nasıl kullanılır?\" bu rehberi tekrar açar.",
-        HOME, Rect(0f, 1400f, 1080f, 2270f),
-        listOf(Rect(216f, 1956f, 864f, 2062f) to Offset(1010f, 1740f), Rect(376f, 2102f, 704f, 2174f) to Offset(120f, 1950f))),
-    TStep("5. Sonuç",
-        "Büyük eğik yazı türün Latince adı, altındaki Türkçe adıdır. Yüzde ve çubuk modelin ne kadar emin olduğunu gösterir. Oran düşükse \"emin değil\" uyarısı çıkar; mantar tanınamazsa \"Tanınamadı\" yazar.",
-        RESULT, Rect(0f, 330f, 1080f, 1190f), mark(Rect(46f, 352f, 1034f, 772f), Offset(540f, 1080f))),
-    TStep("6. Yenilebilirlik etiketi",
-        "Etikete dokunursanız açıklaması açılır. Zehirli ve ölümcül türlerde simge yanıp söner.",
-        RESULT, Rect(0f, 1200f, 1080f, 1720f), mark(Rect(86f, 1250f, 448f, 1358f), Offset(820f, 1290f)),
-        extra = { EdibilityLegend() }),
-    TStep("7. Tür bilgileri",
-        "Aşağı kaydırınca türün tanımı, Temel Bilgiler (cins, sezon, yaşam alanı, spor izi), ayırt edici özellikler ve karıştırılabilecek türler yazar. Zehirli türlerde kırmızı bir zehirlenme kutusu ile 112 ve 114 (Zehir Danışma) arama düğmeleri çıkar.",
-        RESULT, Rect(0f, 1200f, 1080f, 2215f), mark(Rect(86f, 1370f, 996f, 2210f), Offset(860f, 1270f))),
-    TStep("Unutmayın",
-        "Mantar zehirlenmeleri ölümcül olabilir. Hiçbir mantarı yalnızca uygulamaya bakarak yemeyin; mutlaka bir uzmana gösterin.",
-        extra = {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.Warning, null, tint = Color(0xFFB3261E), modifier = Modifier.size(40.dp))
-                Spacer(Modifier.width(10.dp))
-                Text("Şüphe varsa yemeyin.", fontWeight = FontWeight.Bold, color = Color(0xFFB3261E), fontSize = 17.sp)
-            }
-        }),
+private val pages = listOf(
+    TPage("Ana sayfa", "home.jpg", listOf(
+        Mark(Rect(45f, 788f, 1035f, 940f), "Ne yapacağınızı hatırlatır. Sağdaki (i) düğmesi iyi fotoğraf çekme ipuçlarını açar."),
+        Mark(Rect(45f, 975f, 1035f, 1678f), "Mantarın üstten, yandan ve alttan fotoğrafını ekleyin. Kutuya dokunup kamerayla çekin ya da galeriden seçin."),
+        Mark(Rect(62f, 995f, 342f, 1276f), "Yeşil tik fotoğrafın eklendiğini gösterir. Köşedeki X fotoğrafı kaldırır."),
+        Mark(Rect(60f, 1458f, 344f, 1662f), "\"Değiştir\" ile fotoğrafı yenisiyle değiştirin."),
+        Mark(Rect(118f, 1720f, 962f, 1892f), "Üç fotoğraf eklenince \"Tanımla\"ya basın. Uygulama 1000 türle karşılaştırır."),
+        Mark(Rect(220f, 1926f, 860f, 2024f), "Önceki tanımlamalarınız fotoğraf, tarih ve konumla saklanır; dışa aktarabilir ya da silebilirsiniz."),
+        Mark(Rect(300f, 2058f, 780f, 2205f), "\"Nasıl kullanılır?\" bu rehberi açar. Geliştirici adına dokununca uygulama hakkındaki bilgiler açılır."),
+    )),
+    TPage("Sonuç", "sonuc1.jpg", listOf(
+        Mark(Rect(80f, 395f, 740f, 550f), "En olası tür: büyük yazı Latince adı, altındaki Türkçe adı."),
+        Mark(Rect(820f, 420f, 1005f, 615f), "Yüzde ve çubuk modelin ne kadar emin olduğunu gösterir. Düşükse \"emin değil\" uyarısı çıkar."),
+        Mark(Rect(40f, 675f, 1040f, 1050f), "Tanımlamada kullanılan sizin fotoğraflarınız."),
+        Mark(Rect(88f, 1128f, 572f, 1230f), "Yenilebilirlik etiketi. Dokununca tüm kategorilerin açıklaması açılır. Zehirli türlerde simge yanıp söner."),
+        Mark(Rect(88f, 1645f, 992f, 1955f), "Zehirli türlerde zehirlilik özeti."),
+        Mark(Rect(88f, 1978f, 992f, 2265f), "Zehirlenme kutusu: zehir, belirtilerin başlama süresi, ilk yardım ve 112 / 114 arama düğmeleri."),
+    )),
+    TPage("Tür bilgileri", "sonuc2.jpg", listOf(
+        Mark(Rect(85f, 320f, 995f, 835f), "Türü tanımaya yarayan özellikler; elinizdeki mantarla karşılaştırın."),
+        Mark(Rect(88f, 868f, 992f, 1518f), "Bu türle karıştırılabilecek türler. Altı çizili adlara dokununca o türün fotoğrafları açılır."),
+        Mark(Rect(88f, 1550f, 992f, 2265f), "Temel Bilgiler: alemden cinse sınıflandırma, sezon, yaşam alanı, spor izi, koku, tat ve renk değişimi."),
+    )),
+    TPage("Örnekler ve uyarı", "sonuc3.jpg", listOf(
+        Mark(Rect(42f, 1155f, 1038f, 1772f), "Bu türün örnek fotoğrafları. Dokununca büyür; fotoğrafçının adı ve lisansı yazar."),
+        Mark(Rect(42f, 1800f, 1038f, 2030f), "Unutmayın: hiçbir mantarı yalnızca uygulamaya bakarak yemeyin, mutlaka uzmana danışın."),
+        Mark(Rect(42f, 2058f, 1038f, 2228f), "\"Fotoğrafları değiştir\" aynı mantarı yeniden dener; \"Yeni tanıma\" baştan başlar."),
+    )),
 )
 
 @Composable
 fun TutorialScreen(onDone: () -> Unit) {
-    val pager = rememberPagerState { steps.size }
+    val pager = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
-    val last = pager.currentPage == steps.lastIndex
+    val last = pager.currentPage == pages.lastIndex
 
-    Column(Modifier.fillMaxSize().background(Color(0xFFF7FAF5)).safeDrawingPadding()) {
-        Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("${pager.currentPage + 1} / ${steps.size}", color = TGreen, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
-            if (!last) TextButton(onClick = onDone) { Text("Geç", color = TGreen, fontWeight = FontWeight.SemiBold) }
+    Column(Modifier.fillMaxSize().background(Color(0xFF1B1F1C)).safeDrawingPadding()) {
+        Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("${pager.currentPage + 1}/${pages.size}  ${pages[pager.currentPage].title}", color = Color.White,
+                fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
+            if (!last) TextButton(onClick = onDone) { Text("Geç", color = Color.White) }
             else Spacer(Modifier.height(48.dp))
         }
         HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { i ->
-            val s = steps[i]
-            Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
-                Text(s.title, fontWeight = FontWeight.ExtraBold, fontSize = 23.sp, color = TGreen, lineHeight = 27.sp)
-                Spacer(Modifier.height(10.dp))
-                if (s.image != null && s.crop != null) {
-                    Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Shot(s.image, s.crop, s.marks)
-                    }
-                    Spacer(Modifier.height(10.dp))
-                    Column(Modifier.verticalScroll(rememberScrollState())) {
-                        Text(s.text, fontSize = 15.sp, color = TText, lineHeight = 21.sp)
-                        s.extra?.let { Spacer(Modifier.height(8.dp)); it() }
-                    }
-                } else {
-                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-                        Spacer(Modifier.height(8.dp))
-                        Text(s.text, fontSize = 16.sp, color = TText, lineHeight = 23.sp)
-                        s.extra?.let { Spacer(Modifier.height(16.dp)); it() }
-                    }
-                }
+            Box(Modifier.fillMaxSize().padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
+                Shot(pages[i], active = pager.currentPage == i)
             }
         }
-        Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             if (pager.currentPage > 0) {
                 TextButton(onClick = { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } }) {
-                    Text("Geri", color = TGreen, fontWeight = FontWeight.SemiBold)
+                    Text("Geri", color = Color.White)
                 }
             }
             Spacer(Modifier.weight(1f))
             Button(
                 onClick = { if (last) onDone() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
-                colors = ButtonDefaults.buttonColors(containerColor = TGreen),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4E9A2F)),
             ) { Text(if (last) "Başla" else "İleri", fontWeight = FontWeight.Bold) }
         }
     }
 }
 
-/** Ekran görüntüsünün bir bölgesini gösterir; [hl] dışını karartır, çerçeveler ve oka işaret eder. */
+/** Tam sayfa ekran görüntüsü; vurgu, ok ve açıklama öğeden öğeye kendiliğinden geçer (dokununca hemen). */
 @Composable
-private fun Shot(name: String, crop: Rect, marks: List<Pair<Rect, Offset>>) {
+private fun Shot(page: TPage, active: Boolean) {
     val context = LocalContext.current
-    val img: ImageBitmap? = remember(name) {
-        runCatching { context.assets.open("tutorial/$name").use { BitmapFactory.decodeStream(it).asImageBitmap() } }.getOrNull()
+    val img: ImageBitmap? = remember(page.image) {
+        runCatching { context.assets.open("tutorial/${page.image}").use { BitmapFactory.decodeStream(it).asImageBitmap() } }.getOrNull()
     }
+    var step by remember(page) { mutableIntStateOf(0) }
+    LaunchedEffect(active, step) {
+        if (!active) return@LaunchedEffect
+        delay(4500)
+        step = (step + 1) % page.marks.size
+    }
+    val m = page.marks[step]
+    val anim = tween<Float>(500)
+    val l by animateFloatAsState(m.r.left, anim, label = "l")
+    val t by animateFloatAsState(m.r.top, anim, label = "t")
+    val rr by animateFloatAsState(m.r.right, anim, label = "r")
+    val b by animateFloatAsState(m.r.bottom, anim, label = "b")
     val pulse by rememberInfiniteTransition(label = "vurgu").animateFloat(
-        0.45f, 1f, infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "vurgu",
+        0.5f, 1f, infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "vurgu",
     )
-    Canvas(
+    // Açıklama, vurgulanan öğe ekranın alt yarısındaysa üstte, değilse altta durur
+    val bubbleTop = (m.r.center.y - CROP.top) / CROP.height > 0.5f
+    var bubbleH by remember { mutableIntStateOf(0) }
+
+    Box(
         Modifier
-            .aspectRatio(crop.width / crop.height, matchHeightConstraintsFirst = true)
-            .clip(RoundedCornerShape(14.dp))
-            .border(1.dp, Color(0xFFC5D3C0), RoundedCornerShape(14.dp)),
+            .aspectRatio(CROP.width / CROP.height, matchHeightConstraintsFirst = true)
+            .clip(RoundedCornerShape(16.dp))
+            .clickable { step = (step + 1) % page.marks.size },
     ) {
-        if (img == null) return@Canvas
-        val k = img.width / 1080f
-        drawImage(
-            img,
-            srcOffset = IntOffset((crop.left * k).toInt(), (crop.top * k).toInt()),
-            srcSize = IntSize((crop.width * k).toInt(), (crop.height * k).toInt()),
-            dstSize = IntSize(size.width.toInt(), size.height.toInt()),
-        )
-        if (marks.isEmpty()) return@Canvas
-        val sc = size.width / crop.width
-        fun map(o: Offset) = Offset((o.x - crop.left) * sc, (o.y - crop.top) * sc)
-        val corner = CornerRadius(14.dp.toPx())
-        val rects = marks.map { Rect(map(it.first.topLeft), map(it.first.bottomRight)) }
-        val dim = Path().apply {
-            fillType = PathFillType.EvenOdd
-            addRect(Rect(Offset.Zero, size))
-            rects.forEach { addRoundRect(RoundRect(it, corner)) }
+        Canvas(Modifier.fillMaxSize()) {
+            if (img == null) return@Canvas
+            val k = img.width / 1080f
+            drawImage(
+                img,
+                srcOffset = IntOffset((CROP.left * k).toInt(), (CROP.top * k).toInt()),
+                srcSize = IntSize((CROP.width * k).toInt(), (CROP.height * k).toInt()),
+                dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+            )
+            val sc = size.width / CROP.width
+            val r = Rect((l - CROP.left) * sc, (t - CROP.top) * sc, (rr - CROP.left) * sc, (b - CROP.top) * sc)
+            val corner = CornerRadius(12.dp.toPx())
+            val dim = Path().apply {
+                fillType = PathFillType.EvenOdd
+                addRect(Rect(Offset.Zero, size))
+                addRoundRect(RoundRect(r, corner))
+            }
+            drawPath(dim, Color.Black.copy(alpha = 0.6f))
+            drawRoundRect(Accent.copy(alpha = pulse), r.topLeft, Size(r.width, r.height), corner, style = Stroke(3.5.dp.toPx()))
+            val margin = 12.dp.toPx()
+            val start = if (bubbleTop) Offset(size.width * 0.5f, margin + bubbleH + 4.dp.toPx())
+            else Offset(size.width * 0.5f, size.height - margin - bubbleH - 4.dp.toPx())
+            val gap = (if (bubbleTop) r.top - start.y else start.y - r.bottom)
+            if (gap > 24.dp.toPx()) drawArrow(start, r)
         }
-        drawPath(dim, Color.Black.copy(alpha = 0.55f))
-        rects.forEachIndexed { i, r ->
-            drawRoundRect(Accent.copy(alpha = pulse), r.topLeft, Size(r.width, r.height), corner, style = Stroke(4.dp.toPx()))
-            drawArrow(map(marks[i].second), r)
+        Column(
+            Modifier
+                .align(if (bubbleTop) Alignment.TopCenter else Alignment.BottomCenter)
+                .padding(12.dp)
+                .fillMaxWidth()
+                .onSizeChanged { bubbleH = it.height }
+                .shadow(8.dp, RoundedCornerShape(14.dp))
+                .clip(RoundedCornerShape(14.dp))
+                .background(Color.White)
+                .border(2.dp, Accent, RoundedCornerShape(14.dp))
+                .padding(horizontal = 14.dp, vertical = 10.dp),
+        ) {
+            Text(m.text, color = Color(0xFF22262A), fontSize = 15.sp, lineHeight = 20.sp, fontWeight = FontWeight.Medium)
+            Spacer(Modifier.height(4.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+                page.marks.indices.forEach { j ->
+                    Box(Modifier.size(if (j == step) 8.dp else 6.dp).clip(RoundedCornerShape(50))
+                        .background(if (j == step) Accent else Color(0xFFCCCCCC)))
+                }
+            }
         }
     }
 }
@@ -230,76 +243,22 @@ private fun Shot(name: String, crop: Rect, marks: List<Pair<Rect, Offset>>) {
 /** [start] noktasından vurgulanan kutunun kenarına kıvrık ok çizer. */
 private fun DrawScope.drawArrow(start: Offset, target: Rect) {
     val gap = 6.dp.toPx()
-    val inset = 12.dp.toPx()
+    val inset = 14.dp.toPx()
     val px = start.x.coerceIn(target.left + inset, target.right - inset)
-    val py = start.y.coerceIn(target.top, target.bottom)
-    val end = when {
-        start.y > target.bottom -> Offset(px, target.bottom + gap)
-        start.y < target.top -> Offset(px, target.top - gap)
-        start.x > target.right -> Offset(target.right + gap, py)
-        else -> Offset(target.left - gap, py)
-    }
+    val end = if (start.y > target.bottom) Offset(px, target.bottom + gap) else Offset(px, target.top - gap)
     val dx = end.x - start.x
     val dy = end.y - start.y
-    val len = hypot(dx, dy).coerceAtLeast(1f)
-    val bend = 0.2f
-    val ctrl = Offset((start.x + end.x) / 2 - dy / len * len * bend, (start.y + end.y) / 2 + dx / len * len * bend)
+    val ctrl = Offset((start.x + end.x) / 2 - dy * 0.25f, (start.y + end.y) / 2 + dx * 0.25f)
     val path = Path().apply { moveTo(start.x, start.y); quadraticBezierTo(ctrl.x, ctrl.y, end.x, end.y) }
     val ang = atan2(end.y - ctrl.y, end.x - ctrl.x)
-    val h = 16.dp.toPx()
+    val h = 14.dp.toPx()
     val head = Path().apply {
         moveTo(end.x - h * cos(ang - 0.45f), end.y - h * sin(ang - 0.45f))
         lineTo(end.x, end.y)
         lineTo(end.x - h * cos(ang + 0.45f), end.y - h * sin(ang + 0.45f))
     }
-    for ((c, w) in listOf(Color.White to 8.dp.toPx(), Accent to 4.5.dp.toPx())) {
+    for ((c, w) in listOf(Color.White to 7.dp.toPx(), Accent to 4.dp.toPx())) {
         drawPath(path, c, style = Stroke(w, cap = StrokeCap.Round))
         drawPath(head, c, style = Stroke(w, cap = StrokeCap.Round))
-    }
-    drawCircle(Color.White, 8.dp.toPx(), start)
-    drawCircle(Accent, 5.5.dp.toPx(), start)
-}
-
-@Composable
-private fun EdibilityLegend() {
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        listOf(Edibility.EDIBLE, Edibility.EDIBLE_WITH_CAUTION, Edibility.INEDIBLE, Edibility.POISONOUS, Edibility.DEADLY).forEach { e ->
-            val s = e.style
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Row(
-                    Modifier.width(150.dp).background(s.background, RoundedCornerShape(50))
-                        .border(1.dp, s.border, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    EdibilityIcon(e, 18.dp, blink = true)
-                    Spacer(Modifier.width(6.dp))
-                    Text(s.label, color = s.color, fontWeight = FontWeight.Bold, fontSize = 13.sp)
-                }
-                Spacer(Modifier.width(8.dp))
-                Text(
-                    when (e) {
-                        Edibility.EDIBLE -> "Yenebilir kabul edilir."
-                        Edibility.EDIBLE_WITH_CAUTION -> "Pişirme, yaş gibi koşullarla."
-                        Edibility.INEDIBLE -> "Zehirsiz olabilir, yenmez."
-                        Edibility.POISONOUS -> "Zehirlenme yapar."
-                        Edibility.DEADLY -> "Öldürücü olabilir."
-                    },
-                    color = TText, fontSize = 13.sp,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun FakeCall(label: String) {
-    Row(
-        Modifier.clip(RoundedCornerShape(50)).border(1.dp, Color(0xFF8C1D18), RoundedCornerShape(50))
-            .padding(horizontal = 14.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(Icons.Filled.Call, null, tint = Color(0xFF8C1D18), modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(6.dp))
-        Text(label, color = Color(0xFF8C1D18), fontWeight = FontWeight.SemiBold)
     }
 }
