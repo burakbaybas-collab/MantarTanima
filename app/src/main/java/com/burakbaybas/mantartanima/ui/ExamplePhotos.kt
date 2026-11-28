@@ -2,7 +2,16 @@ package com.burakbaybas.mantartanima.ui
 
 import android.content.Context
 import android.graphics.BitmapFactory
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -76,25 +85,35 @@ fun ExamplePhotos(speciesId: String) {
     }
     var open by remember { mutableStateOf<Int?>(null) }
 
-    Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(14.dp)).background(Color(0xFFF1F5EE)).padding(10.dp),
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        border = BorderStroke(1.dp, Color(0xFFCFE2C3)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Text("Bu türün örnek fotoğrafları", fontWeight = FontWeight.Bold, color = Color(0xFF17502A), fontSize = 15.sp)
-        Text("Karşılaştırmak için dokunup büyütün.", fontSize = 12.sp, color = Color(0xFF5F6660))
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            images.forEachIndexed { i, img ->
-                if (img != null) {
-                    Image(
-                        img, contentDescription = "Örnek fotoğraf ${i + 1}", contentScale = ContentScale.Crop,
-                        modifier = Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(10.dp))
-                            .clickable { open = i },
-                    )
-                } else {
-                    Spacer(Modifier.weight(1f))
-                }
+        Column(Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Outlined.PhotoLibrary, null, tint = Color(0xFF2E7D32), modifier = Modifier.size(22.dp))
+                Spacer(Modifier.width(8.dp))
+                Text("Bu türün örnek fotoğrafları", fontWeight = FontWeight.Bold, color = Color(0xFF1F2A22), fontSize = 17.sp)
             }
-            repeat(3 - images.size) { Spacer(Modifier.weight(1f)) }
+            Spacer(Modifier.height(2.dp))
+            Text("Kendi mantarınızla karşılaştırmak için dokunup büyütün.", fontSize = 13.sp, color = Color(0xFF5F6660))
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                images.forEachIndexed { i, img ->
+                    if (img != null) {
+                        Image(
+                            img, contentDescription = "Örnek fotoğraf ${i + 1}", contentScale = ContentScale.Crop,
+                            modifier = Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(10.dp))
+                                .clickable { open = i },
+                        )
+                    } else {
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+                repeat(3 - images.size) { Spacer(Modifier.weight(1f)) }
+            }
         }
     }
 
