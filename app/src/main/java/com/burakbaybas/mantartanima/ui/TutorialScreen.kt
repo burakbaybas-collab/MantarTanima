@@ -65,6 +65,9 @@ import androidx.compose.ui.unit.sp
 import com.burakbaybas.mantartanima.data.Edibility
 import kotlinx.coroutines.launch
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.LaunchedEffect
@@ -105,7 +108,8 @@ private val pages = listOf(
         Mark(Rect(60f, 1458f, 344f, 1662f), "\"Değiştir\" ile fotoğrafı yenisiyle değiştirin."),
         Mark(Rect(118f, 1720f, 962f, 1892f), "Üç fotoğraf eklenince \"Tanımla\"ya basın. Uygulama 1000 türle karşılaştırır."),
         Mark(Rect(220f, 1926f, 860f, 2024f), "Önceki tanımlamalarınız fotoğraf, tarih ve konumla saklanır; dışa aktarabilir ya da silebilirsiniz."),
-        Mark(Rect(300f, 2058f, 780f, 2205f), "\"Nasıl kullanılır?\" bu rehberi açar. Geliştirici adına dokununca uygulama hakkındaki bilgiler açılır."),
+        Mark(Rect(360f, 2050f, 720f, 2124f), "\"Nasıl kullanılır?\" bu rehberi istediğiniz zaman yeniden açar."),
+        Mark(Rect(300f, 2132f, 780f, 2204f), "Geliştiriciye dokununca uygulama ve geliştirici hakkındaki bilgiler, iletişim adresleri ve fotoğraf lisansları açılır."),
     )),
     TPage("Sonuç", "sonuc1.jpg", listOf(
         Mark(Rect(80f, 395f, 740f, 550f), "En olası tür: büyük yazı Latince adı, altındaki Türkçe adı."),
@@ -141,9 +145,20 @@ fun TutorialScreen(onDone: () -> Unit) {
         page = p; step = s
     }
 
-    BackHandler(enabled = !isFirst) {
+    fun prev() {
+        if (isFirst) return
         if (step > 0) go(page, step - 1) else go(page - 1, pages[page - 1].marks.lastIndex)
     }
+
+    fun next() {
+        when {
+            isLast -> onDone()
+            step < pages[page].marks.lastIndex -> go(page, step + 1)
+            else -> go(page + 1, 0)
+        }
+    }
+
+    BackHandler(enabled = !isFirst) { prev() }
 
     Column(Modifier.fillMaxSize().background(Color(0xFF1B1F1C)).safeDrawingPadding()) {
         Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -152,28 +167,34 @@ fun TutorialScreen(onDone: () -> Unit) {
             if (!isLast) TextButton(onClick = onDone) { Text("Geç", color = Color.White) }
             else Spacer(Modifier.height(48.dp))
         }
-        HorizontalPager(state = pager, userScrollEnabled = false, modifier = Modifier.weight(1f)) { i ->
+        // Parmakla sola kaydırma: ileri, sağa kaydırma: geri (son adımda sola kaydırmak rehberi kapatmaz)
+        var drag by remember { mutableFloatStateOf(0f) }
+        HorizontalPager(
+            state = pager, userScrollEnabled = false,
+            modifier = Modifier.weight(1f).pointerInput(page, step) {
+                detectHorizontalDragGestures(
+                    onDragStart = { drag = 0f },
+                    onHorizontalDrag = { _, d -> drag += d },
+                    onDragEnd = {
+                        val limit = 60.dp.toPx()
+                        if (drag < -limit && !isLast) next() else if (drag > limit) prev()
+                    },
+                )
+            },
+        ) { i ->
             Box(Modifier.fillMaxSize().padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
                 Shot(pages[i], if (i == page) step else 0)
             }
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
             if (!isFirst) {
-                TextButton(onClick = {
-                    if (step > 0) go(page, step - 1) else go(page - 1, pages[page - 1].marks.lastIndex)
-                }) { Text("Geri", color = Color.White, fontSize = 16.sp) }
+                TextButton(onClick = { prev() }) { Text("Geri", color = Color.White, fontSize = 16.sp) }
             }
             Spacer(Modifier.weight(1f))
             Button(
-                onClick = {
-                    when {
-                        isLast -> onDone()
-                        step < pages[page].marks.lastIndex -> go(page, step + 1)
-                        else -> go(page + 1, 0)
-                    }
-                },
+                onClick = { next() },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4E9A2F)),
-            ) { Text(if (isLast) "Başla" else "İleri", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
+            ) { Text(if (isLast) "Mantarların Dünyasına Giriş" else "İleri", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
         }
     }
 }
