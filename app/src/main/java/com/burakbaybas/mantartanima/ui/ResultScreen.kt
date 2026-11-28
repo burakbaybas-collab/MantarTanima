@@ -24,15 +24,11 @@ import androidx.compose.material.icons.automirrored.outlined.CompareArrows
 import androidx.compose.material.icons.outlined.Fingerprint
 import androidx.compose.material.icons.outlined.Forest
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.automirrored.outlined.MenuBook
-import androidx.compose.material.icons.outlined.PhotoLibrary
-import androidx.compose.material3.AssistChip
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -227,7 +223,6 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
     val species = SpeciesCatalog.find(prediction.label)
     // Tanınamayan fotoğrafta hiçbir kart açık gelmez ve yenilebilirlik etiketi gösterilmez (yanıltmasın)
     var expanded by rememberSaveable(prediction.label) { mutableStateOf(rank == 0 && !unknown) }
-    val uriHandler = LocalUriHandler.current
     val dangerous = species?.edibility == Edibility.POISONOUS || species?.edibility == Edibility.DEADLY
 
     Card(
@@ -360,22 +355,6 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
                 rows.forEachIndexed { i, (k, v) ->
                     InfoTableRow(k, v, shaded = i % 2 == 0)
                 }
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                val q = Uri.encode(species.latinName)
-                AssistChip(
-                    onClick = { uriHandler.openUri("https://tr.wikipedia.org/w/index.php?search=$q") },
-                    label = { Text("Vikipedi") },
-                    leadingIcon = { Icon(Icons.AutoMirrored.Outlined.MenuBook, null, Modifier.size(18.dp)) },
-                )
-                AssistChip(
-                    onClick = {
-                        uriHandler.openUri("https://www.inaturalist.org/taxa/search?q=$q")
-                    },
-                    label = { Text("Fotoğraflar") },
-                    leadingIcon = { Icon(Icons.Outlined.PhotoLibrary, null, Modifier.size(18.dp)) },
-                )
             }
             }
         }
