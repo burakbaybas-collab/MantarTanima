@@ -84,74 +84,48 @@ private val Accent = Color(0xFFFF8F00)
 
 /**
  * Bir eğitim adımı. Koordinatlar 1080x2400 ekran görüntüsü piksel cinsindendir.
- * [crop]: gösterilecek bölge, [hl]: vurgulanan öğe, [from]: okun başladığı nokta.
+ * [crop]: gösterilecek bölge, [marks]: vurgulanan öğe ve okun başladığı nokta.
  */
 private class TStep(
     val title: String,
     val text: String,
     val image: String? = null,
     val crop: Rect? = null,
-    val hl: Rect? = null,
-    val from: Offset? = null,
+    val marks: List<Pair<Rect, Offset>> = emptyList(),
     val extra: (@Composable () -> Unit)? = null,
 )
 
 private const val HOME = "home.jpg"
 private const val RESULT = "result.jpg"
 
+private fun mark(r: Rect, from: Offset) = listOf(r to from)
+
 private val steps = listOf(
-    TStep("FungiLens'e hoş geldiniz",
-        "Bu kısa rehber düğmeleri ve yazıları uygulamanın kendi ekranları üzerinde gösterir. İnternet gerekmez; tanıma tamamen telefonunuzda yapılır. Sağa kaydırın.",
-        HOME, Rect(0f, 140f, 1080f, 2270f)),
-    TStep("İpuçları düğmesi",
-        "Bu şerit ne yapmanız gerektiğini hatırlatır. Sağdaki (i) düğmesi iyi fotoğraf çekme ipuçlarını açar.",
-        HOME, Rect(0f, 760f, 1080f, 1400f), Rect(40f, 805f, 1038f, 955f), Offset(900f, 1250f)),
-    TStep("Üç fotoğraf kutusu",
-        "Mantarın üç yüzü için üç kutu vardır:\n• Üstten: şapkanın üstü (renk, pullar)\n• Yandan: şapka ve sap birlikte (halka, sap tabanı, volva)\n• Alttan: lameller ya da gözenekler",
-        HOME, Rect(0f, 700f, 1080f, 1730f), Rect(40f, 990f, 1040f, 1695f), Offset(880f, 770f)),
-    TStep("Örnek fotoğraf",
-        "\"Örnek\" yazan resimler nasıl bir fotoğraf çekmeniz gerektiğini gösterir. Kendi fotoğrafınızı yükleyince yerini o alır.",
-        HOME, Rect(0f, 960f, 1080f, 1730f), Rect(58f, 1006f, 346f, 1294f), Offset(640f, 1440f)),
-    TStep("Fotoğraf Yükle",
-        "Dokununca iki seçenek çıkar: \"Kamera ile çek\" ya da \"Galeriden seç\". Fotoğraf eklendikten sonra \"Değiştir\" ile yenileyebilir, köşedeki X ile kaldırabilirsiniz.",
-        HOME, Rect(0f, 960f, 1080f, 1730f), Rect(56f, 1470f, 350f, 1682f), Offset(660f, 1250f)),
-    TStep("Tanımla düğmesi",
-        "Fotoğrafları ekledikten sonra buna basın. Parantezdeki sayı kaç fotoğraf eklediğinizi gösterir (ör. 3/3). Tek fotoğraf da yeter ama üç açı daha doğru sonuç verir.",
-        HOME, Rect(0f, 1400f, 1080f, 2270f), Rect(118f, 1752f, 962f, 1925f), Offset(540f, 1480f)),
-    TStep("Geçmiş Tanımlamalar",
-        "Önceki tanımlamalarınız fotoğrafları, tarihi ve (izin verdiyseniz) konumuyla burada saklanır. Kayıtları dışa aktarabilir ya da silebilirsiniz.",
-        HOME, Rect(0f, 1400f, 1080f, 2270f), Rect(216f, 1956f, 864f, 2062f), Offset(1010f, 1740f)),
-    TStep("Nasıl kullanılır?",
-        "Bu rehberi istediğiniz zaman tekrar açar. Altındaki \"Geliştirici\" yazısı uygulama hakkındaki bilgileri gösterir.",
-        HOME, Rect(0f, 1400f, 1080f, 2270f), Rect(376f, 2102f, 704f, 2174f), Offset(120f, 1950f)),
-    TStep("Tür adı",
-        "Sonuç sayfasında en olası tür yazar. Büyük ve eğik yazı türün bilimsel (Latince) adı, altındaki Türkçe adıdır. Varsa yöresel adları Temel Bilgiler'de yazar.",
-        RESULT, Rect(0f, 330f, 1080f, 1190f), Rect(78f, 385f, 664f, 558f), Offset(300f, 1060f)),
-    TStep("Güven oranı",
-        "Yüzde ve çubuk modelin ne kadar emin olduğunu gösterir. Çubuk ne kadar doluysa model o kadar emindir.",
-        RESULT, Rect(0f, 330f, 1080f, 1190f), Rect(820f, 420f, 1004f, 615f), Offset(760f, 1060f)),
-    TStep("\"Emin değil\" uyarısı",
-        "Oran düşükse bu yazı çıkar: sonucu yalnızca fikir olarak kullanın. Mantar tanınamazsa \"Tanınamadı\" yazar; daha yakından ve iyi ışıkta tekrar çekin.",
-        RESULT, Rect(0f, 330f, 1080f, 1190f), Rect(78f, 616f, 960f, 738f), Offset(540f, 1080f)),
-    TStep("Yenilebilirlik etiketi",
-        "Türün yenilebilirlik durumu. Etikete dokunursanız tüm kategorilerin açıklaması açılır. Zehirli ve ölümcül türlerde simge yanıp söner.",
-        RESULT, Rect(0f, 1200f, 1080f, 1720f), Rect(86f, 1250f, 448f, 1358f), Offset(820f, 1290f),
+    TStep("1. Fotoğraf yükleyin",
+        "Mantarın üç yüzü için üç kutu vardır: Üstten (şapka), Yandan (şapka ve sap), Alttan (lameller ya da gözenekler). \"Örnek\" resimler nasıl çekeceğinizi gösterir. \"Fotoğraf Yükle\"ye dokunup kamerayla çekin ya da galeriden seçin.",
+        HOME, Rect(0f, 700f, 1080f, 1730f), mark(Rect(40f, 990f, 1040f, 1695f), Offset(880f, 770f))),
+    TStep("2. İpuçları",
+        "Sağdaki (i) düğmesi iyi fotoğraf çekme önerilerini açar.",
+        HOME, Rect(0f, 760f, 1080f, 1400f), mark(Rect(40f, 805f, 1038f, 955f), Offset(900f, 1250f))),
+    TStep("3. Tanımla",
+        "Fotoğrafları ekleyince buna basın. Parantezdeki sayı eklenen fotoğraf sayısıdır. Tek fotoğraf da yeter ama üç açı daha doğru sonuç verir.",
+        HOME, Rect(0f, 1400f, 1080f, 2270f), mark(Rect(118f, 1752f, 962f, 1925f), Offset(540f, 1480f))),
+    TStep("4. Geçmiş ve yardım",
+        "Geçmiş Tanımlamalar önceki sonuçlarınızı saklar; dışa aktarabilir ya da silebilirsiniz. \"Nasıl kullanılır?\" bu rehberi tekrar açar.",
+        HOME, Rect(0f, 1400f, 1080f, 2270f),
+        listOf(Rect(216f, 1956f, 864f, 2062f) to Offset(1010f, 1740f), Rect(376f, 2102f, 704f, 2174f) to Offset(120f, 1950f))),
+    TStep("5. Sonuç",
+        "Büyük eğik yazı türün Latince adı, altındaki Türkçe adıdır. Yüzde ve çubuk modelin ne kadar emin olduğunu gösterir. Oran düşükse \"emin değil\" uyarısı çıkar; mantar tanınamazsa \"Tanınamadı\" yazar.",
+        RESULT, Rect(0f, 330f, 1080f, 1190f), mark(Rect(46f, 352f, 1034f, 772f), Offset(540f, 1080f))),
+    TStep("6. Yenilebilirlik etiketi",
+        "Etikete dokunursanız açıklaması açılır. Zehirli ve ölümcül türlerde simge yanıp söner.",
+        RESULT, Rect(0f, 1200f, 1080f, 1720f), mark(Rect(86f, 1250f, 448f, 1358f), Offset(820f, 1290f)),
         extra = { EdibilityLegend() }),
-    TStep("Açıklama",
-        "Etiketin anlamı ve türün kısa tanımı burada yazar.",
-        RESULT, Rect(0f, 1200f, 1080f, 2215f), Rect(86f, 1370f, 996f, 1695f), Offset(860f, 1290f)),
-    TStep("Temel Bilgiler",
-        "Cins, sezon, yaşam alanı ve spor izi. Bilgisi olan türlerde koku, tat ve renk değişimi de yazar.",
-        RESULT, Rect(0f, 1200f, 1080f, 2215f), Rect(86f, 1710f, 996f, 2210f), Offset(1040f, 1560f)),
-    TStep("Zehirlenme kutusu",
-        "Zehirli ve ölümcül türlerde kırmızı bir kutu çıkar. İçinde zehrin adı, belirtilerin yemekten ne kadar sonra başladığı ve ilk yardım yazar. Düğmeler arama ekranını açar: 112 acil çağrı, 114 Ulusal Zehir Danışma Merkezi.",
-        extra = {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { FakeCall("112'yi ara"); FakeCall("114'ü ara") }
-        }),
-    TStep("Sayfanın devamı",
-        "• Ayırt edici özellikler: türü tanımaya yarayan özellikler\n• Benzer türlerden farkı: karıştırılan türler ve ayrım noktaları\n• Diğer olasılıklar: modelin ikinci ve üçüncü tahmini; dokununca açılır\n• Fotoğraflar farklı mantarlara aitse uygulama sizi uyarır."),
+    TStep("7. Tür bilgileri",
+        "Aşağı kaydırınca türün tanımı, Temel Bilgiler (cins, sezon, yaşam alanı, spor izi), ayırt edici özellikler ve benzer türlerden farkı yazar. Zehirli türlerde kırmızı bir zehirlenme kutusu ile 112 ve 114 (Zehir Danışma) arama düğmeleri çıkar.",
+        RESULT, Rect(0f, 1200f, 1080f, 2215f), mark(Rect(86f, 1370f, 996f, 2210f), Offset(860f, 1270f))),
     TStep("Unutmayın",
-        "Mantar zehirlenmeleri ölümcül olabilir. Uygulamanın sonucu ne olursa olsun, hiçbir mantarı yalnızca uygulamaya bakarak yemeyin; mutlaka bir uzmana gösterin.",
+        "Mantar zehirlenmeleri ölümcül olabilir. Hiçbir mantarı yalnızca uygulamaya bakarak yemeyin; mutlaka bir uzmana gösterin.",
         extra = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Filled.Warning, null, tint = Color(0xFFB3261E), modifier = Modifier.size(40.dp))
@@ -180,7 +154,7 @@ fun TutorialScreen(onDone: () -> Unit) {
                 Spacer(Modifier.height(10.dp))
                 if (s.image != null && s.crop != null) {
                     Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Shot(s.image, s.crop, s.hl, s.from)
+                        Shot(s.image, s.crop, s.marks)
                     }
                     Spacer(Modifier.height(10.dp))
                     Column(Modifier.verticalScroll(rememberScrollState())) {
@@ -213,7 +187,7 @@ fun TutorialScreen(onDone: () -> Unit) {
 
 /** Ekran görüntüsünün bir bölgesini gösterir; [hl] dışını karartır, çerçeveler ve oka işaret eder. */
 @Composable
-private fun Shot(name: String, crop: Rect, hl: Rect?, from: Offset?) {
+private fun Shot(name: String, crop: Rect, marks: List<Pair<Rect, Offset>>) {
     val context = LocalContext.current
     val img: ImageBitmap? = remember(name) {
         runCatching { context.assets.open("tutorial/$name").use { BitmapFactory.decodeStream(it).asImageBitmap() } }.getOrNull()
@@ -235,19 +209,21 @@ private fun Shot(name: String, crop: Rect, hl: Rect?, from: Offset?) {
             srcSize = IntSize((crop.width * k).toInt(), (crop.height * k).toInt()),
             dstSize = IntSize(size.width.toInt(), size.height.toInt()),
         )
-        if (hl == null) return@Canvas
+        if (marks.isEmpty()) return@Canvas
         val sc = size.width / crop.width
         fun map(o: Offset) = Offset((o.x - crop.left) * sc, (o.y - crop.top) * sc)
-        val r = Rect(map(hl.topLeft), map(hl.bottomRight))
         val corner = CornerRadius(14.dp.toPx())
+        val rects = marks.map { Rect(map(it.first.topLeft), map(it.first.bottomRight)) }
         val dim = Path().apply {
             fillType = PathFillType.EvenOdd
             addRect(Rect(Offset.Zero, size))
-            addRoundRect(RoundRect(r, corner))
+            rects.forEach { addRoundRect(RoundRect(it, corner)) }
         }
         drawPath(dim, Color.Black.copy(alpha = 0.55f))
-        drawRoundRect(Accent.copy(alpha = pulse), r.topLeft, Size(r.width, r.height), corner, style = Stroke(4.dp.toPx()))
-        if (from != null) drawArrow(map(from), r)
+        rects.forEachIndexed { i, r ->
+            drawRoundRect(Accent.copy(alpha = pulse), r.topLeft, Size(r.width, r.height), corner, style = Stroke(4.dp.toPx()))
+            drawArrow(map(marks[i].second), r)
+        }
     }
 }
 
