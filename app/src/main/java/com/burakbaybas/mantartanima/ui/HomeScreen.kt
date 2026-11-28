@@ -195,7 +195,7 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Header()
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(12.dp))
 
             // Bilgi şeridi
             Surface(
@@ -243,7 +243,7 @@ fun HomeScreen(
                     )
                 }
             }
-            Spacer(Modifier.height(22.dp))
+            Spacer(Modifier.height(16.dp))
 
             AnalyzeButton(
                 enabled = allReady,
@@ -279,27 +279,24 @@ fun HomeScreen(
             }
 
 
-            Spacer(Modifier.height(4.dp))
             Text(
                 "Nasıl kullanılır?",
                 color = DeepGreen, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
                     .clickable { onOpenTutorial() }
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
             )
-            Spacer(Modifier.height(4.dp))
-            Text("Geliştirici", style = MaterialTheme.typography.labelSmall, color = DeepGreen.copy(alpha = 0.7f))
-            Text(
-                DEVELOPER_NAME,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = DeepGreen,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(6.dp))
                     .clickable { showAbout = true }
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
-            )
+                    .padding(horizontal = 8.dp, vertical = 2.dp),
+            ) {
+                Text("Geliştirici: ", style = MaterialTheme.typography.labelMedium, color = DeepGreen.copy(alpha = 0.7f))
+                Text(DEVELOPER_NAME, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold, color = DeepGreen)
+            }
             Spacer(Modifier.height(8.dp))
         }
     }

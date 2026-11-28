@@ -136,13 +136,16 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         return weighted.map { it.copy(confidence = it.confidence / sum) }.sortedByDescending { it.confidence }
     }
 
+    private val MIN_SCAN_MS = 2600L
+
     fun analyze() {
         val uris = PhotoAngle.entries.mapNotNull { _photos.value[it] }
         if (uris.size < PhotoAngle.entries.size) return
         _state.value = UiState.Analyzing
         viewModelScope.launch {
+            val t0 = android.os.SystemClock.elapsedRealtime()
             try {
-                _state.value = withContext(Dispatchers.Default) {
+                val result = withContext(Dispatchers.Default) {
                     val bitmaps = uris.map { decodeBitmap(it) ?: error("Fotoğraf açılamadı") }
                     val predictions = withSeason(classifier.classify(bitmaps, topK = Int.MAX_VALUE)).take(3)
                     val mushroomPhotos = detector?.let { d -> bitmaps.count { d.looksLikeMushroom(it) } }
@@ -158,6 +161,10 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                         UiState.Result(predictions, classifier.isDemo)
                     }
                 }
+                // Tarama ekranı en az ~2,6 sn görünsün
+                val wait = MIN_SCAN_MS - (android.os.SystemClock.elapsedRealtime() - t0)
+                if (wait > 0) kotlinx.coroutines.delay(wait)
+                _state.value = result
             } catch (e: Exception) {
                 _state.value = UiState.Error(e.message ?: "Bilinmeyen hata")
             }

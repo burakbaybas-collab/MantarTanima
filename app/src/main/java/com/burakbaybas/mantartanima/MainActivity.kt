@@ -24,6 +24,7 @@ import com.burakbaybas.mantartanima.ui.HomeScreen
 import com.burakbaybas.mantartanima.ui.TutorialScreen
 import com.burakbaybas.mantartanima.ui.Tutorial
 import com.burakbaybas.mantartanima.ui.ResultScreen
+import com.burakbaybas.mantartanima.ui.ScanScreen
 import com.burakbaybas.mantartanima.ui.theme.MantarTanimaTheme
 
 class MainActivity : ComponentActivity() {
@@ -76,13 +77,7 @@ private fun AppContent(onOpenTutorial: () -> Unit = {}) {
             historyCount = history.size,
             onOpenHistory = vm::openHistory,
         )
-        UiState.Analyzing -> ResultScreen(
-            photos = photos,
-            predictions = null,
-            isDemo = vm.isDemo,
-            onBack = vm::backToHome,
-            onStartOver = vm::startOver,
-        )
+        UiState.Analyzing -> ScanScreen(photos)
         is UiState.Result -> ResultScreen(
             photos = photos,
             predictions = s.predictions,
