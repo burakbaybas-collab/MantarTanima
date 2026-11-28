@@ -1,7 +1,6 @@
 package com.burakbaybas.mantartanima.ui
 
 import android.net.Uri
-import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -53,26 +52,51 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
 import com.burakbaybas.mantartanima.PhotoAngle
 import com.burakbaybas.mantartanima.R
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.Dispatchers
+import com.burakbaybas.mantartanima.data.SpeciesCatalog
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.platform.LocalContext
+import android.graphics.BitmapFactory
 
 private val ScanGreen = Color(0xFF5BE36B)
 private val Deep = Color(0xFF17502A)
 private val Fresh = Color(0xFF4E9A2F)
 
 private val steps = listOf(
-    "Şapka inceleniyor…",
-    "Sap ve halka inceleniyor…",
-    "Lameller / gözenekler inceleniyor…",
+    "Fotoğraflar inceleniyor…",
+    "Şapka, sap ve lameller karşılaştırılıyor…",
     "1000 türle karşılaştırılıyor…",
+    "En olası türler sıralanıyor…",
 )
 
 /** "Tanımla"ya basınca gösterilen tarama ekranı: fotoğraflar sırayla taranır. */
 @Composable
 fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
-    val list = PhotoAngle.entries.mapNotNull { a -> photos[a]?.let { a to it } }
+    val context = LocalContext.current
+    // Uygulamadaki 1000 türün örnek fotoğrafları hızla akar (aranıyor görüntüsü)
+    val files = remember { runCatching { context.assets.list("examples")?.toList().orEmpty() }.getOrDefault(emptyList()).shuffled() }
+    var frame by remember { mutableStateOf<Pair<ImageBitmap, String>?>(null) }
+    LaunchedEffect(files) {
+        var k = 0
+        while (files.isNotEmpty()) {
+            val f = files[k % files.size]; k++
+            val bmp = withContext(Dispatchers.IO) {
+                runCatching { context.assets.open("examples/$f").use { BitmapFactory.decodeStream(it) } }.getOrNull()
+            }
+            if (bmp != null) {
+                val id = f.substringBeforeLast('_')
+                frame = bmp.asImageBitmap() to (SpeciesCatalog.find(id)?.latinName ?: "")
+            }
+            delay(75)
+        }
+    }
     var idx by remember { mutableIntStateOf(0) }
     var progress by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) {
@@ -117,14 +141,10 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
             Text("Tanımlanıyor", color = Deep, fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Spacer(Modifier.height(16.dp))
 
-            val photoIdx = idx.coerceAtMost(list.lastIndex).coerceAtLeast(0)
             Box(Modifier.fillMaxWidth(0.72f).aspectRatio(1f).shadow(10.dp, RoundedCornerShape(22.dp)).clip(RoundedCornerShape(22.dp))
                 .background(Color.Black).border(3.dp, Color.White, RoundedCornerShape(22.dp))) {
-                Crossfade(targetState = list.getOrNull(photoIdx), label = "foto") { item ->
-                    if (item != null) {
-                        AsyncImage(model = item.second, contentDescription = item.first.title,
-                            contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                    }
+                frame?.let { (img, _) ->
+                    Image(img, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 }
                 // Hafif yeşil örtü, ızgara, köşe çerçeveleri ve tarama çizgisi
                 Canvas(Modifier.fillMaxSize()) {
@@ -151,22 +171,21 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
                     )
                     drawLine(ScanGreen, Offset(0f, y), Offset(size.width, y), 3.dp.toPx())
                 }
-                list.getOrNull(photoIdx)?.let { (angle, _) ->
+                frame?.second?.takeIf { it.isNotBlank() }?.let { name ->
                     Text(
-                        angle.title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 14.sp,
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 18.dp)
+                        name, color = Color.White, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold, fontSize = 13.sp,
+                        maxLines = 1,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 14.dp)
                             .clip(RoundedCornerShape(50)).background(Color(0x99000000))
                             .padding(horizontal = 12.dp, vertical = 4.dp),
                     )
                 }
             }
-            Spacer(Modifier.height(14.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                list.forEachIndexed { i, _ ->
-                    Box(Modifier.size(width = 26.dp, height = 5.dp).clip(RoundedCornerShape(50))
-                        .background(if (i <= photoIdx) Fresh else Deep.copy(alpha = 0.18f)))
-                }
-            }
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "Taranan tür: ${(progress / 0.97f * 1000).toInt().coerceIn(0, 1000)} / 1000",
+                color = Deep.copy(alpha = 0.8f), fontSize = 14.sp, fontWeight = FontWeight.Medium,
+            )
             Spacer(Modifier.height(20.dp))
             Text(steps[idx.coerceIn(0, steps.lastIndex)], color = Deep, fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
                 modifier = Modifier.alpha(0.95f))
