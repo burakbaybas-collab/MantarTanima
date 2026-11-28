@@ -19,11 +19,11 @@ def lookup(name):
         tries += [{"name": q, "strict": "true"}, {"name": q}]
     for p in tries:
         m = get("species/match", p)
-        if m.get("matchType") in ("EXACT", "FUZZY") and m.get("family"):
+        if m.get("matchType") in ("EXACT", "FUZZY") and m.get("phylum"):
             return {k: m.get(k, "") for k in KEYS}
     # Yalnız cins adıyla (tür eşleşmezse aile ve üstü yine bulunur)
     m = get("species/match", {"name": name.split()[0], "rank": "GENUS"})
-    return {k: m.get(k, "") for k in KEYS} if m.get("family") else None
+    return {k: m.get(k, "") for k in KEYS} if m.get("phylum") else None
 
 
 def main():
@@ -41,6 +41,9 @@ def main():
             else:
                 missing.append(name)
     print(f"{len(species) - len(missing)}/{len(species)} tür bulundu")
+    for (sid, name), r in zip(species, results):
+        if r and not all(r.values()):
+            print("Eksik alan:", name, r)
     if missing:
         print("Bulunamayan:", ", ".join(missing))
     from collections import Counter
