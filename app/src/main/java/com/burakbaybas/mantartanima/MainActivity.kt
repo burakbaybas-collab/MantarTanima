@@ -77,7 +77,7 @@ private fun AppContent(onOpenTutorial: () -> Unit = {}) {
             historyCount = history.size,
             onOpenHistory = vm::openHistory,
         )
-        UiState.Analyzing -> ScanScreen(photos)
+        is UiState.Analyzing -> ScanScreen(photos, s.found)
         is UiState.Result -> ResultScreen(
             photos = photos,
             predictions = s.predictions,

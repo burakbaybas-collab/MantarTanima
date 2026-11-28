@@ -78,14 +78,24 @@ private val steps = listOf(
 
 /** "Tanımla"ya basınca gösterilen tarama ekranı: fotoğraflar sırayla taranır. */
 @Composable
-fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
+fun ScanScreen(photos: Map<PhotoAngle, Uri>, found: String? = null) {
     val context = LocalContext.current
     // Uygulamadaki 1000 türün örnek fotoğrafları hızla akar (aranıyor görüntüsü)
     val files = remember { runCatching { context.assets.list("examples")?.toList().orEmpty() }.getOrDefault(emptyList()).shuffled() }
     var frame by remember { mutableStateOf<Pair<ImageBitmap, String>?>(null) }
-    LaunchedEffect(files) {
+    LaunchedEffect(files, found) {
+        if (found != null) {
+            val f = files.filter { it.startsWith(found + "_") }.minOrNull()
+            val bmp = f?.let { name ->
+                withContext(Dispatchers.IO) {
+                    runCatching { context.assets.open("examples/$name").use { BitmapFactory.decodeStream(it) } }.getOrNull()
+                }
+            }
+            frame = bmp?.asImageBitmap()?.let { it to (SpeciesCatalog.find(found)?.latinName ?: "") } ?: frame
+            return@LaunchedEffect
+        }
         var k = 0
-        while (files.isNotEmpty()) {
+        while (files.isNotEmpty() && found == null) {
             val f = files[k % files.size]; k++
             val bmp = withContext(Dispatchers.IO) {
                 runCatching { context.assets.open("examples/$f").use { BitmapFactory.decodeStream(it) } }.getOrNull()
@@ -99,7 +109,8 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
     }
     var idx by remember { mutableIntStateOf(0) }
     var progress by remember { mutableFloatStateOf(0f) }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(found) {
+        if (found != null) { progress = 1f; idx = 3; return@LaunchedEffect }
         val total = 4000L
         val stepMs = 40L
         var t = 0L
@@ -142,7 +153,7 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
             Spacer(Modifier.height(16.dp))
 
             Box(Modifier.fillMaxWidth(0.72f).aspectRatio(1f).shadow(10.dp, RoundedCornerShape(22.dp)).clip(RoundedCornerShape(22.dp))
-                .background(Color.Black).border(3.dp, Color.White, RoundedCornerShape(22.dp))) {
+                .background(Color.Black).border(if (found != null) 5.dp else 3.dp, if (found != null) Fresh else Color.White, RoundedCornerShape(22.dp))) {
                 frame?.let { (img, _) ->
                     Image(img, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
                 }
@@ -183,11 +194,14 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
             }
             Spacer(Modifier.height(12.dp))
             Text(
-                "Taranan tür: ${(progress / 0.97f * 1000).toInt().coerceIn(0, 1000)} / 1000",
+                "Taranan tür: ${if (found != null) 1000 else (progress / 0.97f * 1000).toInt().coerceIn(0, 1000)} / 1000",
                 color = Deep.copy(alpha = 0.8f), fontSize = 14.sp, fontWeight = FontWeight.Medium,
             )
             Spacer(Modifier.height(20.dp))
-            Text(steps[idx.coerceIn(0, steps.lastIndex)], color = Deep, fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
+            Text(
+                if (found != null) "Bulundu: " + (SpeciesCatalog.find(found)?.displayName ?: found) else steps[idx.coerceIn(0, steps.lastIndex)],
+                color = Deep, fontWeight = if (found != null) FontWeight.ExtraBold else FontWeight.SemiBold,
+                fontSize = if (found != null) 18.sp else 16.sp,
                 modifier = Modifier.alpha(0.95f))
             Spacer(Modifier.height(12.dp))
             LinearProgressIndicator(

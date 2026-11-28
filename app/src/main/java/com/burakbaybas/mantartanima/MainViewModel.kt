@@ -32,7 +32,8 @@ enum class PhotoAngle(val title: String, val hint: String) {
 
 sealed interface UiState {
     data object Home : UiState
-    data object Analyzing : UiState
+    /** [found]: tarama sonunda gösterilecek bulunan tür (sonuç sayfasına geçmeden hemen önce). */
+    data class Analyzing(val found: String? = null) : UiState
     data class Result(val predictions: List<Prediction>, val isDemo: Boolean) : UiState
 
     /** Fotoğraflar farklı mantarlara ait görünüyor; her fotoğrafın kendi tahmini gösterilir. */
@@ -141,7 +142,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     fun analyze() {
         val uris = PhotoAngle.entries.mapNotNull { _photos.value[it] }
         if (uris.size < PhotoAngle.entries.size) return
-        _state.value = UiState.Analyzing
+        _state.value = UiState.Analyzing()
         viewModelScope.launch {
             val t0 = android.os.SystemClock.elapsedRealtime()
             try {
@@ -164,6 +165,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                 // Tarama ekranı en az ~4 sn görünsün
                 val wait = MIN_SCAN_MS - (android.os.SystemClock.elapsedRealtime() - t0)
                 if (wait > 0) kotlinx.coroutines.delay(wait)
+                // Bulunan türü tarama ekranında kısaca göster, sonra sonuca geç
+                val top = (result as? UiState.Result)?.predictions?.firstOrNull()
+                if (top != null && !result.isDemo && top.confidence >= 0.25f) {
+                    _state.value = UiState.Analyzing(found = top.label)
+                    kotlinx.coroutines.delay(1600)
+                }
                 _state.value = result
             } catch (e: Exception) {
                 _state.value = UiState.Error(e.message ?: "Bilinmeyen hata")
