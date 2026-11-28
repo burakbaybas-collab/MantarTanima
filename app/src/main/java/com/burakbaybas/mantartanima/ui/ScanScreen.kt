@@ -198,8 +198,20 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>, found: String? = null) {
                 color = Deep.copy(alpha = 0.8f), fontSize = 14.sp, fontWeight = FontWeight.Medium,
             )
             Spacer(Modifier.height(20.dp))
-            Text(
-                if (found != null) "Bulundu: " + (SpeciesCatalog.find(found)?.displayName ?: found) else steps[idx.coerceIn(0, steps.lastIndex)],
+            val foundSp = found?.let { SpeciesCatalog.find(it) }
+            if (found != null) {
+                Text(
+                    buildAnnotatedString {
+                        append("Bulundu: ")
+                        withStyle(SpanStyle(fontStyle = FontStyle.Italic)) { append(foundSp?.latinName ?: found) }
+                    },
+                    color = Deep, fontWeight = FontWeight.ExtraBold, fontSize = 18.sp,
+                )
+                foundSp?.turkishName?.takeIf { it.isNotBlank() }?.let {
+                    Text(it, color = Deep.copy(alpha = 0.8f), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                }
+            } else Text(
+                steps[idx.coerceIn(0, steps.lastIndex)],
                 color = Deep, fontWeight = if (found != null) FontWeight.ExtraBold else FontWeight.SemiBold,
                 fontSize = if (found != null) 18.sp else 16.sp,
                 modifier = Modifier.alpha(0.95f))
