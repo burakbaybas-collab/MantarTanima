@@ -108,7 +108,7 @@ private val steps = listOf(
         "Sağdaki (i) düğmesi iyi fotoğraf çekme önerilerini açar.",
         HOME, Rect(0f, 760f, 1080f, 1400f), mark(Rect(40f, 805f, 1038f, 955f), Offset(900f, 1250f))),
     TStep("3. Tanımla",
-        "Fotoğrafları ekleyince buna basın. Parantezdeki sayı eklenen fotoğraf sayısıdır. Tek fotoğraf da yeter ama üç açı daha doğru sonuç verir.",
+        "Parantezdeki sayı kaç fotoğraf eklediğinizi gösterir (ör. 2/3). Üç fotoğraf da eklenince düğme etkinleşir ve yalnızca \"Tanımla\" yazar; basınca tanımlama başlar.",
         HOME, Rect(0f, 1400f, 1080f, 2270f), mark(Rect(118f, 1752f, 962f, 1925f), Offset(540f, 1480f))),
     TStep("4. Geçmiş ve yardım",
         "Geçmiş Tanımlamalar önceki sonuçlarınızı saklar; dışa aktarabilir ya da silebilirsiniz. \"Nasıl kullanılır?\" bu rehberi tekrar açar.",
