@@ -1,7 +1,13 @@
 package com.burakbaybas.mantartanima.ui
 
 import android.content.Context
-import androidx.compose.foundation.BorderStroke
+import android.graphics.BitmapFactory
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -9,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,41 +26,48 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material.icons.outlined.AddAPhoto
-import androidx.compose.material.icons.outlined.Checklist
-import androidx.compose.material.icons.outlined.History
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.School
-import androidx.compose.material.icons.outlined.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.burakbaybas.mantartanima.data.Edibility
 import kotlinx.coroutines.launch
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.sin
 
 /** İlk açılışta bir kez gösterilen kısa kullanım eğitimi (ana ekrandan tekrar açılabilir). */
 object Tutorial {
@@ -65,126 +79,130 @@ object Tutorial {
 }
 
 private val TGreen = Color(0xFF17502A)
-private val TSoft = Color(0xFFEFF5EC)
 private val TText = Color(0xFF33373D)
+private val Accent = Color(0xFFFF8F00)
 
-private class TPage(val icon: ImageVector, val title: String, val intro: String, val body: @Composable () -> Unit)
+/**
+ * Bir eğitim adımı. Koordinatlar 1080x2400 ekran görüntüsü piksel cinsindendir.
+ * [crop]: gösterilecek bölge, [hl]: vurgulanan öğe, [from]: okun başladığı nokta.
+ */
+private class TStep(
+    val title: String,
+    val text: String,
+    val image: String? = null,
+    val crop: Rect? = null,
+    val hl: Rect? = null,
+    val from: Offset? = null,
+    val extra: (@Composable () -> Unit)? = null,
+)
+
+private const val HOME = "home.jpg"
+private const val RESULT = "result.jpg"
+
+private val steps = listOf(
+    TStep("FungiLens'e hoş geldiniz",
+        "Bu kısa rehber düğmeleri ve yazıları uygulamanın kendi ekranları üzerinde gösterir. İnternet gerekmez; tanıma tamamen telefonunuzda yapılır. Sağa kaydırın.",
+        HOME, Rect(0f, 140f, 1080f, 2270f)),
+    TStep("İpuçları düğmesi",
+        "Bu şerit ne yapmanız gerektiğini hatırlatır. Sağdaki (i) düğmesi iyi fotoğraf çekme ipuçlarını açar.",
+        HOME, Rect(0f, 760f, 1080f, 1400f), Rect(40f, 805f, 1038f, 955f), Offset(900f, 1250f)),
+    TStep("Üç fotoğraf kutusu",
+        "Mantarın üç yüzü için üç kutu vardır:\n• Üstten: şapkanın üstü (renk, pullar)\n• Yandan: şapka ve sap birlikte (halka, sap tabanı, volva)\n• Alttan: lameller ya da gözenekler",
+        HOME, Rect(0f, 700f, 1080f, 1730f), Rect(40f, 990f, 1040f, 1695f), Offset(880f, 770f)),
+    TStep("Örnek fotoğraf",
+        "\"Örnek\" yazan resimler nasıl bir fotoğraf çekmeniz gerektiğini gösterir. Kendi fotoğrafınızı yükleyince yerini o alır.",
+        HOME, Rect(0f, 960f, 1080f, 1730f), Rect(58f, 1006f, 346f, 1294f), Offset(640f, 1440f)),
+    TStep("Fotoğraf Yükle",
+        "Dokununca iki seçenek çıkar: \"Kamera ile çek\" ya da \"Galeriden seç\". Fotoğraf eklendikten sonra \"Değiştir\" ile yenileyebilir, köşedeki X ile kaldırabilirsiniz.",
+        HOME, Rect(0f, 960f, 1080f, 1730f), Rect(56f, 1470f, 350f, 1682f), Offset(660f, 1250f)),
+    TStep("Tanımla düğmesi",
+        "Fotoğrafları ekledikten sonra buna basın. Parantezdeki sayı kaç fotoğraf eklediğinizi gösterir (ör. 3/3). Tek fotoğraf da yeter ama üç açı daha doğru sonuç verir.",
+        HOME, Rect(0f, 1400f, 1080f, 2270f), Rect(118f, 1752f, 962f, 1925f), Offset(540f, 1480f)),
+    TStep("Geçmiş Tanımlamalar",
+        "Önceki tanımlamalarınız fotoğrafları, tarihi ve (izin verdiyseniz) konumuyla burada saklanır. Kayıtları dışa aktarabilir ya da silebilirsiniz.",
+        HOME, Rect(0f, 1400f, 1080f, 2270f), Rect(216f, 1956f, 864f, 2062f), Offset(1010f, 1740f)),
+    TStep("Nasıl kullanılır?",
+        "Bu rehberi istediğiniz zaman tekrar açar. Altındaki \"Geliştirici\" yazısı uygulama hakkındaki bilgileri gösterir.",
+        HOME, Rect(0f, 1400f, 1080f, 2270f), Rect(376f, 2102f, 704f, 2174f), Offset(120f, 1950f)),
+    TStep("Tür adı",
+        "Sonuç sayfasında en olası tür yazar. Büyük ve eğik yazı türün bilimsel (Latince) adı, altındaki Türkçe adıdır. Varsa yöresel adları Temel Bilgiler'de yazar.",
+        RESULT, Rect(0f, 330f, 1080f, 1190f), Rect(78f, 385f, 664f, 558f), Offset(300f, 1060f)),
+    TStep("Güven oranı",
+        "Yüzde ve çubuk modelin ne kadar emin olduğunu gösterir. Çubuk ne kadar doluysa model o kadar emindir.",
+        RESULT, Rect(0f, 330f, 1080f, 1190f), Rect(820f, 420f, 1004f, 615f), Offset(760f, 1060f)),
+    TStep("\"Emin değil\" uyarısı",
+        "Oran düşükse bu yazı çıkar: sonucu yalnızca fikir olarak kullanın. Mantar tanınamazsa \"Tanınamadı\" yazar; daha yakından ve iyi ışıkta tekrar çekin.",
+        RESULT, Rect(0f, 330f, 1080f, 1190f), Rect(78f, 616f, 960f, 738f), Offset(540f, 1080f)),
+    TStep("Yenilebilirlik etiketi",
+        "Türün yenilebilirlik durumu. Etikete dokunursanız tüm kategorilerin açıklaması açılır. Zehirli ve ölümcül türlerde simge yanıp söner.",
+        RESULT, Rect(0f, 1200f, 1080f, 1720f), Rect(86f, 1250f, 448f, 1358f), Offset(820f, 1290f),
+        extra = { EdibilityLegend() }),
+    TStep("Açıklama",
+        "Etiketin anlamı ve türün kısa tanımı burada yazar.",
+        RESULT, Rect(0f, 1200f, 1080f, 2215f), Rect(86f, 1370f, 996f, 1695f), Offset(860f, 1290f)),
+    TStep("Temel Bilgiler",
+        "Cins, sezon, yaşam alanı ve spor izi. Bilgisi olan türlerde koku, tat ve renk değişimi de yazar.",
+        RESULT, Rect(0f, 1200f, 1080f, 2215f), Rect(86f, 1710f, 996f, 2210f), Offset(1040f, 1560f)),
+    TStep("Zehirlenme kutusu",
+        "Zehirli ve ölümcül türlerde kırmızı bir kutu çıkar. İçinde zehrin adı, belirtilerin yemekten ne kadar sonra başladığı ve ilk yardım yazar. Düğmeler arama ekranını açar: 112 acil çağrı, 114 Ulusal Zehir Danışma Merkezi.",
+        extra = {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { FakeCall("112'yi ara"); FakeCall("114'ü ara") }
+        }),
+    TStep("Sayfanın devamı",
+        "• Ayırt edici özellikler: türü tanımaya yarayan özellikler\n• Benzer türlerden farkı: karıştırılan türler ve ayrım noktaları\n• Diğer olasılıklar: modelin ikinci ve üçüncü tahmini; dokununca açılır\n• Fotoğraflar farklı mantarlara aitse uygulama sizi uyarır."),
+    TStep("Unutmayın",
+        "Mantar zehirlenmeleri ölümcül olabilir. Uygulamanın sonucu ne olursa olsun, hiçbir mantarı yalnızca uygulamaya bakarak yemeyin; mutlaka bir uzmana gösterin.",
+        extra = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.Warning, null, tint = Color(0xFFB3261E), modifier = Modifier.size(40.dp))
+                Spacer(Modifier.width(10.dp))
+                Text("Şüphe varsa yemeyin.", fontWeight = FontWeight.Bold, color = Color(0xFFB3261E), fontSize = 17.sp)
+            }
+        }),
+)
 
 @Composable
 fun TutorialScreen(onDone: () -> Unit) {
-    val pages = listOf(
-        TPage(Icons.Outlined.School, "FungiLens'e hoş geldiniz",
-            "Bu kısa rehber uygulamadaki düğmeleri ve yazıları tanıtır. Sağa kaydırarak ilerleyin.") {
-            Bullet(Icons.Outlined.WifiOff, "İnternet gerekmez", "Tanıma tamamen telefonunuzda yapılır; ormanda çekmeden de çalışır.")
-            Bullet(Icons.Outlined.Checklist, "1000 tür", "Türkiye ve Avrupa'da görülen 1000 mantar türünü tanır.")
-            Bullet(Icons.Filled.Warning, "Yalnızca fikir verir", "Sonuçlar bilgi amaçlıdır. Hiçbir mantarı yalnızca uygulamaya bakarak yemeyin.", tint = Color(0xFFB3261E))
-        },
-        TPage(Icons.Outlined.AddAPhoto, "1. Üç fotoğraf yükleyin",
-            "Ana ekranda üç kutu vardır. Her biri mantarın farklı bir yüzü içindir:") {
-            MiniChip("Üstten", "Şapkanın üstü: renk, pullar, desen")
-            MiniChip("Yandan", "Şapka ve sap birlikte: halka, sap tabanı, volva")
-            MiniChip("Alttan", "Şapkanın altı: lameller ya da gözenekler")
-            Spacer(Modifier.height(8.dp))
-            Bullet(Icons.Filled.PhotoCamera, "Kamera ile çek", "Kutuya dokunun ve fotoğrafı hemen çekin.")
-            Bullet(Icons.Filled.PhotoLibrary, "Galeriden seç", "Daha önce çektiğiniz bir fotoğrafı seçin.")
-            Bullet(Icons.Outlined.Info, "İpuçları", "Üstteki şeritteki (i) düğmesi iyi fotoğraf çekme önerilerini açar.")
-        },
-        TPage(Icons.Filled.AutoAwesome, "2. Tanımla düğmesi",
-            "Fotoğraflar eklenince yeşil Tanımla düğmesine basın. Parantez içindeki sayı kaç fotoğraf eklediğinizi gösterir.") {
-            FakeButton("Tanımla (3/3)")
-            Spacer(Modifier.height(10.dp))
-            Bullet(Icons.Outlined.Info, "Tek fotoğraf da olur", "Ama üç açı en doğru sonucu verir.")
-            Bullet(Icons.Filled.Warning, "Farklı mantarlar uyarısı", "Fotoğraflar farklı mantarlara aitse uygulama sizi uyarır; aynı mantarın fotoğraflarını kullanın.", tint = Color(0xFFC77700))
-        },
-        TPage(Icons.Outlined.Checklist, "3. Sonuç kartı",
-            "Sonuç sayfasının en üstünde en olası tür yazar:") {
-            Surface(shape = RoundedCornerShape(14.dp), color = Color(0xFFF1F3F1), border = BorderStroke(1.dp, Color(0xFFD5DAD3))) {
-                Column(Modifier.fillMaxWidth().padding(12.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("Boletus edulis", fontStyle = FontStyle.Italic, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp, modifier = Modifier.weight(1f))
-                        Text("%86", fontWeight = FontWeight.Bold, fontSize = 20.sp, color = TGreen)
-                    }
-                    Text("Çörek Mantarı", fontWeight = FontWeight.SemiBold, color = TText)
-                }
-            }
-            Spacer(Modifier.height(8.dp))
-            Explain("Büyük yazı", "Türün bilimsel (Latince) adı.")
-            Explain("Altındaki yazı", "Türkçe adı. Varsa yöresel adları da \"Diğer yöresel adları\" satırında yazar.")
-            Explain("Yüzde ve çubuk", "Modelin ne kadar emin olduğu. Çubuk ne kadar doluysa o kadar emin.")
-            Explain("\"Model emin değil\"", "Oran düşükse çıkar; sonucu yalnızca fikir olarak kullanın.")
-            Explain("\"Tanınamadı\"", "Mantar listede yoksa ya da fotoğraf mantar değilse çıkar. Daha yakından ve iyi ışıkta çekin.")
-        },
-        TPage(Icons.Filled.Warning, "4. Yenilebilirlik etiketleri",
-            "Her türün renkli bir etiketi vardır. Etikete dokunursanız tüm kategorilerin açıklaması açılır.") {
-            listOf(Edibility.EDIBLE, Edibility.EDIBLE_WITH_CAUTION, Edibility.INEDIBLE, Edibility.POISONOUS, Edibility.DEADLY).forEach {
-                EdibilityRow(it)
-            }
-            Spacer(Modifier.height(6.dp))
-            Text("Zehirli ve ölümcül türlerin simgesi dikkat çekmek için yanıp söner.", fontSize = 13.sp, color = TText)
-        },
-        TPage(Icons.Filled.Call, "5. Zehirlenme kutusu",
-            "Zehirli ve ölümcül türlerde kırmızı bir kutu çıkar:") {
-            Explain("Zehir", "Mantarın içerdiği zehrin adı.")
-            Explain("Belirtiler başlar", "Belirtilerin yemekten ne kadar sonra başladığı. Bazı ölümcül türlerde belirtiler saatler ya da günler sonra başlar.")
-            Explain("İlk yardım", "Ne yapmanız gerektiği.")
-            Spacer(Modifier.height(6.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FakeCall("112'yi ara"); FakeCall("114'ü ara")
-            }
-            Spacer(Modifier.height(6.dp))
-            Text("112: Acil çağrı. 114: Ulusal Zehir Danışma Merkezi. Düğmeler arama ekranını açar.", fontSize = 13.sp, color = TText)
-        },
-        TPage(Icons.Outlined.Checklist, "6. Tür bilgileri",
-            "Sonuç kartının altında tür hakkında bilgiler bulunur:") {
-            Explain("Ayırt edici özellikler", "Türü tanımaya yarayan özellikler; elinizdeki mantarla karşılaştırın.")
-            Explain("Benzer türlerden farkı", "Karıştırılan türler ve onlardan nasıl ayrıldığı.")
-            Explain("Temel Bilgiler", "Cins, mevsim, yaşam alanı, spor izi, koku, tat ve renk değişimi.")
-            Explain("Diğer olasılıklar", "Modelin ikinci ve üçüncü tahminleri. Dokununca ayrıntıları açılır.")
-        },
-        TPage(Icons.Outlined.History, "7. Geçmiş Tanımlamalar",
-            "Ana ekrandaki Geçmiş Tanımlamalar düğmesi önceki tanımlamalarınızı açar.") {
-            Explain("Kayıt", "Her tanımlama fotoğrafları, tarihi ve (izin verdiyseniz) konumuyla saklanır.")
-            Explain("Aktar", "Seçtiğiniz kayıtları tablo (Excel/CSV) ya da fotoğraflı ZIP olarak paylaşın.")
-            Explain("Sil", "Seçtiğiniz kayıtları silin.")
-        },
-        TPage(Icons.Filled.Warning, "Unutmayın",
-            "Mantar zehirlenmeleri ölümcül olabilir.") {
-            Bullet(Icons.Filled.Warning, "Uzmana danışın", "Uygulamanın sonucu ne olursa olsun, yemeden önce mutlaka bir uzmana gösterin.", tint = Color(0xFFB3261E))
-            Bullet(Icons.Outlined.Info, "Şüphe varsa yemeyin", "Emin olmadığınız hiçbir mantarı yemeyin.")
-            Bullet(Icons.Outlined.School, "Bu rehberi tekrar açmak için", "Ana ekranın altındaki \"Nasıl kullanılır?\" yazısına dokunun.")
-        },
-    )
-    val pager = rememberPagerState { pages.size }
+    val pager = rememberPagerState { steps.size }
     val scope = rememberCoroutineScope()
-    val last = pager.currentPage == pages.lastIndex
+    val last = pager.currentPage == steps.lastIndex
 
     Column(Modifier.fillMaxSize().background(Color(0xFFF7FAF5)).safeDrawingPadding()) {
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
+        Row(Modifier.fillMaxWidth().padding(start = 20.dp, end = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("${pager.currentPage + 1} / ${steps.size}", color = TGreen, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
             if (!last) TextButton(onClick = onDone) { Text("Geç", color = TGreen, fontWeight = FontWeight.SemiBold) }
             else Spacer(Modifier.height(48.dp))
         }
         HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { i ->
-            val p = pages[i]
-            Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(horizontal = 24.dp)) {
-                Box(Modifier.size(64.dp).clip(CircleShape).background(TSoft), contentAlignment = Alignment.Center) {
-                    Icon(p.icon, null, tint = TGreen, modifier = Modifier.size(34.dp))
+            val s = steps[i]
+            Column(Modifier.fillMaxSize().padding(horizontal = 20.dp)) {
+                Text(s.title, fontWeight = FontWeight.ExtraBold, fontSize = 23.sp, color = TGreen, lineHeight = 27.sp)
+                Spacer(Modifier.height(10.dp))
+                if (s.image != null && s.crop != null) {
+                    Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Shot(s.image, s.crop, s.hl, s.from)
+                    }
+                    Spacer(Modifier.height(10.dp))
+                    Column(Modifier.verticalScroll(rememberScrollState())) {
+                        Text(s.text, fontSize = 15.sp, color = TText, lineHeight = 21.sp)
+                        s.extra?.let { Spacer(Modifier.height(8.dp)); it() }
+                    }
+                } else {
+                    Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                        Spacer(Modifier.height(8.dp))
+                        Text(s.text, fontSize = 16.sp, color = TText, lineHeight = 23.sp)
+                        s.extra?.let { Spacer(Modifier.height(16.dp)); it() }
+                    }
                 }
-                Spacer(Modifier.height(14.dp))
-                Text(p.title, fontWeight = FontWeight.ExtraBold, fontSize = 24.sp, color = TGreen, lineHeight = 28.sp)
-                Spacer(Modifier.height(8.dp))
-                Text(p.intro, fontSize = 15.sp, color = TText, lineHeight = 21.sp)
-                Spacer(Modifier.height(14.dp))
-                p.body()
-                Spacer(Modifier.height(16.dp))
             }
         }
         Row(Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                repeat(pages.size) { i ->
-                    Box(Modifier.size(if (i == pager.currentPage) 10.dp else 7.dp).clip(CircleShape)
-                        .background(if (i == pager.currentPage) TGreen else Color(0xFFC5D3C0)))
+            if (pager.currentPage > 0) {
+                TextButton(onClick = { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } }) {
+                    Text("Geri", color = TGreen, fontWeight = FontWeight.SemiBold)
                 }
             }
+            Spacer(Modifier.weight(1f))
             Button(
                 onClick = { if (last) onDone() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
                 colors = ButtonDefaults.buttonColors(containerColor = TGreen),
@@ -193,48 +211,107 @@ fun TutorialScreen(onDone: () -> Unit) {
     }
 }
 
+/** Ekran görüntüsünün bir bölgesini gösterir; [hl] dışını karartır, çerçeveler ve oka işaret eder. */
 @Composable
-private fun Bullet(icon: ImageVector, title: String, text: String, tint: Color = TGreen) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.Top) {
-        Icon(icon, null, tint = tint, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(12.dp))
-        Column {
-            Text(title, fontWeight = FontWeight.Bold, color = TText, fontSize = 15.sp)
-            Text(text, color = TText, fontSize = 14.sp, lineHeight = 19.sp)
-        }
+private fun Shot(name: String, crop: Rect, hl: Rect?, from: Offset?) {
+    val context = LocalContext.current
+    val img: ImageBitmap? = remember(name) {
+        runCatching { context.assets.open("tutorial/$name").use { BitmapFactory.decodeStream(it).asImageBitmap() } }.getOrNull()
     }
-}
-
-@Composable
-private fun Explain(label: String, text: String) {
-    Column(Modifier.fillMaxWidth().padding(vertical = 5.dp)) {
-        Text(label, fontWeight = FontWeight.Bold, color = TGreen, fontSize = 15.sp)
-        Text(text, color = TText, fontSize = 14.sp, lineHeight = 19.sp)
-    }
-}
-
-@Composable
-private fun MiniChip(title: String, text: String) {
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            Modifier.width(78.dp).clip(RoundedCornerShape(10.dp)).background(TSoft)
-                .border(1.dp, Color(0xFFC5D3C0), RoundedCornerShape(10.dp)).padding(vertical = 8.dp),
-            contentAlignment = Alignment.Center,
-        ) { Text(title, fontWeight = FontWeight.Bold, color = TGreen, fontSize = 14.sp) }
-        Spacer(Modifier.width(12.dp))
-        Text(text, color = TText, fontSize = 14.sp, modifier = Modifier.weight(1f))
-    }
-}
-
-@Composable
-private fun FakeButton(label: String) {
-    Row(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(50)).background(TGreen).padding(vertical = 14.dp),
-        horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically,
+    val pulse by rememberInfiniteTransition(label = "vurgu").animateFloat(
+        0.45f, 1f, infiniteRepeatable(tween(700), RepeatMode.Reverse), label = "vurgu",
+    )
+    Canvas(
+        Modifier
+            .aspectRatio(crop.width / crop.height, matchHeightConstraintsFirst = true)
+            .clip(RoundedCornerShape(14.dp))
+            .border(1.dp, Color(0xFFC5D3C0), RoundedCornerShape(14.dp)),
     ) {
-        Icon(Icons.Filled.AutoAwesome, null, tint = Color.White, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(8.dp))
-        Text(label, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+        if (img == null) return@Canvas
+        val k = img.width / 1080f
+        drawImage(
+            img,
+            srcOffset = IntOffset((crop.left * k).toInt(), (crop.top * k).toInt()),
+            srcSize = IntSize((crop.width * k).toInt(), (crop.height * k).toInt()),
+            dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+        )
+        if (hl == null) return@Canvas
+        val sc = size.width / crop.width
+        fun map(o: Offset) = Offset((o.x - crop.left) * sc, (o.y - crop.top) * sc)
+        val r = Rect(map(hl.topLeft), map(hl.bottomRight))
+        val corner = CornerRadius(14.dp.toPx())
+        val dim = Path().apply {
+            fillType = PathFillType.EvenOdd
+            addRect(Rect(Offset.Zero, size))
+            addRoundRect(RoundRect(r, corner))
+        }
+        drawPath(dim, Color.Black.copy(alpha = 0.55f))
+        drawRoundRect(Accent.copy(alpha = pulse), r.topLeft, Size(r.width, r.height), corner, style = Stroke(4.dp.toPx()))
+        if (from != null) drawArrow(map(from), r)
+    }
+}
+
+/** [start] noktasından vurgulanan kutunun kenarına kıvrık ok çizer. */
+private fun DrawScope.drawArrow(start: Offset, target: Rect) {
+    val gap = 6.dp.toPx()
+    val inset = 12.dp.toPx()
+    val px = start.x.coerceIn(target.left + inset, target.right - inset)
+    val py = start.y.coerceIn(target.top, target.bottom)
+    val end = when {
+        start.y > target.bottom -> Offset(px, target.bottom + gap)
+        start.y < target.top -> Offset(px, target.top - gap)
+        start.x > target.right -> Offset(target.right + gap, py)
+        else -> Offset(target.left - gap, py)
+    }
+    val dx = end.x - start.x
+    val dy = end.y - start.y
+    val len = hypot(dx, dy).coerceAtLeast(1f)
+    val bend = 0.2f
+    val ctrl = Offset((start.x + end.x) / 2 - dy / len * len * bend, (start.y + end.y) / 2 + dx / len * len * bend)
+    val path = Path().apply { moveTo(start.x, start.y); quadraticBezierTo(ctrl.x, ctrl.y, end.x, end.y) }
+    val ang = atan2(end.y - ctrl.y, end.x - ctrl.x)
+    val h = 16.dp.toPx()
+    val head = Path().apply {
+        moveTo(end.x - h * cos(ang - 0.45f), end.y - h * sin(ang - 0.45f))
+        lineTo(end.x, end.y)
+        lineTo(end.x - h * cos(ang + 0.45f), end.y - h * sin(ang + 0.45f))
+    }
+    for ((c, w) in listOf(Color.White to 8.dp.toPx(), Accent to 4.5.dp.toPx())) {
+        drawPath(path, c, style = Stroke(w, cap = StrokeCap.Round))
+        drawPath(head, c, style = Stroke(w, cap = StrokeCap.Round))
+    }
+    drawCircle(Color.White, 8.dp.toPx(), start)
+    drawCircle(Accent, 5.5.dp.toPx(), start)
+}
+
+@Composable
+private fun EdibilityLegend() {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        listOf(Edibility.EDIBLE, Edibility.EDIBLE_WITH_CAUTION, Edibility.INEDIBLE, Edibility.POISONOUS, Edibility.DEADLY).forEach { e ->
+            val s = e.style
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    Modifier.width(150.dp).background(s.background, RoundedCornerShape(50))
+                        .border(1.dp, s.border, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    EdibilityIcon(e, 18.dp, blink = true)
+                    Spacer(Modifier.width(6.dp))
+                    Text(s.label, color = s.color, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+                }
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    when (e) {
+                        Edibility.EDIBLE -> "Yenebilir kabul edilir."
+                        Edibility.EDIBLE_WITH_CAUTION -> "Pişirme, yaş gibi koşullarla."
+                        Edibility.INEDIBLE -> "Zehirsiz olabilir, yenmez."
+                        Edibility.POISONOUS -> "Zehirlenme yapar."
+                        Edibility.DEADLY -> "Öldürücü olabilir."
+                    },
+                    color = TText, fontSize = 13.sp,
+                )
+            }
+        }
     }
 }
 
@@ -248,32 +325,5 @@ private fun FakeCall(label: String) {
         Icon(Icons.Filled.Call, null, tint = Color(0xFF8C1D18), modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(6.dp))
         Text(label, color = Color(0xFF8C1D18), fontWeight = FontWeight.SemiBold)
-    }
-}
-
-@Composable
-private fun EdibilityRow(e: Edibility) {
-    val s = e.style
-    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-        Row(
-            Modifier.width(150.dp).background(s.background, RoundedCornerShape(50))
-                .border(1.dp, s.border, RoundedCornerShape(50)).padding(horizontal = 10.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            EdibilityIcon(e, 20.dp, blink = true)
-            Spacer(Modifier.width(8.dp))
-            Text(s.label, color = s.color, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-        }
-        Spacer(Modifier.width(10.dp))
-        Text(
-            when (e) {
-                Edibility.EDIBLE -> "Yenebilir kabul edilir."
-                Edibility.EDIBLE_WITH_CAUTION -> "Pişirme, yaş gibi koşullarla yenir."
-                Edibility.INEDIBLE -> "Zehirsiz olabilir ama yenmez."
-                Edibility.POISONOUS -> "Zehirlenmeye yol açar."
-                Edibility.DEADLY -> "Öldürücü olabilir."
-            },
-            color = TText, fontSize = 13.sp, modifier = Modifier.weight(1f),
-        )
     }
 }
