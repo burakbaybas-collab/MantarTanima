@@ -124,6 +124,7 @@ fun HomeScreen(
     onAnalyze: () -> Unit,
     historyCount: Int = 0,
     onOpenHistory: () -> Unit = {},
+    onOpenTutorial: () -> Unit = {},
 ) {
     val context = LocalContext.current
     // Konum izni ilk tanımada bir kez sorulur; verilmese de tanıma yapılır.
@@ -278,7 +279,16 @@ fun HomeScreen(
             }
 
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
+            Text(
+                "Nasıl kullanılır?",
+                color = DeepGreen, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable { onOpenTutorial() }
+                    .padding(horizontal = 8.dp, vertical = 6.dp),
+            )
+            Spacer(Modifier.height(4.dp))
             Text("Geliştirici", style = MaterialTheme.typography.labelSmall, color = DeepGreen.copy(alpha = 0.7f))
             Text(
                 DEVELOPER_NAME,

@@ -21,6 +21,8 @@ import com.burakbaybas.mantartanima.ui.ErrorScreen
 import com.burakbaybas.mantartanima.ui.HistoryInfoCard
 import com.burakbaybas.mantartanima.ui.HistoryScreen
 import com.burakbaybas.mantartanima.ui.HomeScreen
+import com.burakbaybas.mantartanima.ui.TutorialScreen
+import com.burakbaybas.mantartanima.ui.Tutorial
 import com.burakbaybas.mantartanima.ui.ResultScreen
 import com.burakbaybas.mantartanima.ui.theme.MantarTanimaTheme
 
@@ -41,7 +43,13 @@ class MainActivity : ComponentActivity() {
                         accepted = true
                     })
                 } else {
-                    AppContent()
+                    var showTutorial by remember { mutableStateOf(!Tutorial.isSeen(context)) }
+                    if (showTutorial) {
+                        BackHandler { Tutorial.markSeen(context); showTutorial = false }
+                        TutorialScreen(onDone = { Tutorial.markSeen(context); showTutorial = false })
+                    } else {
+                        AppContent(onOpenTutorial = { showTutorial = true })
+                    }
                 }
             }
         }
@@ -49,7 +57,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun AppContent() {
+private fun AppContent(onOpenTutorial: () -> Unit = {}) {
     val vm: MainViewModel = viewModel()
     val state by vm.state.collectAsState()
     val photos by vm.photos.collectAsState()
@@ -59,6 +67,7 @@ private fun AppContent() {
 
     when (val s = state) {
         UiState.Home -> HomeScreen(
+            onOpenTutorial = onOpenTutorial,
             photos = photos,
             isDemo = vm.isDemo,
             onPhotoSelected = vm::setPhoto,
