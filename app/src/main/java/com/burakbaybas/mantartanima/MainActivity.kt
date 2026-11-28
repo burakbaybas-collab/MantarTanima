@@ -44,7 +44,7 @@ class MainActivity : ComponentActivity() {
                         accepted = true
                     })
                 } else {
-                    var showTutorial by remember { mutableStateOf(!Tutorial.isSeen(context)) }
+                    var showTutorial by remember { mutableStateOf(false) }  // rehber yalnızca "Nasıl kullanılır?" ile açılır
                     if (showTutorial) {
                         BackHandler { Tutorial.markSeen(context); showTutorial = false }
                         TutorialScreen(onDone = { Tutorial.markSeen(context); showTutorial = false })
