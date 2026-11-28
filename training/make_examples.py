@@ -29,7 +29,8 @@ def main():
     ap.add_argument("--kaynak", default="", help="Birleştirmede öncelik için paket adı")
     ap.add_argument("--per", type=int, default=3)
     ap.add_argument("--cand", type=int, default=24)
-    ap.add_argument("--size", type=int, default=320)
+    ap.add_argument("--size", type=int, default=256)
+    ap.add_argument("--quality", type=int, default=62)
     args = ap.parse_args()
 
     from ai_edge_litert.interpreter import Interpreter
@@ -95,7 +96,7 @@ def main():
             img = Image.open(p).convert("RGB")
             img.thumbnail((args.size, args.size), Image.LANCZOS)
             name = f"{sp}_{n}.webp"
-            img.save(os.path.join(args.out, name), "WEBP", quality=72, method=6)
+            img.save(os.path.join(args.out, name), "WEBP", quality=args.quality, method=6)
             rows.append({"id": sp, "n": n, "file": name, "score": f"{score:.3f}", "top1": int(top1),
                          "license": LICENSE_TEXT[r["license"]], "attribution": r.get("attribution", ""),
                          "observation": r.get("observation", ""), "kaynak": args.kaynak})
