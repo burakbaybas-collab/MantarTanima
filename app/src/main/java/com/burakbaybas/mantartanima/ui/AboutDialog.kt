@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.PhotoLibrary
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -190,6 +191,10 @@ fun AboutDialog(onDismiss: () -> Unit) {
                 LinkBox(Icons.Outlined.Email, DEVELOPER_EMAIL) { uriHandler.openUri("mailto:$DEVELOPER_EMAIL") }
                 Spacer(Modifier.height(8.dp))
                 LinkBox(Icons.Outlined.PhotoCamera, "Instagram: $INSTAGRAM_HANDLE") { uriHandler.openUri(INSTAGRAM_URL) }
+                Spacer(Modifier.height(8.dp))
+                var showCredits by remember { mutableStateOf(false) }
+                LinkBox(Icons.Outlined.PhotoLibrary, "Fotoğraf kaynakları ve lisanslar") { showCredits = true }
+                if (showCredits) PhotoCreditsDialog { showCredits = false }
             }
         }
     }

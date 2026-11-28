@@ -30,9 +30,10 @@ for sid in sorted(best):
     _, pk, rows = best[sid]
     for r in sorted(rows, key=lambda r: int(r["n"])):
         shutil.copy(os.path.join(src, pk, r["file"]), os.path.join(out_dir, r["file"]))
-        lines.append([sid, r["file"], r["license"], r["attribution"].replace("\t", " ")])
+        att = " ".join(r["attribution"].replace('"', "").split())  # satır sonu/sekme temizliği
+        lines.append([sid, r["file"], r["license"], att])
 with open(os.path.join(assets, "examples.tsv"), "w", newline="", encoding="utf-8") as f:
-    w = csv.writer(f, delimiter="\t")
+    w = csv.writer(f, delimiter="\t", quoting=csv.QUOTE_NONE, escapechar="\\")
     w.writerow(["id", "file", "license", "attribution"])
     w.writerows(lines)
 size = sum(os.path.getsize(os.path.join(out_dir, x)) for x in os.listdir(out_dir))

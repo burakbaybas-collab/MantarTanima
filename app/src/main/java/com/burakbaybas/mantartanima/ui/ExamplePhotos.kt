@@ -9,6 +9,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.TextButton
 import androidx.compose.ui.text.font.FontStyle
 import com.burakbaybas.mantartanima.data.Species
+import com.burakbaybas.mantartanima.data.SpeciesCatalog
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -74,7 +77,7 @@ private fun credit(p: ExamplePhoto): String {
         .replace(Regex("""^\(c\)\s*""", RegexOption.IGNORE_CASE), "")
         .replace(Regex(""",?\s*(some|all|no) rights reserved.*$""", RegexOption.IGNORE_CASE), "")
         .trim()
-    return if (name.isBlank()) p.license else "© $name · ${p.license}"
+    return if (name.isBlank()) "${p.license} · iNaturalist" else "© $name · ${p.license} · iNaturalist"
 }
 
 @Composable
@@ -207,6 +210,44 @@ fun SpeciesPhotosDialog(species: Species, onDismiss: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(10.dp))
+            TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
+                Text("Kapat", color = Color(0xFF17502A), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+/** Örnek fotoğrafların hak sahipleri ve lisansları (Creative Commons atıf yükümlülüğü). */
+@Composable
+fun PhotoCreditsDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val rows = remember {
+        SpeciesCatalog.all.flatMap { sp ->
+            ExampleCatalog.forSpecies(context, sp.id).map { sp.latinName to credit(it) }
+        }
+    }
+    Dialog(onDismissRequest = onDismiss) {
+        Column(Modifier.clip(RoundedCornerShape(18.dp)).background(Color.White).padding(16.dp)) {
+            Text("Fotoğraf kaynakları ve lisanslar", fontWeight = FontWeight.ExtraBold, fontSize = 19.sp, color = Color(0xFF17502A))
+            Spacer(Modifier.height(6.dp))
+            Text(
+                "Türlerin örnek fotoğrafları iNaturalist kullanıcılarına aittir ve Creative Commons lisanslarıyla " +
+                    "kullanılmaktadır: CC0 (kamu malı), CC BY 4.0 (atıf) ve CC BY-NC 4.0 (atıf, ticari olmayan kullanım). " +
+                    "Fotoğraflar uygulamaya sığması için küçültülmüş ve sıkıştırılmıştır; başka bir değişiklik yapılmamıştır. " +
+                    "Lisans metinleri: creativecommons.org/licenses/by/4.0, creativecommons.org/licenses/by-nc/4.0, " +
+                    "creativecommons.org/publicdomain/zero/1.0. Kaynak: inaturalist.org",
+                fontSize = 13.sp, color = Color(0xFF33373D), lineHeight = 18.sp,
+            )
+            Spacer(Modifier.height(10.dp))
+            LazyColumn(Modifier.weight(1f, fill = false).heightIn(max = 420.dp)) {
+                items(rows.size) { i ->
+                    val (name, c) = rows[i]
+                    Column(Modifier.padding(vertical = 4.dp)) {
+                        Text(name, fontStyle = FontStyle.Italic, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                        Text(c, fontSize = 12.sp, color = Color(0xFF5F6660))
+                    }
+                }
+            }
             TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                 Text("Kapat", color = Color(0xFF17502A), fontWeight = FontWeight.Bold)
             }
