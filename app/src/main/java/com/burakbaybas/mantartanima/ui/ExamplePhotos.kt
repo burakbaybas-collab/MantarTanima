@@ -3,6 +3,12 @@ package com.burakbaybas.mantartanima.ui
 import android.content.Context
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.text.font.FontStyle
+import com.burakbaybas.mantartanima.data.Species
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -76,13 +82,7 @@ fun ExamplePhotos(speciesId: String) {
     val context = LocalContext.current
     val photos = remember(speciesId) { ExampleCatalog.forSpecies(context, speciesId) }
     if (photos.isEmpty()) return
-    val images: List<ImageBitmap?> = remember(speciesId) {
-        photos.map { p ->
-            runCatching {
-                context.assets.open("examples/${p.file}").use { BitmapFactory.decodeStream(it).asImageBitmap() }
-            }.getOrNull()
-        }
-    }
+    val images: List<ImageBitmap?> = remember(speciesId) { loadExampleImages(context, photos) }
     var open by remember { mutableStateOf<Int?>(null) }
 
     Card(
@@ -154,4 +154,62 @@ object TaxonomyCatalog {
             }.toMap()
         }
     }.getOrDefault(emptyMap())
+}
+
+private fun loadExampleImages(context: Context, photos: List<ExamplePhoto>): List<ImageBitmap?> = photos.map { p ->
+    runCatching {
+        context.assets.open("examples/${p.file}").use { BitmapFactory.decodeStream(it).asImageBitmap() }
+    }.getOrNull()
+}
+
+/** Benzer türün adına dokununca: üstte türün adı, altında 3 örnek fotoğrafı. */
+@Composable
+fun SpeciesPhotosDialog(species: Species, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val photos = remember(species.id) { ExampleCatalog.forSpecies(context, species.id) }
+    val images = remember(species.id) { loadExampleImages(context, photos) }
+    var sel by remember(species.id) { mutableStateOf(0) }
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            Modifier.clip(RoundedCornerShape(18.dp)).background(Color.White)
+                .verticalScroll(rememberScrollState()).padding(16.dp),
+        ) {
+            Text(species.latinName, fontStyle = FontStyle.Italic, fontWeight = FontWeight.ExtraBold, fontSize = 21.sp,
+                color = Color(0xFF1F2A22))
+            if (species.turkishName.isNotBlank()) {
+                Text(species.turkishName, fontWeight = FontWeight.SemiBold, fontSize = 16.sp, color = Color(0xFF444A45))
+            }
+            Spacer(Modifier.height(8.dp))
+            EdibilityBadge(species.edibility)
+            Spacer(Modifier.height(12.dp))
+            if (images.none { it != null }) {
+                Text("Bu tür için örnek fotoğraf yok.", fontSize = 14.sp, color = Color(0xFF5F6660))
+            } else {
+                images.getOrNull(sel)?.let { img ->
+                    Image(img, null, contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(12.dp)))
+                    Text(credit(photos[sel]), fontSize = 11.sp, color = Color(0xFF5F6660),
+                        modifier = Modifier.padding(top = 4.dp))
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    images.forEachIndexed { i, img ->
+                        if (img != null) {
+                            Image(
+                                img, "Örnek fotoğraf ${i + 1}", contentScale = ContentScale.Crop,
+                                modifier = Modifier.weight(1f).aspectRatio(1f).clip(RoundedCornerShape(8.dp))
+                                    .border(if (i == sel) 3.dp else 0.dp, Color(0xFF2E7D32), RoundedCornerShape(8.dp))
+                                    .clickable { sel = i },
+                            )
+                        } else Spacer(Modifier.weight(1f))
+                    }
+                    repeat(3 - images.size) { Spacer(Modifier.weight(1f)) }
+                }
+            }
+            Spacer(Modifier.height(10.dp))
+            TextButton(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
+                Text("Kapat", color = Color(0xFF17502A), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
 }

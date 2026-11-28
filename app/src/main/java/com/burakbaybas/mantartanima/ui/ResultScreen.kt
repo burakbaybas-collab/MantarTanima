@@ -65,6 +65,8 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -358,7 +360,6 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
                     add("Tat" to d.taste)
                     add("Renk değişimi" to d.colorChange)
                 }
-                if (species.lookalikes.isNotEmpty()) add("Benzer türler" to species.lookalikes.joinToString(", "))
             }.filter { it.second.isNotBlank() }
             Column(
                 Modifier
@@ -368,6 +369,19 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
             ) {
                 rows.forEachIndexed { i, (k, v) ->
                     InfoTableRow(k, v, shaded = i % 2 == 0)
+                }
+                if (species.lookalikes.isNotEmpty()) {
+                    Row(
+                        Modifier.fillMaxWidth().background(if (rows.size % 2 == 0) Color(0xFFF4F7F2) else Color.White)
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.Top,
+                    ) {
+                        Text("Benzer türler", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.width(104.dp))
+                        Column(Modifier.weight(1f)) {
+                            species.lookalikes.forEach { SpeciesLink(it) }
+                        }
+                    }
                 }
             }
             }
@@ -458,11 +472,34 @@ private fun CompareSection(items: List<Pair<String, String>>) {
         items.forEachIndexed { i, (name, diff) ->
             Column(Modifier.fillMaxWidth().background(if (i % 2 == 0) Color(0xFFF4F7F2) else Color.White)
                 .padding(horizontal = 12.dp, vertical = 8.dp)) {
-                Text(name, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+                SpeciesLink(name)
                 Text(diff, style = MaterialTheme.typography.bodySmall)
             }
         }
     }
+}
+
+/** Türün adı; uygulamada kayıtlı bir türse dokununca örnek fotoğrafları açılır. */
+@Composable
+private fun SpeciesLink(text: String) {
+    val target = remember(text) { SpeciesCatalog.findByName(text) }
+    var open by remember { mutableStateOf(false) }
+    if (target == null) {
+        Text(text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic)
+        return
+    }
+    Row(
+        Modifier.clip(RoundedCornerShape(6.dp)).clickable { open = true }.padding(vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic,
+            color = Color(0xFF1B5E2E), textDecoration = TextDecoration.Underline, modifier = Modifier.weight(1f, fill = false),
+        )
+        Spacer(Modifier.width(6.dp))
+        Icon(Icons.Outlined.PhotoLibrary, "Fotoğrafları göster", tint = Color(0xFF1B5E2E), modifier = Modifier.size(16.dp))
+    }
+    if (open) SpeciesPhotosDialog(target) { open = false }
 }
 
 @Composable

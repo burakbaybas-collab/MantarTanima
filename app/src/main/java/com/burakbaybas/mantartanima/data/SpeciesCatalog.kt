@@ -106,4 +106,14 @@ object SpeciesCatalog {
     }
 
     fun find(id: String): Species? = byId[id.trim().lowercase()]
+
+    private val byLatin: Map<String, Species> by lazy { byId.values.associateBy { it.latinName.lowercase() } }
+
+    /** "Agaricus campestris (Çayır mantarı)" gibi bir metnin başındaki Latince addan türü bulur. */
+    fun findByName(text: String): Species? {
+        val m = Regex("""^\s*([A-Z][a-z-]+ [a-z-]+)""").find(text) ?: return null
+        val name = m.groupValues[1].lowercase()
+        if (name.endsWith(" türleri") || name.endsWith(" spp")) return null
+        return byLatin[name] ?: byId[name.replace(' ', '_')]
+    }
 }
