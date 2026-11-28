@@ -79,10 +79,35 @@ class TfliteClassifier(
             .map { Prediction(labels[it], probs[it]) }
     }
 
+    /**
+     * Test zamanı çoğaltma (TTA): fotoğrafın kendisi, aynalanmışı ve ortadan yakınlaştırılmış hali
+     * ayrı ayrı değerlendirilip ortalanır. Mantar karede küçük kaldığında ve açı farklarında isabeti artırır.
+     */
     private fun probabilitiesFor(bitmap: Bitmap): FloatArray {
+        val views = listOf(bitmap, mirrored(bitmap), centerCrop(bitmap, 0.8f))
+        val sum = FloatArray(labels.size)
+        for (v in views) {
+            val p = runOnce(v)
+            for (i in sum.indices) sum[i] += p[i] / views.size
+        }
+        return sum
+    }
+
+    private fun runOnce(bitmap: Bitmap): FloatArray {
         val output = Array(1) { FloatArray(labels.size) }
         interpreter.run(toInputBuffer(bitmap), output)
         return output[0].let { if (looksLikeProbabilities(it)) it else softmax(it) }
+    }
+
+    private fun mirrored(b: Bitmap): Bitmap {
+        val m = android.graphics.Matrix().apply { preScale(-1f, 1f) }
+        return Bitmap.createBitmap(b, 0, 0, b.width, b.height, m, true)
+    }
+
+    private fun centerCrop(b: Bitmap, frac: Float): Bitmap {
+        val w = (b.width * frac).toInt().coerceAtLeast(1)
+        val h = (b.height * frac).toInt().coerceAtLeast(1)
+        return Bitmap.createBitmap(b, (b.width - w) / 2, (b.height - h) / 2, w, h)
     }
 
     override fun close() = interpreter.close()
