@@ -1,0 +1,81 @@
+name: Örnek fotoğrafları seç
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  liste:
+    runs-on: ubuntu-latest
+    outputs:
+      paketler: ${{ steps.l.outputs.paketler }}
+    steps:
+      - id: l
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          P=$(gh api repos/${{ github.repository }}/releases/tags/egitim-verisi \
+            -q '[.assets[].name | select(startswith("veri-inat-") or startswith("veri-yama"))]')
+          echo "paketler=$P" >> "$GITHUB_OUTPUT"
+          echo "$P"
+
+  sec:
+    needs: liste
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        paket: ${{ fromJson(needs.liste.outputs.paketler) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Paketi indir ve aç
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download egitim-verisi -p "${{ matrix.paket }}" -D /tmp/pk
+          mkdir -p /tmp/veri && tar -xf "/tmp/pk/${{ matrix.paket }}" -C /tmp/veri && rm -rf /tmp/pk
+          echo "Tür klasörü: $(ls /tmp/veri/data | wc -l)"
+      - name: Örnekleri seç
+        run: |
+          pip install -q ai-edge-litert pillow numpy
+          N="${{ matrix.paket }}"; N="${N%.tar}"
+          python training/make_examples.py --data /tmp/veri/data --out "out/$N" --kaynak "$N"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ornek-${{ matrix.paket }}
+          path: out/
+          retention-days: 3
+
+  birlestir:
+    needs: sec
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: ornek-*
+          path: parcalar
+          merge-multiple: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Birleştir
+        run: python training/merge_examples.py parcalar app/src/main/assets
+      - name: Kaydet ve APK derlemesini başlat
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898699+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/examples app/src/main/assets/examples.tsv
+          git commit -m "Her tür için 3 örnek fotoğraf" || exit 0
+          git pull --rebase -q && git push
+          gh workflow run build-apk.yml --ref main

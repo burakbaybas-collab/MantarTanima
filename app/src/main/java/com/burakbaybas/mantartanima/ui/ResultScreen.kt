@@ -158,6 +158,10 @@ fun ResultScreen(
                     }
                 }
             }
+            val topId = predictions?.firstOrNull()?.takeIf { it.confidence >= VERY_LOW_CONFIDENCE }?.label
+            if (noMushroom == null && mismatch == null && !isDemo && topId != null) {
+                item { ExamplePhotos(topId) }
+            }
             if (infoCard != null) item { infoCard() }
             when {
                 mismatch != null -> item { MismatchCard(mismatch) }
