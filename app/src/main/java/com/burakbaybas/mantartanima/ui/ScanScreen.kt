@@ -118,7 +118,7 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
             Spacer(Modifier.height(16.dp))
 
             val photoIdx = idx.coerceAtMost(list.lastIndex).coerceAtLeast(0)
-            Box(Modifier.fillMaxWidth().aspectRatio(1f).shadow(10.dp, RoundedCornerShape(22.dp)).clip(RoundedCornerShape(22.dp))
+            Box(Modifier.fillMaxWidth(0.72f).aspectRatio(1f).shadow(10.dp, RoundedCornerShape(22.dp)).clip(RoundedCornerShape(22.dp))
                 .background(Color.Black).border(3.dp, Color.White, RoundedCornerShape(22.dp))) {
                 Crossfade(targetState = list.getOrNull(photoIdx), label = "foto") { item ->
                     if (item != null) {
