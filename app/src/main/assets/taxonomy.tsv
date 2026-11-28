@@ -344,6 +344,7 @@ helvella_elastica	Fungi	Ascomycota	Pezizomycetes	Pezizales	Helvellaceae
 porodaedalea_pini	Fungi	Basidiomycota	Agaricomycetes	Hymenochaetales	Hymenochaetaceae
 mycetinis_alliaceus	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Omphalotaceae
 crinipellis_scabella	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Marasmiaceae
+pseudohydnum_gelatinosum	Fungi	Basidiomycota	Agaricomycetes	Auriculariales	
 lactarius_controversus	Fungi	Basidiomycota	Agaricomycetes	Russulales	Russulaceae
 morchella_importuna	Fungi	Ascomycota	Pezizomycetes	Pezizales	Morchellaceae
 coriolopsis_gallica	Fungi	Basidiomycota	Agaricomycetes	Polyporales	Polyporaceae
@@ -379,11 +380,13 @@ kretzschmaria_deusta	Fungi	Ascomycota	Sordariomycetes	Xylariales	Xylariaceae
 mycena_tenerrima	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Mycenaceae
 marasmius_rotula	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Marasmiaceae
 coprinopsis_nivea	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Psathyrellaceae
+trichaptum_biforme	Fungi	Basidiomycota	Agaricomycetes	Hymenochaetales	
 pluteus_salicinus	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Pluteaceae
 clavaria_fragilis	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Clavariaceae
 geastrum_rufescens	Fungi	Basidiomycota	Agaricomycetes	Geastrales	Geastraceae
 coprinopsis_romagnesiana	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Psathyrellaceae
 byssomerulius_corium	Fungi	Basidiomycota	Agaricomycetes	Polyporales	Irpicaceae
+trichaptum_fuscoviolaceum	Fungi	Basidiomycota	Agaricomycetes	Hymenochaetales	
 mycena_purpureofusca	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Mycenaceae
 ascocoryne_sarcoides	Fungi	Ascomycota	Leotiomycetes	Helotiales	Gelatinodiscaceae
 russula_chloroides	Fungi	Basidiomycota	Agaricomycetes	Russulales	Russulaceae
@@ -413,6 +416,7 @@ leccinellum_crocipodium	Fungi	Basidiomycota	Agaricomycetes	Boletales	Boletaceae
 hydropodia_subalpina	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Porotheleaceae
 crepidotus_calolepis	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Crepidotaceae
 rubroboletus_rhodoxanthus	Fungi	Basidiomycota	Agaricomycetes	Boletales	Boletaceae
+trichaptum_abietinum	Fungi	Basidiomycota	Agaricomycetes	Hymenochaetales	
 phlebia_tremellosa	Fungi	Basidiomycota	Agaricomycetes	Polyporales	Meruliaceae
 psathyrella_ammophila	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Psathyrellaceae
 peziza_varia	Fungi	Ascomycota	Pezizomycetes	Pezizales	Pezizaceae
@@ -959,6 +963,7 @@ tricholoma_apium	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Tricholomataceae
 collybiopsis_confluens	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Omphalotaceae
 mycenastrum_corium	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Agaricaceae
 pseudombrophila_guldeniae	Fungi	Ascomycota	Pezizomycetes	Pezizales	Pseudombrophilaceae
+guepinia_helvelloides	Fungi	Basidiomycota	Agaricomycetes	Auriculariales	
 suillus_pseudobrevipes	Fungi	Basidiomycota	Agaricomycetes	Boletales	Suillaceae
 lactarius_lignyotus	Fungi	Basidiomycota	Agaricomycetes	Russulales	Russulaceae
 russula_veternosa	Fungi	Basidiomycota	Agaricomycetes	Russulales	Russulaceae
