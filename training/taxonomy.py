@@ -46,6 +46,9 @@ def main():
             print("Eksik alan:", name, r)
     if missing:
         print("Bulunamayan:", ", ".join(missing))
+        for name in missing:
+            m = get("species/match", {"name": name, "verbose": "true"})
+            print("HAM", name, {k: m.get(k) for k in ("matchType", "rank", "status", "scientificName", "kingdom", "phylum", "class", "order", "family", "note")})
     from collections import Counter
     print("Alemler:", Counter(r["kingdom"] for r in results if r))
     print("Bölümler:", Counter(r["phylum"] for r in results if r))
