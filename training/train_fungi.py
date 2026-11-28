@@ -25,7 +25,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 from timm.data import resolve_data_config
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, Sampler
 from PIL import Image, ImageFile
 from torchvision import datasets, transforms
 
@@ -142,6 +142,32 @@ def merge_sources(species_ids, data_dir, own_dir, tmp, val_frac=0.15, limit=None
     return classes, counts, skipped
 
 
+class PerClassSampler(Sampler):
+    """Her epoch'ta her türden en çok n fotoğraf (her seferinde farklı rastgele seçim).
+    Epoch'lar kısalır; birkaç epoch boyunca model türün tüm fotoğraflarını yine de görür."""
+
+    def __init__(self, targets, n, seed=0):
+        self.by_class = {}
+        for i, t in enumerate(targets):
+            self.by_class.setdefault(t, []).append(i)
+        self.n, self.seed, self.epoch = n, seed, 0
+        self.length = sum(min(n, len(v)) for v in self.by_class.values())
+
+    def set_epoch(self, e):
+        self.epoch = e
+
+    def __iter__(self):
+        rnd = random.Random(self.seed * 1000 + self.epoch)
+        idx = []
+        for v in self.by_class.values():
+            idx += v if len(v) <= self.n else rnd.sample(v, self.n)
+        rnd.shuffle(idx)
+        return iter(idx)
+
+    def __len__(self):
+        return self.length
+
+
 class ExportWrapper(nn.Module):
     """Uygulamanın verdiği girdiyi (NHWC, 0..1) modele uygun hale getirir, olasılık döndürür."""
 
@@ -216,6 +242,8 @@ def main():
     ap.add_argument("--model", default=BASE_MODEL, help="timm / Hugging Face temel model adı")
     ap.add_argument("--img", type=int, default=224, help="Girdi çözünürlüğü (piksel)")
     ap.add_argument("--batch", type=int, default=48)
+    ap.add_argument("--per-epoch", type=int, default=0, help="Her epoch'ta tür başına en çok bu kadar fotoğraf (0 = hepsi)")
+    ap.add_argument("--bench", type=int, default=0, help="Hız denemesi: bu kadar adım eğit, hızı ve tahmini süreyi yaz, çık")
     ap.add_argument("--lr", type=float, default=1.5e-4, help="Tam ince ayar öğrenme hızı")
     ap.add_argument("--calibrate-only", action="store_true", help="Eğitme; --init modelinin sıcaklığını ölç")
     ap.add_argument("--init", default="", help="Eğitilmiş bir modelden (best_model.pt) başla, ör. çözünürlük artırırken")
@@ -297,8 +325,11 @@ def main():
     assert train_ds.classes == classes == val_ds.classes
     workers = max(1, min(ncpu - 1, 12))
     pin = DEVICE.type == "cuda"
-    train_dl = DataLoader(train_ds, batch_size=args.batch, shuffle=True, num_workers=workers,
-                          persistent_workers=True, pin_memory=pin, drop_last=True)
+    sampler = PerClassSampler(train_ds.targets, args.per_epoch, SEED) if args.per_epoch > 0 else None
+    train_dl = DataLoader(train_ds, batch_size=args.batch, shuffle=sampler is None, sampler=sampler,
+                          num_workers=workers, persistent_workers=True, pin_memory=pin, drop_last=True,
+                          prefetch_factor=4)
+    print(f"Epoch başına {len(train_dl) * args.batch} fotoğraf ({len(train_dl)} adım), işçi: {workers}", flush=True)
     val_dl = DataLoader(val_ds, batch_size=args.batch * 2, shuffle=False, num_workers=workers,
                         persistent_workers=True, pin_memory=pin)
     if args.calibrate_only:
@@ -349,13 +380,15 @@ def main():
     budget = args.hours * 3600
     epoch = start_epoch
     while not done and epoch < args.max_epochs:
-        want = "head" if epoch < args.head_epochs else "full"
+        want = "head" if epoch < args.head_epochs and not args.bench else "full"
         if want != phase:
             phase = want
             opt, sched = make_opt(phase)
         model.train()
+        if sampler is not None:
+            sampler.set_epoch(epoch)
         t0, seen, run_loss = time.time(), 0, 0.0
-        for x, y in train_dl:
+        for step, (x, y) in enumerate(train_dl, 1):
             x, y = x.to(DEVICE, non_blocking=True), y.to(DEVICE, non_blocking=True)
             opt.zero_grad(set_to_none=True)
             with torch.autocast(DEVICE.type, enabled=DEVICE.type == "cuda"):
@@ -366,6 +399,19 @@ def main():
             sched.step()
             seen += len(y)
             run_loss += loss.item() * len(y)
+            if step % 200 == 0 or step == args.bench:
+                el = time.time() - t0
+                speed = seen / el
+                left = (len(train_dl) - step) * args.batch / speed
+                print(f"  adım {step}/{len(train_dl)}  {speed:.0f} foto/sn  bu epoch kalan ~{left / 60:.0f} dk", flush=True)
+            if args.bench and step >= args.bench:
+                el = time.time() - t0
+                speed = seen / el
+                ep_min = len(train_dl) * args.batch / speed / 60
+                total_h = (ep_min * (args.max_epochs - args.head_epochs) + ep_min * 0.5 * args.head_epochs) / 60
+                print(f"\nHIZ DENEMESİ: {speed:.0f} foto/sn (tam eğitim aşaması)", flush=True)
+                print(f"Bir epoch ~{ep_min:.0f} dk; {args.max_epochs} epoch'luk eğitim ~{total_h:.1f} saat.", flush=True)
+                return
         acc, _, _ = evaluate(model, val_dl, len(classes))
         dt = time.time() - t0
         print(f"Epoch {epoch + 1}/{args.max_epochs} ({'sınıflandırıcı' if phase == 'head' else 'tam ince ayar'}): "

@@ -4,12 +4,14 @@ Ne yapar:
   1. GitHub'dan güncel eğitim kodunu, tür listesini ve temizlik listesini (haric.csv) indirir.
   2. temizlik.py'nin indirdiği paketleri (C:\\FungiLens\\veri) klasörlere açar
      ve yeniden indirilen 7 türün yamasını uygular.
-  3. Eğitimi başlatır (RTX 5060 ile ~7-9 saat). Kapanırsa yeniden çalıştırın:
-     açılmış veriyi tekrar açmaz.
-  4. Sonuç: C:\\FungiLens\\egitim\\out\\best_model.pt ve rapor_fungi.md
+  3. Büyük fotoğrafları bir kez 448 piksele küçültür (eğitim hızlanır).
+  4. Eğitimi başlatır (384 piksel, RTX 5060 ile ~12-18 saat). Kapanırsa yeniden çalıştırın:
+     kaldığı yerden devam eder.
+  5. Sonuç: C:\\FungiLens\\egitim\\out384\\best_model.pt ve rapor_fungi.md
 
 Çalıştırma (C:\\FungiLens\\sunucu klasöründe):
-    venv\\Scripts\\python egit_pc.py
+    venv\\Scripts\\python egit_pc.py --deneme     (yaklaşık 20 dk hız denemesi)
+    venv\\Scripts\\python egit_pc.py              (tam eğitim)
 """
 import io
 import os
@@ -31,11 +33,12 @@ CODE = WORK / "kod"
 DATA = WORK / "data"
 DATA_FT = WORK / "data_ft"
 DATA_GBIF = WORK / "data_gbif"
-OUT = WORK / "out"
+OUT = WORK / "out384"
 FOTOLAR = ROOT / "fotograflar"   # kendi fotoğraflarınız: fotograflar\Amanita virosa\*.jpg
 
 MODEL = "hf-hub:BVRA/tf_efficientnet_b3.in1k_ft_df20_299"
-IMG, BATCH, PER_SPECIES, EPOCHS, HOURS = 299, 32, 1000, 12, 9.0
+IMG, BATCH, PER_SPECIES, PER_EPOCH, EPOCHS, HOURS = 384, 20, 1000, 450, 9, 60.0
+DENEME = "--deneme" in sys.argv
 
 
 class ConcatReader(io.RawIOBase):
@@ -160,6 +163,17 @@ def step_data():
         g_marker.write_text(g_stamp)
 
 
+def step_shrink():
+    marker = WORK / ".kucultuldu"
+    if marker.exists():
+        return
+    print("== Büyük fotoğraflar küçültülüyor (bir kez, 20-60 dk) ==", flush=True)
+    dirs = [str(d) for d in (DATA, DATA_FT, DATA_GBIF) if d.exists()]
+    rc = subprocess.call([sys.executable, "training/shrink_images.py", *dirs], cwd=CODE)
+    if rc == 0:
+        marker.write_text("ok")
+
+
 def step_own():
     """C:\\FungiLens\\fotograflar altındaki tür klasörlerini eğitime ekler (en yüksek öncelikli kaynak)."""
     FOTOLAR.mkdir(parents=True, exist_ok=True)
@@ -201,16 +215,22 @@ def step_train():
         "--exclude", "training/haric.csv",
         "--model", MODEL, "--img", str(IMG), "--batch", str(BATCH),
         "--limit-per-class", str(PER_SPECIES), "--head-epochs", "1",
-        "--max-epochs", str(EPOCHS), "--patience", "4", "--hours", str(HOURS),
+        "--max-epochs", str(EPOCHS), "--patience", "3", "--hours", str(HOURS), "--per-epoch", str(PER_EPOCH),
         "--out", str(OUT), "--report", str(OUT / "rapor_fungi.md"), "--ckpt", str(ckpt),
         "--final", "--no-export",
     ]
-    if ckpt.exists():
+    if DENEME:
+        cmd += ["--bench", "400"]
+        print("  HIZ DENEMESİ: 400 adım eğitilip tahmini süre yazılacak", flush=True)
+    elif ckpt.exists():
         cmd.append("--resume")
         print("  Önceki eğitimin kaldığı yerden devam ediliyor", flush=True)
     rc = subprocess.call(cmd, cwd=CODE, env=env)
     if rc != 0:
         raise SystemExit(f"Eğitim hata ile bitti (kod {rc}). Ekranın fotoğrafını gönderin.")
+    if DENEME:
+        print("\nDeneme bitti. Ekranın fotoğrafını gönderin; tam eğitim için --deneme olmadan çalıştırın.", flush=True)
+        return
     print(f"\nBitti. Model: {OUT / 'best_model.pt'}", flush=True)
     print(f"Rapor: {OUT / 'rapor_fungi.md'}", flush=True)
 
@@ -219,6 +239,7 @@ if __name__ == "__main__":
     t0 = time.time()
     step_code()
     step_data()
+    step_shrink()
     step_own()
     step_train()
     print(f"Toplam süre: {(time.time() - t0) / 3600:.1f} saat")
