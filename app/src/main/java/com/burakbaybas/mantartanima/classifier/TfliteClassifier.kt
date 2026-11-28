@@ -85,19 +85,9 @@ class TfliteClassifier(
             .map { Prediction(labels[it], probs[it]) }
     }
 
-    /**
-     * Test zamanı çoğaltma (TTA): fotoğrafın kendisi, aynalanmışı ve ortadan yakınlaştırılmış hali
-     * ayrı ayrı değerlendirilip ortalanır. Mantar karede küçük kaldığında ve açı farklarında isabeti artırır.
-     */
-    private fun probabilitiesFor(bitmap: Bitmap): FloatArray {
-        val views = listOf(bitmap, mirrored(bitmap), centerCrop(bitmap, 0.8f))
-        val sum = FloatArray(labels.size)
-        for (v in views) {
-            val p = runOnce(v)
-            for (i in sum.indices) sum[i] += p[i] / views.size
-        }
-        return sum
-    }
+    // Test zamanı çoğaltma (ayna + yakınlaştırma) şimdilik kapalı: hız için tek bakış.
+    // Açmak için views = listOf(bitmap, mirrored(bitmap), centerCrop(bitmap, 0.8f)) ortalaması kullanılabilir.
+    private fun probabilitiesFor(bitmap: Bitmap): FloatArray = runOnce(bitmap)
 
     private fun runOnce(bitmap: Bitmap): FloatArray {
         val output = Array(1) { FloatArray(labels.size) }
