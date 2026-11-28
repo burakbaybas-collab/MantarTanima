@@ -28,7 +28,8 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--kaynak", default="", help="Birleştirmede öncelik için paket adı")
     ap.add_argument("--per", type=int, default=3)
-    ap.add_argument("--cand", type=int, default=24)
+    ap.add_argument("--cand", type=int, default=40)
+    ap.add_argument("--detector", default="app/src/main/assets/detector.tflite")
     ap.add_argument("--size", type=int, default=256)
     ap.add_argument("--quality", type=int, default=62)
     args = ap.parse_args()
@@ -39,6 +40,22 @@ def main():
     inp = interp.get_input_details()[0]
     out = interp.get_output_details()[0]
     _, h, w, _ = inp["shape"]
+    # "Fotoğrafta mantar var mı?" (uygulamadaki MushroomDetector ile aynı kural): mikroskop, spor izi,
+    # ekran görüntüsü, el yazısı not gibi fotoğrafları eler.
+    det = Interpreter(model_path=args.detector, num_threads=os.cpu_count() or 4)
+    det.allocate_tensors()
+    d_in, d_out = det.get_input_details()[0], det.get_output_details()[0]
+    FUNGI = [947, 991, 992, 993, 994, 995, 996, 997]
+
+    def is_mushroom(img):
+        x = np.asarray(img.resize((224, 224), Image.BILINEAR), dtype=np.float32)[None] / 255.0
+        det.set_tensor(d_in["index"], x)
+        det.invoke()
+        v = det.get_tensor(d_out["index"])[0]
+        s = float(v[FUNGI].sum())
+        top10 = set(np.argsort(-v)[:10].tolist())
+        return s >= 0.25 or (s >= 0.10 and bool(top10 & set(FUNGI)))
+
     labels = [l.strip() for l in open(args.labels, encoding="utf-8") if l.strip()]
     index = {l: i for i, l in enumerate(labels)}
 
@@ -82,7 +99,7 @@ def main():
                 img = Image.open(p).convert("RGB")
             except Exception:
                 continue
-            if min(img.size) < 200:
+            if min(img.size) < 200 or not is_mushroom(img):
                 continue
             v = probs(img)
             k = index[sp]
