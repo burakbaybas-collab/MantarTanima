@@ -55,6 +55,9 @@ import androidx.compose.ui.unit.sp
 import com.burakbaybas.mantartanima.PhotoAngle
 import com.burakbaybas.mantartanima.R
 import kotlinx.coroutines.delay
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.draw.rotate
+import androidx.compose.foundation.shape.CircleShape
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.Dispatchers
 import com.burakbaybas.mantartanima.data.SpeciesCatalog
@@ -122,6 +125,7 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>, found: String? = null) {
     }
     val inf = rememberInfiniteTransition(label = "tarama")
     val line by inf.animateFloat(0f, 1f, infiniteRepeatable(tween(1100, easing = LinearEasing), RepeatMode.Reverse), label = "çizgi")
+    val spin by inf.animateFloat(0f, 360f, infiniteRepeatable(tween(1400, easing = LinearEasing)), label = "halka")
     val pulse by inf.animateFloat(0.9f, 1.1f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "nabız")
 
     Box(Modifier.fillMaxSize()) {
@@ -152,46 +156,49 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>, found: String? = null) {
             Text("Tanımlanıyor", color = Deep, fontWeight = FontWeight.Bold, fontSize = 20.sp)
             Spacer(Modifier.height(16.dp))
 
-            Box(Modifier.fillMaxWidth(0.72f).aspectRatio(1f).shadow(10.dp, RoundedCornerShape(22.dp)).clip(RoundedCornerShape(22.dp))
-                .background(Color.Black).border(if (found != null) 5.dp else 3.dp, if (found != null) Fresh else Color.White, RoundedCornerShape(22.dp))) {
-                frame?.let { (img, _) ->
-                    Image(img, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-                }
-                // Hafif yeşil örtü, ızgara, köşe çerçeveleri ve tarama çizgisi
-                Canvas(Modifier.fillMaxSize()) {
-                    drawRect(Color(0x2217502A))
-                    val n = 8
-                    for (i in 1 until n) {
-                        val x = size.width * i / n; val y = size.height * i / n
-                        drawLine(Color.White.copy(alpha = 0.08f), Offset(x, 0f), Offset(x, size.height), 1.dp.toPx())
-                        drawLine(Color.White.copy(alpha = 0.08f), Offset(0f, y), Offset(size.width, y), 1.dp.toPx())
+            // Yuvarlak mercek: foto daire içinde akar, çevresinde dönen yeşil halka (logodaki büyüteç gibi)
+            Box(Modifier.fillMaxWidth(0.72f).aspectRatio(1f), contentAlignment = Alignment.Center) {
+                Canvas(Modifier.fillMaxSize().rotate(if (found != null) 0f else spin)) {
+                    val w = 6.dp.toPx()
+                    val inset = w / 2
+                    val arcSize = Size(size.width - w, size.height - w)
+                    if (found != null) {
+                        drawCircle(Fresh, radius = size.minDimension / 2 - inset, style = Stroke(w))
+                    } else {
+                        drawCircle(Deep.copy(alpha = 0.12f), radius = size.minDimension / 2 - inset, style = Stroke(w))
+                        drawArc(
+                            Brush.sweepGradient(listOf(Color.Transparent, Fresh.copy(alpha = 0.6f), ScanGreen)),
+                            startAngle = 0f, sweepAngle = 300f, useCenter = false,
+                            topLeft = Offset(inset, inset), size = arcSize, style = Stroke(w, cap = StrokeCap.Round),
+                        )
                     }
-                    val c = 34.dp.toPx(); val m = 14.dp.toPx(); val w = 4.dp.toPx()
-                    listOf(
-                        Offset(m, m) to Offset(1f, 1f), Offset(size.width - m, m) to Offset(-1f, 1f),
-                        Offset(m, size.height - m) to Offset(1f, -1f), Offset(size.width - m, size.height - m) to Offset(-1f, -1f),
-                    ).forEach { (p, d) ->
-                        drawLine(ScanGreen, p, Offset(p.x + c * d.x, p.y), w, StrokeCap.Round)
-                        drawLine(ScanGreen, p, Offset(p.x, p.y + c * d.y), w, StrokeCap.Round)
-                    }
-                    val y = size.height * line
-                    val glow = 70.dp.toPx()
-                    drawRect(
-                        Brush.verticalGradient(listOf(Color.Transparent, ScanGreen.copy(alpha = 0.35f)), startY = y - glow, endY = y),
-                        topLeft = Offset(0f, y - glow), size = Size(size.width, glow),
-                    )
-                    drawLine(ScanGreen, Offset(0f, y), Offset(size.width, y), 3.dp.toPx())
                 }
-                frame?.second?.takeIf { it.isNotBlank() }?.let { name ->
-                    Text(
-                        name, color = Color.White, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold, fontSize = 13.sp,
-                        maxLines = 1,
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 14.dp)
-                            .clip(RoundedCornerShape(50)).background(Color(0x99000000))
-                            .padding(horizontal = 12.dp, vertical = 4.dp),
-                    )
+                Box(
+                    Modifier.fillMaxSize(0.9f).shadow(10.dp, CircleShape).clip(CircleShape).background(Color.Black)
+                        .border(4.dp, Color.White, CircleShape),
+                ) {
+                    frame?.let { (img, _) ->
+                        Image(img, null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+                    }
+                    if (found == null) {
+                        Canvas(Modifier.fillMaxSize()) {
+                            drawRect(Color(0x1A17502A))
+                            val y = size.height * line
+                            val glow = 60.dp.toPx()
+                            drawRect(
+                                Brush.verticalGradient(listOf(Color.Transparent, ScanGreen.copy(alpha = 0.35f)), startY = y - glow, endY = y),
+                                topLeft = Offset(0f, y - glow), size = Size(size.width, glow),
+                            )
+                            drawLine(ScanGreen, Offset(0f, y), Offset(size.width, y), 3.dp.toPx())
+                        }
+                    }
                 }
             }
+            Spacer(Modifier.height(10.dp))
+            Text(
+                frame?.second.orEmpty(), color = Deep, fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold,
+                fontSize = 15.sp, maxLines = 1, modifier = Modifier.height(22.dp),
+            )
             Spacer(Modifier.height(12.dp))
             Text(
                 "Taranan tür: ${if (found != null) 1000 else (progress / 0.97f * 1000).toInt().coerceIn(0, 1000)} / 1000",
