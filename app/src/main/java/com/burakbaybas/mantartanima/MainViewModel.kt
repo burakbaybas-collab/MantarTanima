@@ -136,7 +136,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         return weighted.map { it.copy(confidence = it.confidence / sum) }.sortedByDescending { it.confidence }
     }
 
-    private val MIN_SCAN_MS = 2600L
+    private val MIN_SCAN_MS = 4000L
 
     fun analyze() {
         val uris = PhotoAngle.entries.mapNotNull { _photos.value[it] }
@@ -161,7 +161,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                         UiState.Result(predictions, classifier.isDemo)
                     }
                 }
-                // Tarama ekranı en az ~2,6 sn görünsün
+                // Tarama ekranı en az ~4 sn görünsün
                 val wait = MIN_SCAN_MS - (android.os.SystemClock.elapsedRealtime() - t0)
                 if (wait > 0) kotlinx.coroutines.delay(wait)
                 _state.value = result

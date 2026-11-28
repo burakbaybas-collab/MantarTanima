@@ -11,6 +11,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -53,8 +58,9 @@ import com.burakbaybas.mantartanima.PhotoAngle
 import com.burakbaybas.mantartanima.R
 import kotlinx.coroutines.delay
 
-private val ScanGreen = Color(0xFF7CFC8A)
+private val ScanGreen = Color(0xFF5BE36B)
 private val Deep = Color(0xFF17502A)
+private val Fresh = Color(0xFF4E9A2F)
 
 private val steps = listOf(
     "Şapka inceleniyor…",
@@ -70,7 +76,7 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
     var idx by remember { mutableIntStateOf(0) }
     var progress by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(Unit) {
-        val total = 2600L
+        val total = 4000L
         val stepMs = 40L
         var t = 0L
         while (true) {
@@ -83,24 +89,37 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
     val line by inf.animateFloat(0f, 1f, infiniteRepeatable(tween(1100, easing = LinearEasing), RepeatMode.Reverse), label = "çizgi")
     val pulse by inf.animateFloat(0.9f, 1.1f, infiniteRepeatable(tween(600), RepeatMode.Reverse), label = "nabız")
 
-    Box(
-        Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF0E2A17), Color(0xFF17502A)))),
-    ) {
+    Box(Modifier.fillMaxSize()) {
+        // Ana sayfadaki orman arka planı ve açık perde
+        Image(painterResource(R.drawable.bg_forest), null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+        Box(
+            Modifier.fillMaxSize().background(
+                Brush.verticalGradient(0f to Color(0xF2FBF8F2), 0.55f to Color(0xD9FBF8F2), 1f to Color(0x99FBF8F2))
+            )
+        )
         Column(
-            Modifier.fillMaxSize().statusBarsPadding().padding(24.dp),
+            Modifier.fillMaxSize().statusBarsPadding().padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
             Image(
-                painterResource(R.drawable.ic_mushroom), null,
-                modifier = Modifier.size(64.dp).scale(pulse),
+                painterResource(R.drawable.logo_mark), "FungiLens logosu",
+                modifier = Modifier.size(84.dp).scale(pulse),
             )
-            Spacer(Modifier.height(10.dp))
-            Text("Tanımlanıyor", color = Color.White, fontWeight = FontWeight.ExtraBold, fontSize = 26.sp)
-            Spacer(Modifier.height(20.dp))
+            Text(
+                buildAnnotatedString {
+                    withStyle(SpanStyle(color = Deep)) { append("Fungi") }
+                    withStyle(SpanStyle(color = Fresh)) { append("Lens") }
+                },
+                fontSize = 30.sp, fontWeight = FontWeight.ExtraBold,
+            )
+            Spacer(Modifier.height(4.dp))
+            Text("Tanımlanıyor", color = Deep, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Spacer(Modifier.height(16.dp))
 
             val photoIdx = idx.coerceAtMost(list.lastIndex).coerceAtLeast(0)
-            Box(Modifier.fillMaxWidth().aspectRatio(1f).clip(RoundedCornerShape(22.dp)).background(Color.Black)) {
+            Box(Modifier.fillMaxWidth().aspectRatio(1f).shadow(10.dp, RoundedCornerShape(22.dp)).clip(RoundedCornerShape(22.dp))
+                .background(Color.Black).border(3.dp, Color.White, RoundedCornerShape(22.dp))) {
                 Crossfade(targetState = list.getOrNull(photoIdx), label = "foto") { item ->
                     if (item != null) {
                         AsyncImage(model = item.second, contentDescription = item.first.title,
@@ -145,17 +164,17 @@ fun ScanScreen(photos: Map<PhotoAngle, Uri>) {
             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                 list.forEachIndexed { i, _ ->
                     Box(Modifier.size(width = 26.dp, height = 5.dp).clip(RoundedCornerShape(50))
-                        .background(if (i <= photoIdx) ScanGreen else Color.White.copy(alpha = 0.25f)))
+                        .background(if (i <= photoIdx) Fresh else Deep.copy(alpha = 0.18f)))
                 }
             }
             Spacer(Modifier.height(20.dp))
-            Text(steps[idx.coerceIn(0, steps.lastIndex)], color = Color.White.copy(alpha = 0.9f), fontSize = 16.sp,
+            Text(steps[idx.coerceIn(0, steps.lastIndex)], color = Deep, fontWeight = FontWeight.SemiBold, fontSize = 16.sp,
                 modifier = Modifier.alpha(0.95f))
             Spacer(Modifier.height(12.dp))
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(6.dp).clip(RoundedCornerShape(50)),
-                color = ScanGreen, trackColor = Color.White.copy(alpha = 0.2f),
+                color = Fresh, trackColor = Deep.copy(alpha = 0.15f),
             )
         }
     }
