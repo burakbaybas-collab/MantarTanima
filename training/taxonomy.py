@@ -16,7 +16,7 @@ KEYS = ["kingdom", "phylum", "class", "order", "family"]
 def lookup(name):
     tries = []
     for q in OVERRIDES.get(name, [name]):
-        tries += [{"name": q, "strict": "true"}, {"name": q}]
+        tries += [{"name": q, "strict": "true"}, {"name": q}, {"name": q, "kingdom": "Fungi"}]
     for p in tries:
         m = get("species/match", p)
         if m.get("matchType") in ("EXACT", "FUZZY") and m.get("phylum"):
