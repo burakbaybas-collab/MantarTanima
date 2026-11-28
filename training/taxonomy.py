@@ -11,9 +11,17 @@ sys.path.insert(0, os.path.dirname(__file__))
 from fetch_gbif import OVERRIDES, get  # noqa: E402
 
 KEYS = ["kingdom", "phylum", "class", "order", "family"]
+# GBIF'te aynı adlı birden çok kayıt olduğu için eşleşmeyen türler
+MANUAL = {
+    "Cyathus striatus": ["Fungi", "Basidiomycota", "Agaricomycetes", "Agaricales", "Nidulariaceae"],
+    "Clavulina rugosa": ["Fungi", "Basidiomycota", "Agaricomycetes", "Cantharellales", "Clavulinaceae"],
+    "Lactarius atlanticus": ["Fungi", "Basidiomycota", "Agaricomycetes", "Russulales", "Russulaceae"],
+}
 
 
 def lookup(name):
+    if name in MANUAL:
+        return dict(zip(KEYS, MANUAL[name]))
     tries = []
     for q in OVERRIDES.get(name, [name]):
         tries += [{"name": q, "strict": "true"}, {"name": q}, {"name": q, "kingdom": "Fungi"}]
