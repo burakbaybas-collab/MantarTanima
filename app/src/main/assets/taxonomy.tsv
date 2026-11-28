@@ -221,6 +221,7 @@ geastrum_triplex	Fungi	Basidiomycota	Agaricomycetes	Geastrales	Geastraceae
 astraeus_hygrometricus	Fungi	Basidiomycota	Agaricomycetes	Boletales	Diplocystidiaceae
 mutinus_caninus	Fungi	Basidiomycota	Agaricomycetes	Phallales	Phallaceae
 clathrus_archeri	Fungi	Basidiomycota	Agaricomycetes	Phallales	Phallaceae
+cyathus_striatus	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Nidulariaceae
 sarcoscypha_coccinea	Fungi	Ascomycota	Pezizomycetes	Pezizales	Sarcoscyphaceae
 otidea_onotica	Fungi	Ascomycota	Pezizomycetes	Pezizales	Otideaceae
 disciotis_venosa	Fungi	Ascomycota	Pezizomycetes	Pezizales	Morchellaceae
@@ -290,6 +291,7 @@ mycena_pseudocorticola	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Mycenaceae
 phaeolus_schweinitzii	Fungi	Basidiomycota	Agaricomycetes	Polyporales	Laetiporaceae
 auriscalpium_vulgare	Fungi	Basidiomycota	Agaricomycetes	Russulales	Auriscalpiaceae
 trametes_hirsuta	Fungi	Basidiomycota	Agaricomycetes	Polyporales	Polyporaceae
+clavulina_rugosa	Fungi	Basidiomycota	Agaricomycetes	Cantharellales	Clavulinaceae
 rickenella_fibula	Fungi	Basidiomycota	Agaricomycetes	Hymenochaetales	Rickenellaceae
 gymnopus_androsaceus	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Omphalotaceae
 panellus_stipticus	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Mycenaceae
@@ -959,6 +961,7 @@ pluteus_nanus	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Pluteaceae
 inocybe_sindonia	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Inocybaceae
 tricholoma_viridilutescens	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Tricholomataceae
 mycena_silvaenigrae	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Mycenaceae
+lactarius_atlanticus	Fungi	Basidiomycota	Agaricomycetes	Russulales	Russulaceae
 tricholoma_apium	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Tricholomataceae
 collybiopsis_confluens	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Omphalotaceae
 mycenastrum_corium	Fungi	Basidiomycota	Agaricomycetes	Agaricales	Agaricaceae
