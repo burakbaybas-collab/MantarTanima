@@ -38,15 +38,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk MantarTanima.apk
+          cp app/build/outputs/apk/debug/app-debug.apk FungiLens.apk
           # Önceki yarım kalmış taslak sürümleri temizle
           for id in $(gh api repos/${{ github.repository }}/releases -q '.[] | select(.draft) | .id'); do
             gh api -X DELETE repos/${{ github.repository }}/releases/$id || true
           done
           NOTES="Otomatik derleme: ${GITHUB_SHA::7}. Telefondan indirip kurabilirsiniz."
           if gh release view son-surum >/dev/null 2>&1; then
-            gh release upload son-surum MantarTanima.apk --clobber
+            gh release upload son-surum FungiLens.apk --clobber
+            gh release delete-asset son-surum MantarTanima.apk -y 2>/dev/null || true
             gh release edit son-surum --notes "$NOTES" --prerelease
           else
-            gh release create son-surum MantarTanima.apk --title "Son sürüm (deneme)" --notes "$NOTES" --prerelease
+            gh release create son-surum FungiLens.apk --title "Son sürüm (deneme)" --notes "$NOTES" --prerelease
           fi
