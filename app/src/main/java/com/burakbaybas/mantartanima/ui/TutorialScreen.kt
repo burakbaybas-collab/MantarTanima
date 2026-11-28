@@ -64,6 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.burakbaybas.mantartanima.data.Edibility
 import kotlinx.coroutines.launch
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.LaunchedEffect
@@ -130,47 +131,59 @@ private val pages = listOf(
 fun TutorialScreen(onDone: () -> Unit) {
     val pager = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
-    val last = pager.currentPage == pages.lastIndex
+    var page by remember { mutableIntStateOf(0) }
+    var step by remember { mutableIntStateOf(0) }
+    val isLast = page == pages.lastIndex && step == pages[page].marks.lastIndex
+    val isFirst = page == 0 && step == 0
+
+    fun go(p: Int, s: Int) {
+        if (p != page) scope.launch { pager.animateScrollToPage(p) }
+        page = p; step = s
+    }
+
+    BackHandler(enabled = !isFirst) {
+        if (step > 0) go(page, step - 1) else go(page - 1, pages[page - 1].marks.lastIndex)
+    }
 
     Column(Modifier.fillMaxSize().background(Color(0xFF1B1F1C)).safeDrawingPadding()) {
         Row(Modifier.fillMaxWidth().padding(start = 16.dp, end = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("${pager.currentPage + 1}/${pages.size}  ${pages[pager.currentPage].title}", color = Color.White,
+            Text("${page + 1}/${pages.size}  ${pages[page].title}", color = Color.White,
                 fontWeight = FontWeight.Bold, fontSize = 16.sp, modifier = Modifier.weight(1f))
-            if (!last) TextButton(onClick = onDone) { Text("Geç", color = Color.White) }
+            if (!isLast) TextButton(onClick = onDone) { Text("Geç", color = Color.White) }
             else Spacer(Modifier.height(48.dp))
         }
-        HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { i ->
+        HorizontalPager(state = pager, userScrollEnabled = false, modifier = Modifier.weight(1f)) { i ->
             Box(Modifier.fillMaxSize().padding(horizontal = 8.dp), contentAlignment = Alignment.Center) {
-                Shot(pages[i], active = pager.currentPage == i)
+                Shot(pages[i], if (i == page) step else 0)
             }
         }
         Row(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-            if (pager.currentPage > 0) {
-                TextButton(onClick = { scope.launch { pager.animateScrollToPage(pager.currentPage - 1) } }) {
-                    Text("Geri", color = Color.White)
-                }
+            if (!isFirst) {
+                TextButton(onClick = {
+                    if (step > 0) go(page, step - 1) else go(page - 1, pages[page - 1].marks.lastIndex)
+                }) { Text("Geri", color = Color.White, fontSize = 16.sp) }
             }
             Spacer(Modifier.weight(1f))
             Button(
-                onClick = { if (last) onDone() else scope.launch { pager.animateScrollToPage(pager.currentPage + 1) } },
+                onClick = {
+                    when {
+                        isLast -> onDone()
+                        step < pages[page].marks.lastIndex -> go(page, step + 1)
+                        else -> go(page + 1, 0)
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4E9A2F)),
-            ) { Text(if (last) "Başla" else "İleri", fontWeight = FontWeight.Bold) }
+            ) { Text(if (isLast) "Başla" else "İleri", fontWeight = FontWeight.Bold, fontSize = 16.sp) }
         }
     }
 }
 
-/** Tam sayfa ekran görüntüsü; vurgu, ok ve açıklama öğeden öğeye kendiliğinden geçer (dokununca hemen). */
+/** Tam sayfa ekran görüntüsü; vurgu, ok ve açıklama İleri/Geri ile öğeden öğeye geçer. */
 @Composable
-private fun Shot(page: TPage, active: Boolean) {
+private fun Shot(page: TPage, step: Int) {
     val context = LocalContext.current
     val img: ImageBitmap? = remember(page.image) {
         runCatching { context.assets.open("tutorial/${page.image}").use { BitmapFactory.decodeStream(it).asImageBitmap() } }.getOrNull()
-    }
-    var step by remember(page) { mutableIntStateOf(0) }
-    LaunchedEffect(active, step) {
-        if (!active) return@LaunchedEffect
-        delay(4500)
-        step = (step + 1) % page.marks.size
     }
     val m = page.marks[step]
     val anim = tween<Float>(500)
@@ -188,8 +201,7 @@ private fun Shot(page: TPage, active: Boolean) {
     Box(
         Modifier
             .aspectRatio(CROP.width / CROP.height, matchHeightConstraintsFirst = true)
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { step = (step + 1) % page.marks.size },
+            .clip(RoundedCornerShape(16.dp)),
     ) {
         Canvas(Modifier.fillMaxSize()) {
             if (img == null) return@Canvas
