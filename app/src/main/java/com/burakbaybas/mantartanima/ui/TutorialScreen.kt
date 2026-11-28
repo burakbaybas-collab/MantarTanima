@@ -122,7 +122,7 @@ private val steps = listOf(
         RESULT, Rect(0f, 1200f, 1080f, 1720f), mark(Rect(86f, 1250f, 448f, 1358f), Offset(820f, 1290f)),
         extra = { EdibilityLegend() }),
     TStep("7. Tür bilgileri",
-        "Aşağı kaydırınca türün tanımı, Temel Bilgiler (cins, sezon, yaşam alanı, spor izi), ayırt edici özellikler ve benzer türlerden farkı yazar. Zehirli türlerde kırmızı bir zehirlenme kutusu ile 112 ve 114 (Zehir Danışma) arama düğmeleri çıkar.",
+        "Aşağı kaydırınca türün tanımı, Temel Bilgiler (cins, sezon, yaşam alanı, spor izi), ayırt edici özellikler ve karıştırılabilecek türler yazar. Zehirli türlerde kırmızı bir zehirlenme kutusu ile 112 ve 114 (Zehir Danışma) arama düğmeleri çıkar.",
         RESULT, Rect(0f, 1200f, 1080f, 2215f), mark(Rect(86f, 1370f, 996f, 2210f), Offset(860f, 1270f))),
     TStep("Unutmayın",
         "Mantar zehirlenmeleri ölümcül olabilir. Hiçbir mantarı yalnızca uygulamaya bakarak yemeyin; mutlaka bir uzmana gösterin.",

@@ -463,7 +463,7 @@ private fun CompareSection(items: List<Pair<String, String>>) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(Icons.AutoMirrored.Outlined.CompareArrows, null, tint = Color(0xFF1B5E2E), modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(8.dp))
-        Text("Benzer türlerden farkı", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+        Text("Karıştırılabilecek türler", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
     }
     Spacer(Modifier.height(6.dp))
     Column(
