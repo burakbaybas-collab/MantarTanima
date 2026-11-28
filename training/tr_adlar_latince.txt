@@ -1,0 +1,158 @@
+russula_recondita|Gizli Okra Kırılgan Mantar
+ganoderma_resinaceum|Reçineli Parlak Raf Mantarı
+ganoderma_adspersum|Kalın Kahve Raf Mantarı
+delicatula_integrella|Narin Beyaz Mantar
+clavaria_falcata|Orak Uçlu Beyaz Topuz
+phaeotremella_frondosa|Yapraklı Kahve Jöle Mantarı
+calocera_furcata|Çatallı Jöle Boynuzu
+pholiota_lenta|Yapışkan Kil Rengi Pullu Mantar
+ascocoryne_cylichnium|Mor Jöle Kadehi
+marasmius_bulliardii|Kahve Göbekli Paraşüt Mantarı
+tubaria_dispersa|Alıç Dal Mantarı
+arrhenia_spathulata|Kaşık Göbek Mantarı
+hortiboletus_engelii|Kırmızı Noktalı Kadife Bolet
+tricholoma_populinum|Kavak Şövalye Mantarı
+vanderbylia_fraxinea|Dişbudak Raf Mantarı
+picipes_melanopus|Kara Kadife Ayaklı Gözenek Mantarı
+climacocystis_borealis|Kuzey Sulu Raf Mantarı
+ganoderma_carnosum|Köknar Parlak Raf Mantarı
+osteina_undosa|Kemikleşen Raf Mantarı
+boletopsis_leucomelaena|Ak-Kara Gözenek Mantarı
+helvella_atra|Kara Eyer Mantarı
+otidea_leporina|Tavşan Kulağı
+peziza_arvernensis|Dalgalı Kahve Çanak Mantarı
+chalciporus_piperatoides|Mavileşen Biberli Bolet
+suillus_mediterraneensis|Akdeniz Çam Boleti
+chroogomphus_mediterraneus|Akdeniz Bakır Çivi Mantarı
+paxillus_ammoniavirescens|Amonyakla Yeşillenen Kıvrık Kenar Mantarı
+rhizocybe_vermicularis|Kurt İplikli Huni Mantarı
+lactarius_pterosporus|Kanatlı Sporlu Süt Mantarı
+lactarius_azonites|Halkasız Kadife Süt Mantarı
+lactarius_albocarneus|Leylak Krem Süt Mantarı
+russula_nauseosa|Narin Şarap Kırılgan Mantarı
+russula_luteotacta|Dokununca Sararan Kırılgan Mantar
+cortinarius_brunneus|Koyu Kahve Örümcek Mantarı
+cortinarius_cotoneus|Zeytin Kadife Örümcek Mantarı
+cortinarius_olivaceofuscus|Zeytin Kahve Örümcek Mantarı
+cortinarius_renidens|Parlak Turuncu Örümcek Mantarı
+calonarius_elegantior|Zarif Sarı Örümcek Mantarı
+calonarius_rufo_olivaceus|Kızıl Zeytin Örümcek Mantarı
+thaxterogaster_barbatus|Sakallı Örümcek Mantarı
+phlegmacium_olidum|Kötü Kokulu Örümcek Mantarı
+inocybe_curvipes|Eğri Saplı Lif Mantarı
+inocybe_dulcamara|Keçeli Sarı Lif Mantarı
+inocybe_mixtilis|Yumru Saplı Lif Mantarı
+inocybe_nitidiuscula|Parlak Lif Mantarı
+hebeloma_velutipes|Kadife Saplı Zehirli Turta Mantarı
+entoloma_chalybeum|Lacivert Pembe Lamelli Mantar
+entoloma_hirtipes|Şalgam Kokulu Pembe Lamelli Mantar
+entoloma_lividoalbum|Kurşuni Ak Pembe Lamelli Mantar
+entoloma_sepium|Çit Pembe Lamelli Mantarı
+entoloma_sericatum|İpek Saplı Pembe Lamelli Mantar
+entoloma_sordidulum|Kirli Pembe Lamelli Mantar
+entoloma_subserrulatum|Mavi Kenarlı Küçük Pembe Lamelli Mantar
+clitopilus_cystidiatus|Beyaz Değirmenci Mantarı
+clitopilus_scyphoides|Kadeh Değirmenci Mantarı
+clitocella_mundula|Acı Değirmenci Mantarı
+lepiota_oreadiformis|Çayır Şemsiyeciği
+leucoagaricus_nympharum|Peri Şemsiye Mantarı
+deconica_inquilina|Ot Sapı Deconica
+agaricus_butyreburneus|Tereyağı Rengi Çayır Mantarı
+clitocybe_agrestis|Tarla Huni Mantarı
+clitocybe_diatreta|Pembe Kahve Huni Mantarı
+leucocybe_candicans|Parlak Beyaz Huni Mantarı
+atractosporocybe_inornata|Balık Kokulu Huni Mantarı
+aphroditeola_olida|Pembe Tatlı Kokulu Mantar
+pseudoclitocybe_expallens|Solgun Kadeh Mantarı
+lepista_tarda|Geç Mor Mantar
+tricholoma_basirubens|Kırmızı Tabanlı Şövalye Mantarı
+tricholoma_lascivum|Tatlı Kokulu Şövalye Mantarı
+tricholoma_virgatum|Çizgili Acı Şövalye Mantarı
+melanoleuca_strictipes|Dik Saplı Süvari Mantarı
+laccaria_macrocystidiata|İri Lamelli Cila Mantarı
+hygrophorus_agathosmoides|Gri Balmumu Mantarı
+hygrophorus_discoideus|Koyu Göbekli Balmumu Mantarı
+hygrophorus_pinophilus|Çam Seven Balmumu Mantarı
+mycena_zephirus|Pas Lekeli Başlık Mantarı
+mycena_abramsii|Klor Kokulu Başlık Mantarı
+xerula_pudens|Tüylü Köklü Mantar
+morchella_vulgaris|Gri Kuzugöbeği
+entoloma_vernum|İlkbahar Pembe Lamelli Mantarı
+panaeolus_antillarum|Beyaz Benekli Lamel Mantarı
+tricholoma_albobrunneum|Ak Kahve Şövalye Mantarı
+psathyrella_uliginicola|Dere Kenarı Kırılgan Saplı Mantar
+byssonectria_fusispora|İğ Sporlu Turuncu Disk
+pycnoporellus_fulgens|Parlak Turuncu Raf Mantarı
+entoloma_undatum|Dalgalı Pembe Lamelli Mantar
+byssonectria_terrestris|Toprak Turuncu Diski
+tricholoma_argyraceum|Gümüşi Şövalye Mantarı
+tricholoma_squarrulosum|Pullu Saplı Şövalye Mantarı
+helvella_fibrosa|Lifli Kadeh Mantarı
+phellopilus_nigrolimitatus|Kara Hatlı Kav Mantarı
+helvella_corium|Kum Kara Kadehi
+tricholoma_triste|Gri Keçeli Şövalye Mantarı
+tricholoma_imbricatum|Kiremit Pullu Şövalye Mantarı
+helvella_solitaria|Yalnız Kadeh Mantarı
+helvella_fusca|Koyu Eyer Mantarı
+cortinarius_saniosus|Sarı Kuşaklı Örümcek Mantarı
+agaricus_iodosmus|İyot Kokulu Çayır Mantarı
+clitocybe_mediterranea|Akdeniz Huni Mantarı
+lepiota_lilacea|Leylak Şemsiyecik
+tricholoma_aurantium|Turuncu Şövalye Mantarı
+inosperma_adaequatum|Şarap Rengi Lif Mantarı
+lepiota_ignivolvata|Turuncu Halkalı Şemsiyecik
+entoloma_mougeotii|Kurşuni Mavi Pembe Lamelli Mantar
+pleurotus_calyptratus|Örtülü İstiridye Mantarı
+russula_grisea|Gri Kırılgan Mantar
+tricholoma_inamoenum|Havagazı Kokulu Şövalye Mantarı
+trametes_trogii|Kaba Tüylü Raf Mantarı
+tricholoma_stiparophyllum|Kötü Kokulu Beyaz Şövalye Mantarı
+cortinarius_casimirii|Mor Saplı Küçük Örümcek Mantarı
+entoloma_rhodocylix|Küçük Huni Pembe Lamelli Mantar
+inocybe_insinuata|Sinsi Lif Mantarı
+inosperma_lanatodiscum|Yünlü Göbekli Lif Mantarı
+mycena_metata|Pembe Kahve Başlık Mantarı
+mycena_plumipes|Kozalak Seven Başlık Mantarı
+pholiota_limonella|Limon Pullu Mantar
+tricholoma_arvernense|Yeşil Sarı Şövalye Mantarı
+inocybe_grammata|Pembe Saplı Lif Mantarı
+agrocybe_acericola|Akçaağaç Tarla Mantarı
+rhizocybe_pruinosa|Kırağılı Huni Mantarı
+rubroboletus_lupinus|Kurt Boleti
+pluteus_hongoi|Gri Lifli Kalkan Mantarı
+inocybe_calospora|Dikenli Sporlu Lif Mantarı
+russula_maculata|Benekli Kırılgan Mantar
+hebeloma_hiemale|Kış Zehirli Turta Mantarı
+russula_acrifolia|Kararan Acı Kırılgan Mantar
+inocutis_rheades|Kavak Kav Mantarı
+hypholoma_dispersum|Dağınık Kükürt Mantarı
+inocybe_hirtella|Acı Badem Kokulu Lif Mantarı
+inocybe_nemorosa|Orman Lif Mantarı
+russula_romellii|Romell Kırılgan Mantarı
+leccinum_leucopodium|Kavak Boleti
+coprinopsis_strossmayeri|Beyaz Pullu Mürekkep Mantarı
+cystodermella_granulosa|Taneli Pudralı Mantar
+russula_odorata|Kokulu Kırılgan Mantar
+hypomyces_microspermus|Beyaz Bolet Küfü
+tricholoma_acerbum|Acı Şövalye Mantarı
+infundibulicybe_squamulosa|Pullu Huni Mantarı
+tricholoma_stans|Yapışkan Acı Şövalye Mantarı
+oxyporus_corticola|Kabuk Gözenek Mantarı
+tarzetta_catinus|Tırtıklı Kâse Mantarı
+tricholoma_aestuans|Yakıcı Şövalye Mantarı
+cortinarius_stillatitius|Damlalı Örümcek Mantarı
+geopora_arenicola|Kum Çanağı
+pyronema_omphalodes|Yanık Toprak Diski
+phlebia_rufa|Kızıl Kırışık Kabuk Mantarı
+tricholoma_viridilutescens|Yeşil Kahve Şövalye Mantarı
+lactarius_atlanticus|Atlantik Süt Mantarı
+tricholoma_apium|Kereviz Kokulu Şövalye Mantarı
+pseudombrophila_guldeniae|Gübre Çanağı
+suillus_pseudobrevipes|Kısa Saplı Çam Boleti
+russula_veternosa|Acı Pembe Kırılgan Mantar
+russula_alutacea|Deri Rengi Kırılgan Mantar
+tricholoma_psammopus|Kum Ayaklı Şövalye Mantarı
+lactarius_vinosus|Şarap Süt Mantarı
+choiromyces_meandriformis|Beyaz Yer Trüfü
+phellorinia_herculeana|Bozkır Tozlu Mantarı
+flammulina_elastica|Söğüt Kış Mantarı
