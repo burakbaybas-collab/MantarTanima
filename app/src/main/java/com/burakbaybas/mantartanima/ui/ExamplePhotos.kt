@@ -134,3 +134,24 @@ fun ExamplePhotos(speciesId: String) {
         }
     }
 }
+
+data class Taxonomy(val kingdom: String, val phylum: String, val klass: String, val order: String, val family: String)
+
+/** assets/taxonomy.tsv: id, kingdom, phylum, class, order, family (GBIF). */
+object TaxonomyCatalog {
+    @Volatile private var cache: Map<String, Taxonomy>? = null
+
+    fun forSpecies(context: Context, id: String): Taxonomy? {
+        val map = cache ?: load(context).also { cache = it }
+        return map[id]
+    }
+
+    private fun load(context: Context): Map<String, Taxonomy> = runCatching {
+        context.assets.open("taxonomy.tsv").bufferedReader(Charsets.UTF_8).useLines { lines ->
+            lines.drop(1).mapNotNull { line ->
+                val c = line.split('\t')
+                if (c.size < 6) null else c[0] to Taxonomy(c[1], c[2], c[3], c[4], c[5])
+            }.toMap()
+        }
+    }.getOrDefault(emptyMap())
+}

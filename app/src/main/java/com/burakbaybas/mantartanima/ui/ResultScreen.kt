@@ -158,10 +158,6 @@ fun ResultScreen(
                     }
                 }
             }
-            val topId = predictions?.firstOrNull()?.takeIf { it.confidence >= VERY_LOW_CONFIDENCE }?.label
-            if (noMushroom == null && mismatch == null && !isDemo && topId != null) {
-                item { ExamplePhotos(topId) }
-            }
             if (infoCard != null) item { infoCard() }
             when {
                 mismatch != null -> item { MismatchCard(mismatch) }
@@ -202,7 +198,13 @@ fun ResultScreen(
                             )
                         }
                     }
-                    itemsIndexed(shown) { i, p -> PredictionCard(p, i, unknown) }
+                    itemsIndexed(shown) { i, p ->
+                        PredictionCard(p, i, unknown)
+                        if (i == 0 && !unknown && !isDemo) {
+                            Spacer(Modifier.height(12.dp))
+                            ExamplePhotos(p.label)
+                        }
+                    }
                 }
             }
             item { SafetyNotice() }
@@ -338,7 +340,15 @@ private fun PredictionCard(prediction: Prediction, rank: Int, unknown: Boolean =
                 Text("Temel Bilgiler", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(6.dp))
+            val taxonomy = TaxonomyCatalog.forSpecies(LocalContext.current, species.id)
             val rows = buildList {
+                taxonomy?.let { t ->
+                    add("Alem" to (if (t.kingdom == "Fungi") "Mantarlar – Fungi" else t.kingdom))
+                    add("Bölüm" to t.phylum)
+                    add("Sınıf" to t.klass)
+                    add("Takım" to t.order)
+                    add("Aile" to t.family)
+                }
                 add("Cins" to species.latinName.substringBefore(' '))
                 add("Sezon" to species.season)
                 add("Habitat" to species.habitat)
